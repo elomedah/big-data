@@ -212,13 +212,15 @@ docker exec -it mongodb bash
 https://docs.mongodb.com/database-tools/mongoimport/ 
 
 ```
-$ wget https://raw.githubusercontent.com/elomedah/big-data/refs/heads/main/tp/mongo/prix-nobel.json
+$ wget https://raw.githubusercontent.com/elomedah/big-data/refs/heads/main/tp/mongo/prix-nobel.json -P /tmp
 ```
 La base de données sera nommée : prix_nobel_db   
-La collection sera nommée : laureat   
-La syntaxe est    
+La collection sera nommée : laureat 
+filepath : /tmp/prix-nobel.json
+La syntaxe est
+
 ```
-$ mongoimport --db my_db_name --collection collectionName --file fileName.json
+$ mongoimport --db my_db_name --collection collectionName --file filepath
 ```
 
 1. Combien de documents ont été importés ?

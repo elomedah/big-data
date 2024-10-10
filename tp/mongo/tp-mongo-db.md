@@ -16,14 +16,14 @@ Pour installer mongo avec docker il faudrait suivre la documentation officielle.
 
 https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/?msockid=376374e3195c6ea2274c6796182b6f14
 
-### Pré requis
+### Pré requis hors Docker (Si vous utilisez docker, vous devez aller directement à l'étape Start mongo)
 Vous devez installer le système ubuntu sur votre machine
 Si vous utilisez déja une distribution linux vous pouvez installer mongodb en suivant la documentation de votre distribution.
 
 Documentation officielle d'installation sur ubuntu https://doc.ubuntu-fr.org/mongodb
 Documentation officielle d'installation sur Mac https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/
 
-### Installation et démarrage
+#### Installation et démarrage hors Docker
 
 ##### Installation sur ubuntu < 22
 Ouvrir le terminal ubuntu en tant qu'administrateur
@@ -46,7 +46,7 @@ sudo apt-get update
 sudo apt-get install -y mongodb-org
 ```
 
-##### Démarrage
+##### Démarrage hors Docker
 
 Lancer mongodb :
 ```
@@ -68,6 +68,10 @@ $ mongo
 ```
 
 ###### Ubuntu >=22
+
+
+
+## Start mongo
 ```
 $ mongosh
 ```
@@ -198,10 +202,17 @@ En SQL : drop table etudiant
 
 ###### Import de données
 
+### For docker only
+Vous devez vous connecter sur le container pour importer la donnée
+
+```
+docker exec -it mongodb bash 
+```
+
 https://docs.mongodb.com/database-tools/mongoimport/ 
 
 ```
-$ wget https://raw.githubusercontent.com/elomedah/big-data/main/prix-nobel.json
+$ wget https://raw.githubusercontent.com/elomedah/big-data/refs/heads/main/tp/mongo/prix-nobel.json
 ```
 La base de données sera nommée : prix_nobel_db   
 La collection sera nommée : laureat   

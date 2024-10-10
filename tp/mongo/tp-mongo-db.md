@@ -11,6 +11,11 @@ Chaque collection contient des documents. Le document peut être vu comme un tup
 
 ## Installation
 
+### Installation avec docker (Recommandé)
+Pour installer mongo avec docker il faudrait suivre la documentation officielle.
+
+https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/?msockid=376374e3195c6ea2274c6796182b6f14
+
 ### Pré requis
 Vous devez installer le système ubuntu sur votre machine
 Si vous utilisez déja une distribution linux vous pouvez installer mongodb en suivant la documentation de votre distribution.
@@ -77,7 +82,7 @@ show dbs
 Connexion à une base : use nom_de_la_base. Cette commande possède une double fonction, elle assure la connexion si la base existe, elle la crée puis s’y connecte si la base n’existe pas encore. Une fois connecté, la commande db permet de connaître la base.
 
 ```
-use iris_user_db
+use user_db
 db
 
 ```
@@ -196,7 +201,7 @@ En SQL : drop table etudiant
 https://docs.mongodb.com/database-tools/mongoimport/ 
 
 ```
-$ wget https://raw.githubusercontent.com/elomedah/iris-2020/main/prix-nobel.json
+$ wget https://raw.githubusercontent.com/elomedah/big-data/main/prix-nobel.json
 ```
 La base de données sera nommée : prix_nobel_db   
 La collection sera nommée : laureat   

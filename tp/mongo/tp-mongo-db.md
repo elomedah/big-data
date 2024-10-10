@@ -16,7 +16,7 @@ Pour installer mongo avec docker il faudrait suivre la documentation officielle.
 
 https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/?msockid=376374e3195c6ea2274c6796182b6f14
 
-### Pré requis hors Docker (Si vous utilisez docker, vous devez aller directement à l'étape Start mongo)
+### Pré requis hors Docker (Si vous utilisez docker, vous devez aller directement à l'étape [Start mongo](https://github.com/elomedah/big-data/blob/main/tp/mongo/tp-mongo-db.md#start-mongo))
 Vous devez installer le système ubuntu sur votre machine
 Si vous utilisez déja une distribution linux vous pouvez installer mongodb en suivant la documentation de votre distribution.
 

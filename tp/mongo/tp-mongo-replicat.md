@@ -15,9 +15,9 @@ https://www.mongodb.com/docs/manual/replication/#replication
 
 Pour configurer un cluster mongodb nous allons l'effectuer en 3 étapes
 
-1- Créez un réseau Docker
-2- Démarrez trois instances de MongoDB
-3- Lancez le replica set
+1- Créez un réseau Docker   
+2- Démarrez trois instances de MongoDB   
+3- Lancez le replica set   
 
 ## Creation d'un réseau docker
 

@@ -22,7 +22,7 @@ Pour configurer un cluster mongodb nous allons l'effectuer en 3 étapes
 ## Creation d'un réseau docker
 
 La première étape consiste à créer un réseau Docker.    
-Ce réseau permettra à chacun de vos conteneurs exécutés sur ce réseau de se voir. 
+Ce réseau permettra à chacun de vos conteneurs exécutés sur ce réseau de se voir.  
 Pour créer un réseau, exécutez la commande suivante
 ```
 docker network create mongoCluster
@@ -44,20 +44,20 @@ docker run -d --rm -p 27017:27017 --name mongo1 --network mongoCluster mongo:5 m
 
 Ici, vous dites à Docker de démarrer un conteneur avec les paramètres suivants :
 
--d indique que ce conteneur doit s'exécuter en mode détaché (en arrière-plan).
--p indique le mappage de port. Toute requête entrante sur le port 27017 de votre machine sera redirigée vers le port 27017 du conteneur.
---name indique le nom du conteneur. Cela deviendra le nom d'hôte de cette machine.
---network indique quel réseau Docker utiliser. Tous les conteneurs du même réseau peuvent se voir.
-mongo:5 est l'image qui sera utilisée par Docker. Cette image est la version 5 du serveur MongoDB Community (maintenue par Docker). Vous pouvez également utiliser une image personnalisée MongoDB Enterprise.
-Le reste de cette instruction est la commande qui sera exécutée une fois le conteneur démarré. Cette commande crée une nouvelle instance mongod prête pour un replica set.
+-d indique que ce conteneur doit s'exécuter en mode détaché (en arrière-plan).   
+-p indique le mappage de port. Toute requête entrante sur le port 27017 de votre machine sera redirigée vers le port 27017 du conteneur.   
+--name indique le nom du conteneur. Cela deviendra le nom d'hôte de cette machine.   
+--network indique quel réseau Docker utiliser. Tous les conteneurs du même réseau peuvent se voir.   
+mongo:5 est l'image qui sera utilisée par Docker. Cette image est la version 5 du serveur MongoDB Community (maintenue par Docker). Vous pouvez également utiliser une image personnalisée MongoDB Enterprise.   
+Le reste de cette instruction est la commande qui sera exécutée une fois le conteneur démarré. Cette commande crée une nouvelle instance mongod prête pour un replica set.   
 
-Si la commande a été exécutée avec succès, vous devriez voir une longue chaîne hexadécimale représentant l'ID du conteneur.
+Si la commande a été exécutée avec succès, vous devriez voir une longue chaîne hexadécimale représentant l'ID du conteneur.   
 
 ![image](https://github.com/user-attachments/assets/bcda20c2-2123-4e83-8bbe-4b1e4d36afb3)
 
-Démarrez deux autres conteneurs. Vous devrez utiliser un nom différent et un port différent pour ces deux-là.
+Démarrez deux autres conteneurs. Vous devrez utiliser un nom différent et un port différent pour ces deux-là.   
 
-Démarrez le deuxième (Le démarrage devrait être rapide étant donné que vous avez déja l'image docker mongo:5
+Démarrez le deuxième (Le démarrage devrait être rapide étant donné que vous avez déja l'image docker mongo:5   
 ```
 docker run -d --rm -p 27018:27017 --name mongo2 --network mongoCluster mongo:5 mongod --replSet myReplicaSet --bind_ip localhost,mongo2
 ```
@@ -77,11 +77,11 @@ docker ps
 
 ## Initialisation du replica set
 
-L’étape suivante consiste à créer le replica set réel avec les trois membres.   
-Pour ce faire, vous devrez utiliser le shell MongoDB (tp1).
-Cependant, si vous n’avez pas l’outil installé sur votre ordinateur portable, il est possible d’utiliser mongosh disponible dans les conteneurs avec la commande docker exec.
+L’étape suivante consiste à créer le replica set réel avec les trois membres.      
+Pour ce faire, vous devrez utiliser le shell MongoDB (tp1).   
+Cependant, si vous n’avez pas l’outil installé sur votre ordinateur portable, il est possible d’utiliser mongosh disponible dans les conteneurs avec la commande docker exec.   
 
-Pour windows : Pour éviter une erreur docker executer d'abord  commande suivante et ensuite fermer la console et ouvrer une nouvelle console
+Pour windows : Pour éviter une erreur docker executer d'abord  commande suivante et ensuite fermer la console et ouvrer une nouvelle console   
 
 
 ```
@@ -99,10 +99,10 @@ docker exec -it mongo1 mongosh --eval "rs.initiate({
 })"
 ```
 
-Cette commande indique à Docker d'exécuter l'outil mongosh dans le conteneur nommé mongo1. mongosh essaiera ensuite d'évaluer la commande rs.initiate() pour initialiser le replica set.
+Cette commande indique à Docker d'exécuter l'outil mongosh dans le conteneur nommé mongo1. mongosh essaiera ensuite d'évaluer la commande rs.initiate() pour initialiser le replica set.   
 
-Dans le cadre de l'objet de configuration transmis à rs.initiate(), vous devrez spécifier le nom du replica set (myReplicaSet, dans ce cas), ainsi que la liste des membres qui feront partie du replica set.    
-Les noms d'hôtes des conteneurs sont les noms des conteneurs tels que spécifiés par le paramètre --name dans la commande docker run.
+Dans le cadre de l'objet de configuration transmis à rs.initiate(), vous devrez spécifier le nom du replica set (myReplicaSet, dans ce cas), ainsi que la liste des membres qui feront partie du replica set.      
+Les noms d'hôtes des conteneurs sont les noms des conteneurs tels que spécifiés par le paramètre --name dans la commande docker run.    
 
 Si la commande a été exécutée avec succès, vous devriez voir un message de la CLI mongosh indiquant:
 
@@ -121,7 +121,7 @@ docker exec -it mongo1 mongosh --eval "rs.status()"
 
 ### Connexion à l'instance mongo1
 
-Vous pouvez également vous connecter à votre cluster à l'aide de MongoDB Compass (https://www.mongodb.com/products/tools/compass)  pour créer une base de données et ajouter des documents.   
+Vous pouvez également vous connecter à votre cluster à l'aide de MongoDB Compass   (https://www.mongodb.com/products/tools/compass)  pour créer une base de données et ajouter des documents.   
 Vous pourriez téléchargez les données de parcoursup : https://data.enseignementsup-recherche.gouv.fr/pages/parcoursupdata/?disjunctive.fili
 - Créer la base de données : universite
 - Créér la collection : parcourssup

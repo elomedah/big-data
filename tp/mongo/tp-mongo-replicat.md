@@ -39,7 +39,7 @@ Notez que cette commande ne doit être exécutée qu’une seule fois. Si vous r
 Comme le tp precédent pour démarrer une instance, executer la commande suivante
 
 ```
-docker run -d --rm -p 27017:27017 --name mongo1 --network mongoCluster mongo:5 mongod --replSet myReplicaSet --bind_ip localhost,mongo1
+docker run -d --rm -p 27017:27017 --name mongo1 --network mongoCluster mongo:5 mongod --replSet myReplicaSet --bind_ip 0.0.0.0
 ```
 
 Ici, vous dites à Docker de démarrer un conteneur avec les paramètres suivants :
@@ -59,12 +59,12 @@ Démarrez deux autres conteneurs. Vous devrez utiliser un nom différent et un p
 
 Démarrez le deuxième (Le démarrage devrait être rapide étant donné que vous avez déja l'image docker mongo:5   
 ```
-docker run -d --rm -p 27018:27017 --name mongo2 --network mongoCluster mongo:5 mongod --replSet myReplicaSet --bind_ip localhost,mongo2
+docker run -d --rm -p 27018:27017 --name mongo2 --network mongoCluster mongo:5 mongod --replSet myReplicaSet --bind_ip 0.0.0.0
 ```
 Démarrez le troisième
 
 ```
-docker run -d --rm -p 27019:27017 --name mongo3 --network mongoCluster mongo:5 mongod --replSet myReplicaSet --bind_ip localhost,mongo3
+docker run -d --rm -p 27019:27017 --name mongo3 --network mongoCluster mongo:5 mongod --replSet myReplicaSet --bind_ip 0.0.0.0
 ```
 
 Pour vérifier que vous avez les 3 instances correctement démarrées, exécutez la commande suivante :

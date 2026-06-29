@@ -213,7 +213,7 @@ Chaque équipe présente :
 
 -   l'architecture proposée ;
 -   l'organisation du stockage à froid ;
--   les traitements MapReduce ;
+-   les traitements Spark ;
 -   les analyses Hive ;
 -   le modèle HBase ;
 -   les choix techniques ;

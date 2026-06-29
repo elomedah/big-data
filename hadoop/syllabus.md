@@ -114,26 +114,20 @@ considérées comme **hors périmètre** du projet. Elles servent uniquement
 
 ------------------------------------------------------------------------
 
-## Séance 4 - MapReduce I : Fondamentaux
+## Séance 4 - Traitement distribué :  MapReduce  et Introduction à Spark
 
 ### Cours
 
--   Paradigme MapReduce
--   Mapper
--   Reducer
--   Shuffle
--   Sort
--   Combiner
--   Partitioner
--   Driver
+-   Paradigme MapReduce (Mapper, Reducer, Shuffle, Sort, Combiner, Partitioner, Driver)
+-   Limites de MapReduce
+-   Pourquoi MapReduce est aujourd'hui principalement étudié pour comprendre les fondements du calcul distribué
+-   Nouveaux framework de traitement de données : Spark
 
 ### TP
 
--   WordCount
--   Nombre de lignes
--   Somme
--   Moyenne
--   Comptage de fréquences
+-   WordCount et Comptage de fréquences
+-   Somme et Moyenne
+-   Configuration Spark
 
 ### Projet
 
@@ -141,16 +135,15 @@ considérées comme **hors périmètre** du projet. Elles servent uniquement
 
 ------------------------------------------------------------------------
 
-## Séance 5 - MapReduce II : Cas d'usage DORA
+## Séance 5 - Spark : Cas d'usage DORA
 
 ### Cours
 
--   Traitements distribués sur les logs
--   Optimisation
--   Analyse des performances
--   Limites de MapReduce
--   Pourquoi MapReduce est aujourd'hui principalement étudié pour
-    comprendre les fondements du calcul distribué
+-   Traitements distribués
+-   DataFrame vs DataSet
+-   Transformation vs Action 
+-   Analyse des logs et performances
+
 
 ### TP
 

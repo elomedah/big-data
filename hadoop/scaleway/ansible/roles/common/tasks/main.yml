@@ -51,6 +51,12 @@
   ansible.builtin.group:
     name: "{{ student_group }}"
 
+- name: Disable local loopback hostname entry
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s+.*\b{{ inventory_hostname }}\b.*$'
+    state: absent
+
 - name: Register cluster private hostnames
   ansible.builtin.blockinfile:
     path: /etc/hosts

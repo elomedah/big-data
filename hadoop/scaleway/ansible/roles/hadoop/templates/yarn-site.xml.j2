@@ -9,6 +9,22 @@
     <value>mapreduce_shuffle</value>
   </property>
   <property>
+    <name>yarn.nodemanager.hostname</name>
+    <value>{{ hostvars[inventory_hostname].private_ip }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.address</name>
+    <value>{{ hostvars[inventory_hostname].private_ip }}:0</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.localizer.address</name>
+    <value>{{ hostvars[inventory_hostname].private_ip }}:8040</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.webapp.address</name>
+    <value>{{ hostvars[inventory_hostname].private_ip }}:8042</value>
+  </property>
+  <property>
     <name>yarn.application.classpath</name>
     <value>{{ hadoop_home }}/etc/hadoop,{{ hadoop_home }}/share/hadoop/common/*,{{ hadoop_home }}/share/hadoop/common/lib/*,{{ hadoop_home }}/share/hadoop/hdfs/*,{{ hadoop_home }}/share/hadoop/hdfs/lib/*,{{ hadoop_home }}/share/hadoop/mapreduce/*,{{ hadoop_home }}/share/hadoop/mapreduce/lib/*,{{ hadoop_home }}/share/hadoop/yarn/*,{{ hadoop_home }}/share/hadoop/yarn/lib/*</value>
   </property>

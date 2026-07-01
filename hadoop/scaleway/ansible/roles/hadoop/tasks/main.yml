@@ -1,5 +1,5 @@
 ---
-- name: Download Hadoop archive on Ansible controller
+- name: Download Hadoop archive from Apache CDN on Ansible controller
   ansible.builtin.get_url:
     url: "{{ hadoop_download_url }}"
     dest: /tmp/hadoop-{{ hadoop_version }}.tar.gz
@@ -7,6 +7,18 @@
     timeout: 120
   delegate_to: localhost
   run_once: true
+  register: hadoop_cdn_download
+  ignore_errors: true
+
+- name: Download Hadoop archive from Apache archive fallback
+  ansible.builtin.get_url:
+    url: "{{ hadoop_download_fallback_url }}"
+    dest: /tmp/hadoop-{{ hadoop_version }}.tar.gz
+    mode: "0644"
+    timeout: 120
+  delegate_to: localhost
+  run_once: true
+  when: hadoop_cdn_download is failed
 
 - name: Copy and extract Hadoop
   ansible.builtin.unarchive:

@@ -70,6 +70,12 @@ cd hadoop/scaleway/terraform
 ./copy-inventory-to-bastion.sh
 ```
 
+Copy the private SSH key to the bastion:
+
+```bash
+./copy-private-key-to-bastion.sh
+```
+
 This creates `../ansible/inventory-bastion.ini` locally and copies it to the
 bastion as:
 

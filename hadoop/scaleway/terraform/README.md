@@ -147,6 +147,14 @@ chmod +x copy-inventory-to-bastion.sh
 ./copy-inventory-to-bastion.sh
 ```
 
+Copy the private SSH key to the bastion so Ansible can connect from the bastion
+to the private nodes:
+
+```bash
+chmod +x copy-private-key-to-bastion.sh
+./copy-private-key-to-bastion.sh
+```
+
 By default, the script copies the inventory to:
 
 ```text

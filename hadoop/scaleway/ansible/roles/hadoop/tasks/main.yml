@@ -1,4 +1,34 @@
 ---
+- name: Check existing Hadoop archive on Ansible controller
+  ansible.builtin.stat:
+    path: /tmp/hadoop-{{ hadoop_version }}.tar.gz
+  delegate_to: localhost
+  run_once: true
+  register: hadoop_archive_stat
+
+- name: Validate existing Hadoop archive on Ansible controller
+  ansible.builtin.command:
+    argv:
+      - tar
+      - -tzf
+      - /tmp/hadoop-{{ hadoop_version }}.tar.gz
+  delegate_to: localhost
+  run_once: true
+  register: hadoop_archive_validation
+  changed_when: false
+  failed_when: false
+  when: hadoop_archive_stat.stat.exists
+
+- name: Remove invalid Hadoop archive from Ansible controller
+  ansible.builtin.file:
+    path: /tmp/hadoop-{{ hadoop_version }}.tar.gz
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  when:
+    - hadoop_archive_stat.stat.exists
+    - hadoop_archive_validation.rc != 0
+
 - name: Download Hadoop archive from Apache CDN on Ansible controller
   ansible.builtin.get_url:
     url: "{{ hadoop_download_url }}"
@@ -19,6 +49,16 @@
   delegate_to: localhost
   run_once: true
   when: hadoop_cdn_download is failed
+
+- name: Validate downloaded Hadoop archive on Ansible controller
+  ansible.builtin.command:
+    argv:
+      - tar
+      - -tzf
+      - /tmp/hadoop-{{ hadoop_version }}.tar.gz
+  delegate_to: localhost
+  run_once: true
+  changed_when: false
 
 - name: Copy and extract Hadoop
   ansible.builtin.unarchive:

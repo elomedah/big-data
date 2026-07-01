@@ -111,12 +111,25 @@ locals {
   }
 
   gateway_cidrs = length(var.student_ssh_cidrs) > 0 ? var.student_ssh_cidrs : [var.teacher_ssh_cidr]
+
+  private_ip_offsets = {
+    bastion  = 10
+    gateway  = 11
+    master   = 12
+    worker-1 = 21
+    worker-2 = 22
+    worker-3 = 23
+  }
 }
 
 resource "scaleway_vpc_private_network" "hadoop" {
   name   = "${var.project_name}-private"
   region = var.region
   tags   = local.tags
+
+  ipv4_subnet {
+    subnet = var.private_subnet
+  }
 }
 
 resource "scaleway_instance_security_group" "bastion" {
@@ -179,6 +192,17 @@ resource "scaleway_block_volume" "data" {
   size_in_gb = each.value.data_size_gb
 }
 
+resource "scaleway_ipam_ip" "private" {
+  for_each = local.servers
+
+  address = cidrhost(var.private_subnet, local.private_ip_offsets[each.key])
+  tags    = concat(local.tags, [each.value.role])
+
+  source {
+    private_network_id = scaleway_vpc_private_network.hadoop.id
+  }
+}
+
 resource "scaleway_instance_server" "node" {
   for_each = local.servers
 
@@ -197,13 +221,18 @@ resource "scaleway_instance_server" "node" {
     volume_type = "sbs_volume"
   }
 
-  private_network {
-    pn_id = scaleway_vpc_private_network.hadoop.id
-  }
-
   user_data = {
     cloud-init = templatefile("${path.module}/cloud-init.yaml.tftpl", {
       ssh_public_key = local.admin_ssh_public_key
     })
   }
+}
+
+resource "scaleway_instance_private_nic" "node" {
+  for_each = local.servers
+
+  server_id          = scaleway_instance_server.node[each.key].id
+  private_network_id = scaleway_vpc_private_network.hadoop.id
+  ipam_ip_ids        = [scaleway_ipam_ip.private[each.key].id]
+  zone               = var.zone
 }

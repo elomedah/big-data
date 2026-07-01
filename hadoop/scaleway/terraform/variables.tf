@@ -45,6 +45,12 @@ variable "private_cidr" {
   default     = "10.42.0.0/16"
 }
 
+variable "private_subnet" {
+  description = "Private subnet reserved in Scaleway IPAM for the Hadoop cluster."
+  type        = string
+  default     = "10.42.0.0/24"
+}
+
 variable "student_count" {
   description = "Number of student Linux/HDFS accounts to prepare."
   type        = number

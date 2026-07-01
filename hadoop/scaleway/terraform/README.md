@@ -8,6 +8,7 @@ This Terraform project creates the Scaleway infrastructure described in
 - 1 private Hadoop master.
 - 3 private Hadoop workers.
 - A private network.
+- Reserved private IPs through Scaleway IPAM.
 - Security groups.
 - Block volumes for Hadoop metadata and HDFS data.
 
@@ -28,6 +29,34 @@ Install and run these tools inside WSL:
 terraform
 ansible
 ssh client
+```
+
+Install Terraform on Ubuntu/WSL:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y wget gpg lsb-release software-properties-common
+wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt-get update
+sudo apt-get install -y terraform
+```
+
+Install Ansible on Ubuntu/WSL:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt-get install -y ansible
+```
+
+Check the installation:
+
+```bash
+terraform version
+ansible --version
+ssh -V
 ```
 
 Terraform creates the Scaleway infrastructure. Ansible then connects to the
@@ -121,6 +150,8 @@ cluster_size = "large"
   allow SSH from every IPv4 address. This is convenient for temporary tests,
   but restrict these values before using the cluster with students.
 - Internal nodes are reachable through the bastion with SSH `ProxyJump`.
+- Private node addresses are reserved from `private_subnet`, which defaults to
+  `10.42.0.0/24`.
 - Data disks are attached to the master and workers. The Ansible storage role
   defaults to `/dev/vdb`; override `hadoop_data_device` if Scaleway exposes a
   different device path.

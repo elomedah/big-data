@@ -4,7 +4,7 @@ locals {
       name       = name
       role       = local.servers[name].role
       public_ip  = try(scaleway_instance_ip.public[name].address, null)
-      private_ip = try(server.private_ip, null)
+      private_ip = scaleway_ipam_ip.private[name].address
     }
   }
 

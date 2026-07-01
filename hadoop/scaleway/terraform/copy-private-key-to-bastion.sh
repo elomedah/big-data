@@ -2,7 +2,7 @@
 set -euo pipefail
 
 KEY_PATH="${1:-$HOME/.ssh/m2-hadoop-scaleway}"
-REMOTE_KEY_PATH="${2:-.ssh/m2-hadoop-scaleway}"
+REMOTE_KEY_PATH="${2:-/home/ubuntu/.ssh/m2-hadoop-scaleway}"
 SSH_USER="${SSH_USER:-ubuntu}"
 
 if ! command -v terraform >/dev/null 2>&1; then
@@ -25,7 +25,7 @@ if [[ -z "$BASTION_IP" ]]; then
   exit 1
 fi
 
-ssh -i "$KEY_PATH" "${SSH_USER}@${BASTION_IP}" "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
+ssh -i "$KEY_PATH" "${SSH_USER}@${BASTION_IP}" "mkdir -p /home/${SSH_USER}/.ssh && chmod 700 /home/${SSH_USER}/.ssh"
 scp -i "$KEY_PATH" "$KEY_PATH" "${SSH_USER}@${BASTION_IP}:${REMOTE_KEY_PATH}"
 ssh -i "$KEY_PATH" "${SSH_USER}@${BASTION_IP}" "chmod 600 '${REMOTE_KEY_PATH}'"
 

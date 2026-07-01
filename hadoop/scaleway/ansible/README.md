@@ -67,13 +67,8 @@ inventory:
 
 ```bash
 cd hadoop/scaleway/terraform
+chmod +x copy-inventory-to-bastion.sh
 ./copy-inventory-to-bastion.sh
-```
-
-Copy the private SSH key to the bastion:
-
-```bash
-./copy-private-key-to-bastion.sh
 ```
 
 This creates `../ansible/inventory-bastion.ini` locally and copies it to the
@@ -83,6 +78,14 @@ bastion as:
 ~/hadoop/scaleway/ansible/inventory.ini
 ```
 
+Copy the private SSH key to the bastion so Ansible can connect to the private
+cluster nodes:
+
+```bash
+chmod +x copy-private-key-to-bastion.sh
+./copy-private-key-to-bastion.sh
+```
+
 Then run:
 
 ```bash
@@ -90,6 +93,30 @@ cd hadoop/scaleway/ansible
 ansible-galaxy collection install -r requirements.yml
 ansible-playbook site.yml
 ```
+
+Test SSH access from the bastion before running the full playbook:
+
+```bash
+ssh -i /home/ubuntu/.ssh/m2-hadoop-scaleway ubuntu@10.42.0.12
+ansible hadoop -m ping
+```
+
+If SSH returns `Permission denied (publickey)`, the private network is reachable,
+but the SSH key is not accepted by the target machine. Check that the private
+key copied to the bastion matches the public key used by Terraform:
+
+```bash
+ssh-keygen -y -f /home/ubuntu/.ssh/m2-hadoop-scaleway
+```
+
+The output must match the content of the file configured by:
+
+```hcl
+admin_ssh_public_key_path = "~/.ssh/m2-hadoop-scaleway.pub"
+```
+
+If the key path was changed after the servers were created, recreate the
+servers so cloud-init injects the correct key.
 
 ## SSH access
 

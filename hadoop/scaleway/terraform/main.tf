@@ -102,7 +102,7 @@ locals {
 
   public_servers = {
     for name, server in local.servers : name => server
-    if server.public
+    if server.public || var.allocate_public_ip_to_private_nodes
   }
 
   data_volumes = {

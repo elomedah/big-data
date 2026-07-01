@@ -8,6 +8,7 @@ student_ssh_cidrs         = ["0.0.0.0/0"]
 # zone         = "fr-par-1"
 # image        = "ubuntu_jammy"
 # private_subnet = "10.42.0.0/24"
+# allocate_public_ip_to_private_nodes = true
 
 # Sizing profile:
 # - tiny: test cluster, all data volumes <= 20 GB, very small instances.

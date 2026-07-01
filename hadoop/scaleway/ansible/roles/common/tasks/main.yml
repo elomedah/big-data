@@ -1,4 +1,26 @@
 ---
+- name: Remove broken Scaleway apt source files
+  ansible.builtin.find:
+    paths: /etc/apt/sources.list.d
+    patterns:
+      - "*scaleway*"
+      - "*scw*"
+    file_type: file
+  register: scaleway_apt_sources
+
+- name: Delete broken Scaleway apt source files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ scaleway_apt_sources.files }}"
+
+- name: Remove broken Scaleway apt source lines
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list
+    regexp: ".*ppa\\.launchpadcontent\\.net/scaleway/stable.*"
+    state: absent
+  when: ansible_facts['distribution'] == 'Ubuntu'
+
 - name: Install base packages
   ansible.builtin.apt:
     name:

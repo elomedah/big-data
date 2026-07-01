@@ -51,6 +51,12 @@ variable "private_subnet" {
   default     = "10.42.0.0/24"
 }
 
+variable "allocate_public_ip_to_private_nodes" {
+  description = "Attach public IPs to private Hadoop nodes for outbound internet during provisioning. Inbound traffic is still controlled by security groups."
+  type        = bool
+  default     = true
+}
+
 variable "student_count" {
   description = "Number of student Linux/HDFS accounts to prepare."
   type        = number

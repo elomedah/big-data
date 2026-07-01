@@ -9,6 +9,8 @@ This Terraform project creates the Scaleway infrastructure described in
 - 3 private Hadoop workers.
 - A private network.
 - Reserved private IPs through Scaleway IPAM.
+- Optional public IPs on private nodes for outbound internet during
+  provisioning.
 - Security groups.
 - Block volumes for Hadoop metadata and HDFS data.
 
@@ -199,6 +201,9 @@ cluster_size = "large"
 - Internal nodes are reachable through the bastion with SSH `ProxyJump`.
 - Private node addresses are reserved from `private_subnet`, which defaults to
   `10.42.0.0/24`.
+- `allocate_public_ip_to_private_nodes = true` gives master and workers
+  outbound internet access for `apt` and Hadoop downloads. Their security group
+  still blocks public inbound access.
 - Data disks are attached to the master and workers. The Ansible storage role
   defaults to `/dev/vdb`; override `hadoop_data_device` if Scaleway exposes a
   different device path.

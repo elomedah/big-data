@@ -1,69 +1,67 @@
 # Ansible Hadoop Installation
 
-This Ansible project configures the servers created by
-`../terraform`:
+This Ansible project configures the Scaleway servers created by
+`../terraform`.
 
-- Java and base packages.
-- A Hadoop user and Linux resource limits.
+It installs and configures:
+
+- Java and base Linux packages.
+- A `hadoop` system user.
+- Linux resource limits for students.
 - Mounted data disks on the master and workers.
-- Hadoop HDFS, YARN and MapReduce configuration.
-- NameNode, DataNode, ResourceManager, NodeManager and History Server
-  systemd services.
+- Hadoop HDFS, YARN and MapReduce.
+- NameNode, DataNode, ResourceManager, NodeManager and History Server services.
 - Student Linux accounts on the gateway.
 - Student HDFS home directories and quotas.
 
-## Usage
+## Prerequisites
+
+Terraform must be applied first from `../terraform`.
 
 From `hadoop/scaleway/terraform`:
 
 ```bash
+terraform apply
+```
+
+Install required Ansible collections:
+
+```bash
+cd hadoop/scaleway/ansible
+ansible-galaxy collection install -r requirements.yml
+```
+
+The SSH key used by Ansible must match the Terraform variable:
+
+```hcl
+admin_ssh_public_key_path = "~/.ssh/m2-hadoop-scaleway.pub"
+```
+
+## Option 1: Run Ansible Locally
+
+Use this when Ansible is installed on your local machine or WSL.
+
+Generate the local inventory:
+
+```bash
+cd hadoop/scaleway/terraform
 terraform output -raw ansible_inventory > ../ansible/inventory.ini
 ```
 
-From `hadoop/scaleway/ansible`:
+Run the playbook:
 
 ```bash
-ansible-galaxy collection install -r requirements.yml
+cd ../ansible
 ansible-playbook site.yml
 ```
 
-## Run Ansible from the bastion
+This inventory uses SSH `ProxyJump` through the bastion to reach private nodes.
 
-If you prefer to run Ansible from the bastion, connect to it first:
+## Option 2: Run Ansible From The Bastion
 
-```bash
-ssh -i ~/.ssh/m2-hadoop-scaleway ubuntu@<bastion_public_ip>
-```
+Use this when Ansible is installed directly on the bastion.
 
-Or use the Terraform helper script:
-
-```bash
-cd hadoop/scaleway/terraform
-./connect-bastion.sh
-```
-
-You can get the bastion IP from Terraform:
-
-```bash
-cd hadoop/scaleway/terraform
-terraform output -raw bastion_public_ip
-```
-
-On the bastion, install Ansible:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y software-properties-common
-sudo add-apt-repository --yes --update ppa:ansible/ansible
-sudo apt-get install -y ansible
-```
-
-Copy the project directory and the private SSH key to the bastion before
-running Ansible. The private key must match `admin_ssh_public_key_path` from
-Terraform.
-
-From your local Terraform directory, generate and copy the bastion-ready
-inventory:
+From your local machine, copy the bastion-ready inventory:
 
 ```bash
 cd hadoop/scaleway/terraform
@@ -71,19 +69,27 @@ chmod +x copy-inventory-to-bastion.sh
 ./copy-inventory-to-bastion.sh
 ```
 
-This creates `../ansible/inventory-bastion.ini` locally and copies it to the
-bastion as:
-
-```text
-~/hadoop/scaleway/ansible/inventory.ini
-```
-
-Copy the private SSH key to the bastion so Ansible can connect to the private
-cluster nodes:
+Copy the private SSH key to the bastion:
 
 ```bash
 chmod +x copy-private-key-to-bastion.sh
 ./copy-private-key-to-bastion.sh
+```
+
+Connect to the bastion:
+
+```bash
+chmod +x connect-bastion.sh
+./connect-bastion.sh
+```
+
+On the bastion, install Ansible if needed:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt-get install -y ansible
 ```
 
 Then run:
@@ -94,41 +100,35 @@ ansible-galaxy collection install -r requirements.yml
 ansible-playbook site.yml
 ```
 
-Test SSH access from the bastion before running the full playbook:
+## SSH Validation
+
+Before running the full playbook from the bastion, test direct SSH to a private
+node:
 
 ```bash
 ssh -i /home/ubuntu/.ssh/m2-hadoop-scaleway ubuntu@10.42.0.12
+```
+
+Then test Ansible:
+
+```bash
 ansible hadoop -m ping
 ```
 
-If SSH returns `Permission denied (publickey)`, the private network is reachable,
-but the SSH key is not accepted by the target machine. Check that the private
-key copied to the bastion matches the public key used by Terraform:
+If this works, Ansible can reach the gateway, master and workers.
 
-```bash
-ssh-keygen -y -f /home/ubuntu/.ssh/m2-hadoop-scaleway
+## Student SSH Keys
+
+The playbook creates locked Linux accounts named:
+
+```text
+student01
+student02
+...
+student30
 ```
 
-The output must match the content of the file configured by:
-
-```hcl
-admin_ssh_public_key_path = "~/.ssh/m2-hadoop-scaleway.pub"
-```
-
-If the key path was changed after the servers were created, recreate the
-servers so cloud-init injects the correct key.
-
-## SSH access
-
-The generated inventory connects to private nodes through the bastion with
-`ProxyJump`. Use the private key matching `admin_ssh_public_key_path` from
-Terraform.
-
-## Student keys
-
-The playbook creates locked Linux accounts named `student01` to `student30`.
-Students should generate their own SSH key locally and send only the public
-key.
+Students should generate their own SSH key locally and send only the public key.
 
 Student command:
 
@@ -156,7 +156,7 @@ student_ssh_keys:
     - "ssh-ed25519 AAAA... student02@example"
 ```
 
-Then rerun the student role:
+Then rerun only the student role:
 
 ```bash
 ansible-playbook site.yml --tags students
@@ -168,8 +168,43 @@ Students connect to the gateway:
 ssh -i ~/.ssh/m2-hadoop-student student01@<gateway_public_ip>
 ```
 
-## Device name
+## Troubleshooting
+
+`Permission denied (publickey)` means the private network is reachable, but the
+SSH key is not accepted by the target machine.
+
+On the bastion, check the private key:
+
+```bash
+ssh-keygen -y -f /home/ubuntu/.ssh/m2-hadoop-scaleway
+```
+
+The output must match the public key configured by Terraform:
+
+```hcl
+admin_ssh_public_key_path = "~/.ssh/m2-hadoop-scaleway.pub"
+```
+
+If the key path was changed after the servers were created, recreate the
+servers so cloud-init injects the correct key.
+
+APT errors on private nodes usually mean they cannot reach the internet.
+Terraform defaults to:
+
+```hcl
+allocate_public_ip_to_private_nodes = true
+```
+
+This gives master and workers outbound internet access for `apt` and downloads,
+while security groups still block public inbound access.
+
+## Device Name
 
 The storage role uses `/dev/vdb` by default. If Scaleway exposes the attached
-block volume under another path, change `hadoop_data_device` in
-`group_vars/all.yml` and rerun the playbook.
+block volume under another path, change this value in `group_vars/all.yml`:
+
+```yaml
+hadoop_data_device: /dev/vdb
+```
+
+Then rerun the playbook.

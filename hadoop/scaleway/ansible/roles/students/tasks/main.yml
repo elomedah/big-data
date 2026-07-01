@@ -3,7 +3,7 @@
   ansible.builtin.set_fact:
     student_accounts: "{{ query('sequence', 'start=1 end=' ~ student_count ~ ' format=student%02d') }}"
 
-- name: Create Linux student accounts on gateway
+- name: Create Linux student accounts for SSH and HDFS group mapping
   ansible.builtin.user:
     name: "{{ item }}"
     group: "{{ student_group }}"
@@ -14,7 +14,7 @@
     password_lock: "{{ student_password_lock }}"
   loop: "{{ student_accounts }}"
 
-- name: Create teacher admin account on gateway
+- name: Create teacher admin account for SSH and HDFS group mapping
   ansible.builtin.user:
     name: "{{ teacher_user }}"
     groups:
@@ -33,6 +33,7 @@
     group: "{{ student_group }}"
     mode: "0700"
   loop: "{{ student_accounts }}"
+  when: inventory_hostname in groups['gateway']
 
 - name: Install student SSH public keys
   ansible.posix.authorized_key:
@@ -41,7 +42,15 @@
     state: present
     exclusive: false
   loop: "{{ student_ssh_keys | dict2items | subelements('value') }}"
-  when: item.0.key in student_accounts
+  when:
+    - inventory_hostname in groups['gateway']
+    - item.0.key in student_accounts
+
+- name: Refresh NameNode user to group mappings
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -refreshUserToGroupsMappings"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  when: inventory_hostname in groups['masters']
 
 - name: Wait for HDFS to answer
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -report"
@@ -51,6 +60,7 @@
   delay: 6
   until: hdfs_report.rc == 0
   changed_when: false
+  when: inventory_hostname in groups['gateway']
 
 - name: Create HDFS base directories
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p {{ item }}"
@@ -62,6 +72,7 @@
     - /datalake/archive
     - /datalake/processed
     - /datalake/audit
+  when: inventory_hostname in groups['gateway']
 
 - name: Set HDFS datalake ownership
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chown hadoop:{{ student_group }} {{ item.path }}"
@@ -73,6 +84,7 @@
     - { path: /datalake/archive }
     - { path: /datalake/processed }
     - { path: /datalake/audit }
+  when: inventory_hostname in groups['gateway']
 
 - name: Set HDFS datalake permissions
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chmod {{ item.mode }} {{ item.path }}"
@@ -84,37 +96,44 @@
     - { path: /datalake/archive, mode: "755" }
     - { path: /datalake/processed, mode: "775" }
     - { path: /datalake/audit, mode: "775" }
+  when: inventory_hostname in groups['gateway']
 
 - name: Create student HDFS directories
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p /user/{{ item }}"
   become_user: "{{ hadoop_user }}"
   changed_when: false
   loop: "{{ student_accounts }}"
+  when: inventory_hostname in groups['gateway']
 
 - name: Create teacher HDFS directory
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p /user/{{ teacher_user }}"
   become_user: "{{ hadoop_user }}"
   changed_when: false
+  when: inventory_hostname in groups['gateway']
 
 - name: Assign HDFS ownership to students
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chown {{ item }}:{{ student_group }} /user/{{ item }}"
   become_user: "{{ hadoop_user }}"
   changed_when: false
   loop: "{{ student_accounts }}"
+  when: inventory_hostname in groups['gateway']
 
 - name: Assign HDFS ownership to teacher
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chown {{ teacher_user }}:{{ student_group }} /user/{{ teacher_user }}"
   become_user: "{{ hadoop_user }}"
   changed_when: false
+  when: inventory_hostname in groups['gateway']
 
 - name: Apply HDFS space quotas
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -setSpaceQuota {{ student_space_quota }} /user/{{ item }}"
   become_user: "{{ hadoop_user }}"
   changed_when: false
   loop: "{{ student_accounts }}"
+  when: inventory_hostname in groups['gateway']
 
 - name: Apply HDFS file quotas
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -setQuota {{ student_file_quota }} /user/{{ item }}"
   become_user: "{{ hadoop_user }}"
   changed_when: false
   loop: "{{ student_accounts }}"
+  when: inventory_hostname in groups['gateway']

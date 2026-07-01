@@ -24,7 +24,7 @@
     - gateway_proxy
 
 - name: Create teaching accounts and quotas
-  hosts: gateway
+  hosts: gateway:masters
   become: true
   tags:
     - students

@@ -68,6 +68,7 @@
   changed_when: false
   loop:
     - /tmp
+    - /tmp/hadoop-yarn
     - /user
     - /datalake/raw
     - /datalake/archive
@@ -93,11 +94,24 @@
   changed_when: false
   loop:
     - { path: /tmp, mode: "1777" }
+    - { path: /tmp/hadoop-yarn, mode: "1777" }
     - { path: /datalake, mode: "775" }
     - { path: /datalake/raw, mode: "775" }
     - { path: /datalake/archive, mode: "755" }
     - { path: /datalake/processed, mode: "775" }
     - { path: /datalake/audit, mode: "775" }
+  when: inventory_hostname in groups['gateway']
+
+- name: Apply sticky bit to every HDFS directory under /tmp
+  ansible.builtin.shell: |
+    set -e
+    {{ hadoop_home }}/bin/hdfs dfs -find /tmp -type d -print | while read -r dir; do
+      {{ hadoop_home }}/bin/hdfs dfs -chmod 1777 "$dir"
+    done
+  args:
+    executable: /bin/bash
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
   when: inventory_hostname in groups['gateway']
 
 - name: Create student HDFS directories

@@ -51,6 +51,15 @@
   ansible.builtin.group:
     name: "{{ student_group }}"
 
+- name: Register cluster private hostnames
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    marker: "# {mark} ANSIBLE HADOOP CLUSTER HOSTS"
+    block: |
+      {% for host in groups['cluster'] %}
+      {{ hostvars[host].private_ip }} {{ host }}
+      {% endfor %}
+
 - name: Install Linux resource limits for students
   ansible.builtin.template:
     src: student-limits.conf.j2

@@ -117,6 +117,90 @@ ansible hadoop -m ping
 
 If this works, Ansible can reach the gateway, master and workers.
 
+## Hadoop Web Interfaces
+
+In cloud mode, Hadoop web interfaces are not exposed publicly. Access them
+through an SSH tunnel or a SOCKS proxy via the bastion.
+
+### Option 1: SSH port forwarding
+
+From your local machine:
+
+```bash
+ssh -i ~/.ssh/m2-hadoop-scaleway \
+  -L 9870:10.42.0.12:9870 \
+  -L 8088:10.42.0.12:8088 \
+  -L 9864:10.42.0.21:9864 \
+  -L 8042:10.42.0.21:8042 \
+  ubuntu@<bastion_public_ip>
+```
+
+Then open these URLs locally:
+
+```text
+NameNode UI:          http://localhost:9870
+YARN ResourceManager: http://localhost:8088
+Worker 1 DataNode:    http://localhost:9864
+Worker 1 NodeManager: http://localhost:8042
+```
+
+For all workers, use different local ports:
+
+```bash
+ssh -i ~/.ssh/m2-hadoop-scaleway \
+  -L 9870:10.42.0.12:9870 \
+  -L 8088:10.42.0.12:8088 \
+  -L 9864:10.42.0.21:9864 \
+  -L 9865:10.42.0.22:9864 \
+  -L 9866:10.42.0.23:9864 \
+  -L 8042:10.42.0.21:8042 \
+  -L 8043:10.42.0.22:8042 \
+  -L 8044:10.42.0.23:8042 \
+  ubuntu@<bastion_public_ip>
+```
+
+Then open:
+
+```text
+Worker 1 DataNode:    http://localhost:9864
+Worker 2 DataNode:    http://localhost:9865
+Worker 3 DataNode:    http://localhost:9866
+Worker 1 NodeManager: http://localhost:8042
+Worker 2 NodeManager: http://localhost:8043
+Worker 3 NodeManager: http://localhost:8044
+```
+
+### Option 2: SOCKS proxy
+
+This is more convenient because the browser can reach all private Hadoop URLs
+through the bastion.
+
+Start a SOCKS proxy:
+
+```bash
+ssh -i ~/.ssh/m2-hadoop-scaleway -D 1080 ubuntu@<bastion_public_ip>
+```
+
+Configure your browser to use:
+
+```text
+SOCKS host: localhost
+SOCKS port: 1080
+```
+
+Then open the private URLs directly:
+
+```text
+NameNode UI:          http://10.42.0.12:9870
+YARN ResourceManager: http://10.42.0.12:8088
+Worker 1 DataNode:    http://10.42.0.21:9864
+Worker 2 DataNode:    http://10.42.0.22:9864
+Worker 3 DataNode:    http://10.42.0.23:9864
+Worker 1 NodeManager: http://10.42.0.21:8042
+Worker 2 NodeManager: http://10.42.0.22:8042
+Worker 3 NodeManager: http://10.42.0.23:8042
+```
+
 ## Student SSH Keys
 
 The playbook creates locked Linux accounts named:
@@ -197,6 +281,63 @@ allocate_public_ip_to_private_nodes = true
 
 This gives master and workers outbound internet access for `apt` and downloads,
 while security groups still block public inbound access.
+
+If the NameNode UI shows no DataNodes, the NameNode is running but no worker
+has registered as a DataNode. From the bastion, check:
+
+```bash
+cd hadoop/scaleway/ansible
+ansible workers -m shell -a "systemctl status hadoop-datanode --no-pager"
+ansible workers -m shell -a "jps"
+ansible masters -m shell -a "/opt/hadoop/bin/hdfs dfsadmin -report" -b
+```
+
+If the DataNode service is stopped, restart it:
+
+```bash
+ansible workers -m systemd -a "name=hadoop-datanode state=restarted" -b
+```
+
+If it still fails, inspect the logs:
+
+```bash
+ansible workers -m shell -a "journalctl -u hadoop-datanode -n 80 --no-pager" -b
+ansible workers -m shell -a "ls -lah /data/hadoop/datanode /opt/hadoop/logs" -b
+```
+
+Common causes are:
+
+- the playbook stopped before the Hadoop role started DataNode services;
+- the data disk was not mounted on `/data/hadoop`;
+- the DataNode cannot reach the NameNode on `10.42.0.12:9000`;
+- the DataNode directory has wrong ownership.
+- the NameNode rejects the DataNode because private IP reverse DNS is not
+  available.
+
+If logs show `DisallowedDatanodeException` and `hostname cannot be resolved`,
+rerun the playbook. The Hadoop role disables strict DataNode hostname checking
+and the common role writes cluster private hostnames to `/etc/hosts`.
+
+If the DataNode web UI shows `Actor State = INIT_FAILED`, check for a
+NameNode/DataNode cluster ID mismatch:
+
+```bash
+ansible workers -m shell -a "journalctl -u hadoop-datanode -n 120 --no-pager | grep -i 'clusterid\|incompatible\|failed'" -b
+```
+
+On a fresh test cluster, you can reset DataNode storage and restart the
+DataNodes:
+
+```bash
+ansible workers -m systemd -a "name=hadoop-datanode state=stopped" -b
+ansible workers -m shell -a "rm -rf /data/hadoop/datanode/current" -b
+ansible workers -m file -a "path=/data/hadoop/datanode state=directory owner=hadoop group=hadoop mode=0755" -b
+ansible workers -m systemd -a "name=hadoop-datanode state=started" -b
+ansible masters -m shell -a "/opt/hadoop/bin/hdfs dfsadmin -report" -b
+```
+
+This deletes the worker block metadata and HDFS blocks. Use it only for a new
+or disposable test cluster.
 
 ## Device Name
 

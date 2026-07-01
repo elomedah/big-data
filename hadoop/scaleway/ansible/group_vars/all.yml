@@ -12,7 +12,7 @@ hadoop_block_size: 134217728
 java_package: openjdk-11-jdk
 
 student_group: student
-student_count: 30
+student_count: 3
 student_space_quota: 5g
 student_file_quota: 50000
 student_password_lock: true

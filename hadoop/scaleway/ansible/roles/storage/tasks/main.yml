@@ -1,18 +1,50 @@
 ---
-- name: Check Hadoop data device
+- name: Detect attached Hadoop data device
+  ansible.builtin.shell: |
+    set -e
+    root_source="$(findmnt -n -o SOURCE /)"
+    root_disk="$(lsblk -no PKNAME "$root_source" 2>/dev/null | head -n 1)"
+    if [ -n "$root_disk" ]; then
+      root_disk="/dev/$root_disk"
+    else
+      root_disk="$root_source"
+    fi
+    lsblk -dnro NAME,TYPE | awk '$2 == "disk" { print "/dev/" $1 }' | while read -r disk; do
+      if [ "$disk" != "$root_disk" ]; then
+        echo "$disk"
+        exit 0
+      fi
+    done
+  args:
+    executable: /bin/bash
+  register: detected_hadoop_data_device
+  changed_when: false
+  when: hadoop_data_device == "auto"
+
+- name: Set effective Hadoop data device
+  ansible.builtin.set_fact:
+    effective_hadoop_data_device: "{{ detected_hadoop_data_device.stdout_lines[0] | default(hadoop_data_device) }}"
+  when: hadoop_data_device == "auto"
+
+- name: Set configured Hadoop data device
+  ansible.builtin.set_fact:
+    effective_hadoop_data_device: "{{ hadoop_data_device }}"
+  when: hadoop_data_device != "auto"
+
+- name: Check effective Hadoop data device
   ansible.builtin.stat:
-    path: "{{ hadoop_data_device }}"
+    path: "{{ effective_hadoop_data_device }}"
   register: hadoop_data_device_stat
 
 - name: Fail when data device is missing
   ansible.builtin.fail:
-    msg: "Data device {{ hadoop_data_device }} does not exist. Override hadoop_data_device in group_vars/all.yml."
+    msg: "Data device {{ effective_hadoop_data_device }} does not exist. Run 'lsblk -f' on this host and override hadoop_data_device in group_vars/all.yml."
   when: not hadoop_data_device_stat.stat.exists
 
 - name: Create filesystem on Hadoop data device
   community.general.filesystem:
     fstype: ext4
-    dev: "{{ hadoop_data_device }}"
+    dev: "{{ effective_hadoop_data_device }}"
   when: hadoop_data_device_stat.stat.exists
 
 - name: Create Hadoop data mountpoint
@@ -26,7 +58,7 @@
 - name: Mount Hadoop data volume
   ansible.posix.mount:
     path: "{{ hadoop_data_dir }}"
-    src: "{{ hadoop_data_device }}"
+    src: "{{ effective_hadoop_data_device }}"
     fstype: ext4
     opts: defaults,noatime
     state: mounted

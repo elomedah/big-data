@@ -200,11 +200,24 @@ while security groups still block public inbound access.
 
 ## Device Name
 
-The storage role uses `/dev/vdb` by default. If Scaleway exposes the attached
-block volume under another path, change this value in `group_vars/all.yml`:
+The storage role uses automatic disk detection by default:
 
 ```yaml
-hadoop_data_device: /dev/vdb
+hadoop_data_device: auto
+```
+
+It excludes the root disk and uses the attached data disk for `/data/hadoop`.
+
+If detection fails, connect to the failing host and inspect disks:
+
+```bash
+lsblk -f
+```
+
+Then override the value in `group_vars/all.yml`, for example:
+
+```yaml
+hadoop_data_device: /dev/sdb
 ```
 
 Then rerun the playbook.

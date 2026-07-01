@@ -5,7 +5,7 @@ hadoop_home: /opt/hadoop
 hadoop_user: hadoop
 hadoop_group: hadoop
 hadoop_data_dir: /data/hadoop
-hadoop_data_device: /dev/vdb
+hadoop_data_device: auto
 hadoop_replication: 3
 hadoop_block_size: 134217728
 

@@ -1,15 +1,18 @@
 ---
-- name: Download Hadoop archive
+- name: Download Hadoop archive on Ansible controller
   ansible.builtin.get_url:
     url: "{{ hadoop_download_url }}"
     dest: /tmp/hadoop-{{ hadoop_version }}.tar.gz
     mode: "0644"
+    timeout: 120
+  delegate_to: localhost
+  run_once: true
 
-- name: Extract Hadoop
+- name: Copy and extract Hadoop
   ansible.builtin.unarchive:
     src: /tmp/hadoop-{{ hadoop_version }}.tar.gz
     dest: /opt
-    remote_src: true
+    remote_src: false
     creates: /opt/hadoop-{{ hadoop_version }}
 
 - name: Link Hadoop installation

@@ -129,19 +129,6 @@ Get the bastion public IP:
 terraform output -raw bastion_public_ip
 ```
 
-Connect to the bastion with the generated SSH key:
-
-```bash
-chmod +x connect-bastion.sh
-./connect-bastion.sh
-```
-
-To use another private key:
-
-```bash
-./connect-bastion.sh ~/.ssh/my-scaleway-key
-```
-
 Prepare the bastion for Ansible. This copies the whole `hadoop/scaleway`
 project, installs the bastion inventory, and copies the private SSH key needed
 to reach private nodes:
@@ -180,6 +167,20 @@ To use another private key or remote project directory:
 
 Then run Ansible from `../ansible`, either from your local machine through the
 bastion or after logging in to the bastion.
+
+Connect to the bastion with the generated SSH key:
+
+```bash
+chmod +x connect-bastion.sh
+./connect-bastion.sh
+```
+
+To use another private key:
+
+```bash
+./connect-bastion.sh ~/.ssh/my-scaleway-key
+```
+
 
 ## Sizing profiles
 

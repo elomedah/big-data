@@ -1,0 +1,26 @@
+[bastion]
+bastion ansible_host=127.0.0.1 ansible_connection=local private_ip=${nodes["bastion"].private_ip}
+
+[gateway]
+gateway ansible_host=${nodes["gateway"].private_ip} public_ip=${nodes["gateway"].public_ip} private_ip=${nodes["gateway"].private_ip}
+
+[masters]
+master ansible_host=${nodes["master"].private_ip} private_ip=${nodes["master"].private_ip}
+
+[workers]
+worker-1 ansible_host=${nodes["worker-1"].private_ip} private_ip=${nodes["worker-1"].private_ip}
+worker-2 ansible_host=${nodes["worker-2"].private_ip} private_ip=${nodes["worker-2"].private_ip}
+worker-3 ansible_host=${nodes["worker-3"].private_ip} private_ip=${nodes["worker-3"].private_ip}
+
+[hadoop:children]
+gateway
+masters
+workers
+
+[cluster:children]
+bastion
+hadoop
+
+[cluster:vars]
+ansible_user=ubuntu
+ansible_ssh_common_args='-o StrictHostKeyChecking=accept-new'

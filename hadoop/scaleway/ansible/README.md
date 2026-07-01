@@ -27,6 +27,64 @@ ansible-galaxy collection install -r requirements.yml
 ansible-playbook site.yml
 ```
 
+## Run Ansible from the bastion
+
+If you prefer to run Ansible from the bastion, connect to it first:
+
+```bash
+ssh -i ~/.ssh/m2-hadoop-scaleway ubuntu@<bastion_public_ip>
+```
+
+Or use the Terraform helper script:
+
+```bash
+cd hadoop/scaleway/terraform
+./connect-bastion.sh
+```
+
+You can get the bastion IP from Terraform:
+
+```bash
+cd hadoop/scaleway/terraform
+terraform output -raw bastion_public_ip
+```
+
+On the bastion, install Ansible:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt-get install -y ansible
+```
+
+Copy the project directory and the private SSH key to the bastion before
+running Ansible. The private key must match `admin_ssh_public_key_path` from
+Terraform.
+
+From your local Terraform directory, generate and copy the bastion-ready
+inventory:
+
+```bash
+cd hadoop/scaleway/terraform
+./copy-inventory-to-bastion.sh
+```
+
+This creates `../ansible/inventory-bastion.ini` locally and copies it to the
+bastion as:
+
+```text
+~/hadoop/scaleway/ansible/inventory.ini
+```
+
+Then run:
+
+```bash
+cd hadoop/scaleway/ansible
+ansible-galaxy collection install -r requirements.yml
+ansible-playbook site.yml
+```
+
 ## SSH access
 
 The generated inventory connects to private nodes through the bastion with

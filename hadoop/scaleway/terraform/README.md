@@ -121,7 +121,46 @@ terraform apply
 terraform output -raw ansible_inventory > ../ansible/inventory.ini
 ```
 
-Then run Ansible from `../ansible`.
+Get the bastion public IP:
+
+```bash
+terraform output -raw bastion_public_ip
+```
+
+Connect to the bastion with the generated SSH key:
+
+```bash
+chmod +x connect-bastion.sh
+./connect-bastion.sh
+```
+
+To use another private key:
+
+```bash
+./connect-bastion.sh ~/.ssh/my-scaleway-key
+```
+
+Generate and copy the bastion-ready Ansible inventory to the bastion:
+
+```bash
+chmod +x copy-inventory-to-bastion.sh
+./copy-inventory-to-bastion.sh
+```
+
+By default, the script copies the inventory to:
+
+```text
+ubuntu@<bastion_public_ip>:hadoop/scaleway/ansible/inventory.ini
+```
+
+To use another private key or remote directory:
+
+```bash
+./copy-inventory-to-bastion.sh ~/.ssh/my-scaleway-key hadoop/scaleway/ansible
+```
+
+Then run Ansible from `../ansible`, either from your local machine through the
+bastion or after logging in to the bastion.
 
 ## Sizing profiles
 

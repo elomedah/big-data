@@ -33,3 +33,10 @@ output "ansible_inventory" {
     bastion_ip = local.bastion_ip
   })
 }
+
+output "bastion_ansible_inventory" {
+  description = "Inventory to copy to the bastion when Ansible runs from the bastion."
+  value = templatefile("${path.module}/inventory-bastion.ini.tftpl", {
+    nodes = local.nodes
+  })
+}

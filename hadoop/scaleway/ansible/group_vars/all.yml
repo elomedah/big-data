@@ -18,6 +18,7 @@ student_space_quota: 5g
 student_file_quota: 50000
 student_password_lock: true
 student_ssh_keys: {}
+teacher_user: teacher
 
 yarn_students_capacity: 60
 yarn_students_max_capacity: 70

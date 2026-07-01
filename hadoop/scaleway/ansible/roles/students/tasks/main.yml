@@ -14,6 +14,17 @@
     password_lock: "{{ student_password_lock }}"
   loop: "{{ student_accounts }}"
 
+- name: Create teacher admin account on gateway
+  ansible.builtin.user:
+    name: "{{ teacher_user }}"
+    groups:
+      - "{{ student_group }}"
+      - sudo
+    append: true
+    shell: /bin/bash
+    create_home: true
+    password_lock: true
+
 - name: Create SSH directory for student accounts
   ansible.builtin.file:
     path: "/home/{{ item }}/.ssh"
@@ -52,17 +63,49 @@
     - /datalake/processed
     - /datalake/audit
 
+- name: Set HDFS datalake ownership
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chown hadoop:{{ student_group }} {{ item.path }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  loop:
+    - { path: /datalake }
+    - { path: /datalake/raw }
+    - { path: /datalake/archive }
+    - { path: /datalake/processed }
+    - { path: /datalake/audit }
+
+- name: Set HDFS datalake permissions
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chmod {{ item.mode }} {{ item.path }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  loop:
+    - { path: /datalake, mode: "775" }
+    - { path: /datalake/raw, mode: "775" }
+    - { path: /datalake/archive, mode: "755" }
+    - { path: /datalake/processed, mode: "775" }
+    - { path: /datalake/audit, mode: "775" }
+
 - name: Create student HDFS directories
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p /user/{{ item }}"
   become_user: "{{ hadoop_user }}"
   changed_when: false
   loop: "{{ student_accounts }}"
 
+- name: Create teacher HDFS directory
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p /user/{{ teacher_user }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+
 - name: Assign HDFS ownership to students
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chown {{ item }}:{{ student_group }} /user/{{ item }}"
   become_user: "{{ hadoop_user }}"
   changed_when: false
   loop: "{{ student_accounts }}"
+
+- name: Assign HDFS ownership to teacher
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chown {{ teacher_user }}:{{ student_group }} /user/{{ teacher_user }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
 
 - name: Apply HDFS space quotas
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -setSpaceQuota {{ student_space_quota }} /user/{{ item }}"

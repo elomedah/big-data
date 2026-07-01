@@ -5,6 +5,26 @@
     <value>yarn</value>
   </property>
   <property>
+    <name>yarn.app.mapreduce.am.env</name>
+    <value>HADOOP_MAPRED_HOME={{ hadoop_home }}</value>
+  </property>
+  <property>
+    <name>mapreduce.map.env</name>
+    <value>HADOOP_MAPRED_HOME={{ hadoop_home }}</value>
+  </property>
+  <property>
+    <name>mapreduce.reduce.env</name>
+    <value>HADOOP_MAPRED_HOME={{ hadoop_home }}</value>
+  </property>
+  <property>
+    <name>mapreduce.application.classpath</name>
+    <value>{{ hadoop_home }}/share/hadoop/mapreduce/*,{{ hadoop_home }}/share/hadoop/mapreduce/lib/*,{{ hadoop_home }}/share/hadoop/common/*,{{ hadoop_home }}/share/hadoop/common/lib/*,{{ hadoop_home }}/share/hadoop/hdfs/*,{{ hadoop_home }}/share/hadoop/hdfs/lib/*,{{ hadoop_home }}/share/hadoop/yarn/*,{{ hadoop_home }}/share/hadoop/yarn/lib/*</value>
+  </property>
+  <property>
+    <name>yarn.app.mapreduce.am.command-opts</name>
+    <value>-Xmx512m</value>
+  </property>
+  <property>
     <name>mapreduce.jobhistory.address</name>
     <value>{{ hostvars[resourcemanager_host].private_ip }}:10020</value>
   </property>

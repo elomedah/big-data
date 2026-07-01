@@ -111,6 +111,9 @@
     - mapred-site.xml
     - workers
     - capacity-scheduler.xml
+  notify:
+    - Restart master Hadoop services
+    - Restart worker Hadoop services
 
 - name: Install Hadoop systemd units
   ansible.builtin.template:

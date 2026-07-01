@@ -2,3 +2,22 @@
 - name: Reload systemd
   ansible.builtin.systemd:
     daemon_reload: true
+
+- name: Restart master Hadoop services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - hadoop-namenode
+    - hadoop-resourcemanager
+    - hadoop-historyserver
+  when: inventory_hostname in groups['masters']
+
+- name: Restart worker Hadoop services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - hadoop-datanode
+    - hadoop-nodemanager
+  when: inventory_hostname in groups['workers']

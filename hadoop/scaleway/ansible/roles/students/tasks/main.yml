@@ -102,14 +102,8 @@
     - { path: /datalake/audit, mode: "775" }
   when: inventory_hostname in groups['gateway']
 
-- name: Apply sticky bit to every HDFS directory under /tmp
-  ansible.builtin.shell: |
-    set -e
-    {{ hadoop_home }}/bin/hdfs dfs -find /tmp -type d -print | while read -r dir; do
-      {{ hadoop_home }}/bin/hdfs dfs -chmod 1777 "$dir"
-    done
-  args:
-    executable: /bin/bash
+- name: Apply sticky bit recursively under HDFS /tmp
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chmod -R 1777 /tmp"
   become_user: "{{ hadoop_user }}"
   changed_when: false
   when: inventory_hostname in groups['gateway']

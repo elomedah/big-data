@@ -1,0 +1,51 @@
+server {
+    listen 9870;
+    server_name _;
+    location / {
+        proxy_pass http://{{ hostvars[groups['masters'][0]].private_ip }}:9870;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+server {
+    listen 8088;
+    server_name _;
+    location / {
+        proxy_pass http://{{ hostvars[groups['masters'][0]].private_ip }}:8088;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+server {
+    listen 19888;
+    server_name _;
+    location / {
+        proxy_pass http://{{ hostvars[groups['masters'][0]].private_ip }}:19888;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+{% for host in groups['workers'] %}
+server {
+    listen {{ 9864 + loop.index0 }};
+    server_name _;
+    location / {
+        proxy_pass http://{{ hostvars[host].private_ip }}:9864;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+server {
+    listen {{ 8042 + loop.index0 }};
+    server_name _;
+    location / {
+        proxy_pass http://{{ hostvars[host].private_ip }}:8042;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+{% endfor %}

@@ -120,9 +120,49 @@ If this works, Ansible can reach the gateway, master and workers.
 ## Hadoop Web Interfaces
 
 In cloud mode, Hadoop web interfaces are not exposed publicly. Access them
-through an SSH tunnel or a SOCKS proxy via the bastion.
+through the gateway public IP, an SSH tunnel, or a SOCKS proxy via the bastion.
 
-### Option 1: SSH port forwarding
+### Option 1: Gateway public IP
+
+The Ansible `gateway_proxy` role installs Nginx on the gateway and exposes the
+Hadoop web UIs through the gateway public IP.
+
+First apply Terraform so the gateway security group opens the web UI ports:
+
+```bash
+cd hadoop/scaleway/terraform
+terraform apply
+```
+
+Then rerun Ansible:
+
+```bash
+cd hadoop/scaleway/ansible
+ansible-playbook site.yml
+```
+
+Get the gateway public IP:
+
+```bash
+cd hadoop/scaleway/terraform
+terraform output -raw gateway_public_ip
+```
+
+Students can then open:
+
+```text
+NameNode UI:             http://<gateway_public_ip>:9870
+YARN ResourceManager:    http://<gateway_public_ip>:8088
+MapReduce HistoryServer: http://<gateway_public_ip>:19888
+Worker 1 DataNode:       http://<gateway_public_ip>:9864
+Worker 2 DataNode:       http://<gateway_public_ip>:9865
+Worker 3 DataNode:       http://<gateway_public_ip>:9866
+Worker 1 NodeManager:    http://<gateway_public_ip>:8042
+Worker 2 NodeManager:    http://<gateway_public_ip>:8043
+Worker 3 NodeManager:    http://<gateway_public_ip>:8044
+```
+
+### Option 2: SSH port forwarding
 
 From your local machine:
 
@@ -130,6 +170,7 @@ From your local machine:
 ssh -i ~/.ssh/m2-hadoop-scaleway \
   -L 9870:10.42.0.12:9870 \
   -L 8088:10.42.0.12:8088 \
+  -L 19888:10.42.0.12:19888 \
   -L 9864:10.42.0.21:9864 \
   -L 8042:10.42.0.21:8042 \
   ubuntu@<bastion_public_ip>
@@ -140,6 +181,7 @@ Then open these URLs locally:
 ```text
 NameNode UI:          http://localhost:9870
 YARN ResourceManager: http://localhost:8088
+HistoryServer:        http://localhost:19888
 Worker 1 DataNode:    http://localhost:9864
 Worker 1 NodeManager: http://localhost:8042
 ```
@@ -150,6 +192,7 @@ For all workers, use different local ports:
 ssh -i ~/.ssh/m2-hadoop-scaleway \
   -L 9870:10.42.0.12:9870 \
   -L 8088:10.42.0.12:8088 \
+  -L 19888:10.42.0.12:19888 \
   -L 9864:10.42.0.21:9864 \
   -L 9865:10.42.0.22:9864 \
   -L 9866:10.42.0.23:9864 \
@@ -170,7 +213,7 @@ Worker 2 NodeManager: http://localhost:8043
 Worker 3 NodeManager: http://localhost:8044
 ```
 
-### Option 2: SOCKS proxy
+### Option 3: SOCKS proxy
 
 This is more convenient because the browser can reach all private Hadoop URLs
 through the bastion.
@@ -193,6 +236,7 @@ Then open the private URLs directly:
 ```text
 NameNode UI:          http://10.42.0.12:9870
 YARN ResourceManager: http://10.42.0.12:8088
+HistoryServer:        http://10.42.0.12:19888
 Worker 1 DataNode:    http://10.42.0.21:9864
 Worker 2 DataNode:    http://10.42.0.22:9864
 Worker 3 DataNode:    http://10.42.0.23:9864

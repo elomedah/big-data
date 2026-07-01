@@ -204,6 +204,10 @@ cluster_size = "large"
 - `allocate_public_ip_to_private_nodes = true` gives master and workers
   outbound internet access for `apt` and Hadoop downloads. Their security group
   still blocks public inbound access.
+- `student_web_cidrs` controls who can access Hadoop web UIs through the
+  gateway public IP. It defaults to `["0.0.0.0/0"]` for tests and includes
+  NameNode `9870`, YARN ResourceManager `8088`, HistoryServer `19888`,
+  DataNode `9864-9866`, and NodeManager `8042-8044`.
 - Data disks are attached to the master and workers. The Ansible storage role
   defaults to `/dev/vdb`; override `hadoop_data_device` if Scaleway exposes a
   different device path.

@@ -17,6 +17,12 @@
   roles:
     - hadoop
 
+- name: Expose Hadoop web UIs through the gateway
+  hosts: gateway
+  become: true
+  roles:
+    - gateway_proxy
+
 - name: Create teaching accounts and quotas
   hosts: gateway
   become: true

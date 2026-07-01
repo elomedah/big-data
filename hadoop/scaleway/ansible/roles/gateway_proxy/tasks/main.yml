@@ -1,0 +1,33 @@
+---
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+
+- name: Disable default Nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Configure Hadoop web UI reverse proxy
+  ansible.builtin.template:
+    src: hadoop-web-ui.conf.j2
+    dest: /etc/nginx/sites-available/hadoop-web-ui.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Enable Hadoop web UI reverse proxy
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/hadoop-web-ui.conf
+    dest: /etc/nginx/sites-enabled/hadoop-web-ui.conf
+    state: link
+  notify: Reload nginx
+
+- name: Start Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    state: started

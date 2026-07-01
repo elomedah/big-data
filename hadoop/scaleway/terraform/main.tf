@@ -111,6 +111,7 @@ locals {
   }
 
   gateway_cidrs = length(var.student_ssh_cidrs) > 0 ? var.student_ssh_cidrs : [var.teacher_ssh_cidr]
+  gateway_web_ports = [9870, 8088, 19888, 9864, 9865, 9866, 8042, 8043, 8044]
 
   private_ip_offsets = {
     bastion  = 10
@@ -163,6 +164,20 @@ resource "scaleway_instance_security_group" "gateway" {
   inbound_rule {
     action   = "accept"
     ip_range = var.private_cidr
+  }
+
+  dynamic "inbound_rule" {
+    for_each = {
+      for pair in setproduct(var.student_web_cidrs, local.gateway_web_ports) : "${pair[0]}-${pair[1]}" => {
+        cidr = pair[0]
+        port = pair[1]
+      }
+    }
+    content {
+      action   = "accept"
+      port     = inbound_rule.value.port
+      ip_range = inbound_rule.value.cidr
+    }
   }
 }
 

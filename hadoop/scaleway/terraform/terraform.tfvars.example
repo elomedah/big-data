@@ -1,6 +1,7 @@
 admin_ssh_public_key_path = "~/.ssh/m2-hadoop-scaleway.pub"
 teacher_ssh_cidr          = "0.0.0.0/0"
 student_ssh_cidrs         = ["0.0.0.0/0"]
+student_web_cidrs         = ["0.0.0.0/0"]
 
 # Optional overrides:
 # project_name = "m2-hadoop"

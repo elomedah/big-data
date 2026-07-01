@@ -39,6 +39,12 @@ variable "student_ssh_cidrs" {
   default     = []
 }
 
+variable "student_web_cidrs" {
+  description = "CIDRs allowed to access Hadoop web UIs through the gateway."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
 variable "private_cidr" {
   description = "Private network CIDR used for security group rules."
   type        = string

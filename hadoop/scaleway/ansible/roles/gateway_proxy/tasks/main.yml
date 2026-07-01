@@ -26,8 +26,31 @@
     state: link
   notify: Reload nginx
 
+- name: Validate Nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
 - name: Start Nginx
   ansible.builtin.systemd:
     name: nginx
     enabled: true
     state: started
+
+- name: Flush Nginx reload before port checks
+  ansible.builtin.meta: flush_handlers
+
+- name: Check gateway web UI listening ports
+  ansible.builtin.wait_for:
+    host: 0.0.0.0
+    port: "{{ item }}"
+    timeout: 5
+  loop:
+    - 9870
+    - 8088
+    - 19888
+    - 9864
+    - 9865
+    - 9866
+    - 8042
+    - 8043
+    - 8044

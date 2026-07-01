@@ -1,51 +1,66 @@
 server {
-    listen 9870;
+    listen 0.0.0.0:9870;
     server_name _;
     location / {
         proxy_pass http://{{ hostvars[groups['masters'][0]].private_ip }}:9870;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 
 server {
-    listen 8088;
+    listen 0.0.0.0:8088;
     server_name _;
     location / {
         proxy_pass http://{{ hostvars[groups['masters'][0]].private_ip }}:8088;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 
 server {
-    listen 19888;
+    listen 0.0.0.0:19888;
     server_name _;
     location / {
         proxy_pass http://{{ hostvars[groups['masters'][0]].private_ip }}:19888;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 
 {% for host in groups['workers'] %}
 server {
-    listen {{ 9864 + loop.index0 }};
+    listen 0.0.0.0:{{ 9864 + loop.index0 }};
     server_name _;
     location / {
         proxy_pass http://{{ hostvars[host].private_ip }}:9864;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 
 server {
-    listen {{ 8042 + loop.index0 }};
+    listen 0.0.0.0:{{ 8042 + loop.index0 }};
     server_name _;
     location / {
         proxy_pass http://{{ hostvars[host].private_ip }}:8042;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 {% endfor %}

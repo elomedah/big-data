@@ -2,9 +2,11 @@
 set -euo pipefail
 
 KEY_PATH="${1:-$HOME/.ssh/m2-hadoop-scaleway}"
-REMOTE_DIR="${2:-hadoop/scaleway/ansible}"
+REMOTE_PROJECT_DIR="${2:-hadoop/scaleway}"
 SSH_USER="${SSH_USER:-ubuntu}"
-LOCAL_INVENTORY="../ansible/inventory-bastion.ini"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCALEWAY_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOCAL_INVENTORY="$SCALEWAY_DIR/ansible/inventory-bastion.ini"
 
 if ! command -v terraform >/dev/null 2>&1; then
   echo "terraform command not found. Install Terraform first."
@@ -28,7 +30,14 @@ fi
 
 terraform output -raw bastion_ansible_inventory > "$LOCAL_INVENTORY"
 
-ssh -i "$KEY_PATH" "${SSH_USER}@${BASTION_IP}" "mkdir -p '$REMOTE_DIR'"
-scp -i "$KEY_PATH" "$LOCAL_INVENTORY" "${SSH_USER}@${BASTION_IP}:${REMOTE_DIR}/inventory.ini"
+tar \
+  --exclude="terraform/.terraform" \
+  --exclude="terraform/terraform.tfstate" \
+  --exclude="terraform/terraform.tfstate.backup" \
+  --exclude="terraform/terraform.tfvars" \
+  -C "$SCALEWAY_DIR" \
+  -czf - . | ssh -i "$KEY_PATH" "${SSH_USER}@${BASTION_IP}" \
+  "mkdir -p '$REMOTE_PROJECT_DIR' && tar -xzf - -C '$REMOTE_PROJECT_DIR' && cp '$REMOTE_PROJECT_DIR/ansible/inventory-bastion.ini' '$REMOTE_PROJECT_DIR/ansible/inventory.ini'"
 
-echo "Inventory copied to ${SSH_USER}@${BASTION_IP}:${REMOTE_DIR}/inventory.ini"
+echo "Scaleway project copied to ${SSH_USER}@${BASTION_IP}:${REMOTE_PROJECT_DIR}"
+echo "Bastion inventory installed at ${REMOTE_PROJECT_DIR}/ansible/inventory.ini"

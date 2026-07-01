@@ -142,31 +142,40 @@ To use another private key:
 ./connect-bastion.sh ~/.ssh/my-scaleway-key
 ```
 
-Generate and copy the bastion-ready Ansible inventory to the bastion:
+Prepare the bastion for Ansible. This copies the whole `hadoop/scaleway`
+project, installs the bastion inventory, and copies the private SSH key needed
+to reach private nodes:
 
 ```bash
-chmod +x copy-inventory-to-bastion.sh
-./copy-inventory-to-bastion.sh
+chmod +x prepare-bastion.sh
+./prepare-bastion.sh
 ```
 
-Copy the private SSH key to the bastion so Ansible can connect from the bastion
-to the private nodes:
-
-```bash
-chmod +x copy-private-key-to-bastion.sh
-./copy-private-key-to-bastion.sh
-```
-
-By default, the script copies the inventory to:
+By default, the script copies the project to:
 
 ```text
-ubuntu@<bastion_public_ip>:hadoop/scaleway/ansible/inventory.ini
+ubuntu@<bastion_public_ip>:hadoop/scaleway
 ```
 
-To use another private key or remote directory:
+It excludes local Terraform state and secrets:
+
+```text
+terraform/.terraform
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfvars
+```
+
+It also installs the bastion inventory as:
+
+```text
+hadoop/scaleway/ansible/inventory.ini
+```
+
+To use another private key or remote project directory:
 
 ```bash
-./copy-inventory-to-bastion.sh ~/.ssh/my-scaleway-key hadoop/scaleway/ansible
+./prepare-bastion.sh ~/.ssh/my-scaleway-key hadoop/scaleway
 ```
 
 Then run Ansible from `../ansible`, either from your local machine through the

@@ -37,43 +37,30 @@ The SSH key used by Ansible must match the Terraform variable:
 admin_ssh_public_key_path = "~/.ssh/m2-hadoop-scaleway.pub"
 ```
 
-## Option 1: Run Ansible Locally
-
-Use this when Ansible is installed on your local machine or WSL.
-
-Generate the local inventory:
-
-```bash
-cd hadoop/scaleway/terraform
-terraform output -raw ansible_inventory > ../ansible/inventory.ini
-```
-
-Run the playbook:
-
-```bash
-cd ../ansible
-ansible-playbook site.yml
-```
-
-This inventory uses SSH `ProxyJump` through the bastion to reach private nodes.
-
-## Option 2: Run Ansible From The Bastion
+## Run Ansible From The Bastion
 
 Use this when Ansible is installed directly on the bastion.
 
-From your local machine, copy the bastion-ready inventory:
+From your local machine, prepare the bastion. This copies the whole
+`hadoop/scaleway` project, installs the bastion inventory, and copies the
+private SSH key needed to reach private nodes:
 
 ```bash
 cd hadoop/scaleway/terraform
-chmod +x copy-inventory-to-bastion.sh
-./copy-inventory-to-bastion.sh
+chmod +x prepare-bastion.sh
+./prepare-bastion.sh
 ```
 
-Copy the private SSH key to the bastion:
+The script copies the project to:
 
-```bash
-chmod +x copy-private-key-to-bastion.sh
-./copy-private-key-to-bastion.sh
+```text
+~/hadoop/scaleway
+```
+
+and installs the bastion inventory as:
+
+```text
+~/hadoop/scaleway/ansible/inventory.ini
 ```
 
 Connect to the bastion:

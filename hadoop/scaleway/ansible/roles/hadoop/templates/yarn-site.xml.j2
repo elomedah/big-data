@@ -21,6 +21,22 @@
     <value>{{ yarn_log_dir }}</value>
   </property>
   <property>
+    <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.remote-app-log-dir</name>
+    <value>/tmp/logs</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.remote-app-log-dir-suffix</name>
+    <value>logs</value>
+  </property>
+  <property>
+    <name>yarn.log.server.url</name>
+    <value>http://{{ hostvars[resourcemanager_host].private_ip }}:19888/jobhistory/logs</value>
+  </property>
+  <property>
     <name>yarn.scheduler.capacity.maximum-allocation-mb</name>
     <value>{{ yarn_maximum_allocation_mb }}</value>
   </property>

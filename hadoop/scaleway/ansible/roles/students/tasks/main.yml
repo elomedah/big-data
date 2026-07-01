@@ -69,6 +69,7 @@
   loop:
     - /tmp
     - /tmp/hadoop-yarn
+    - /tmp/logs
     - /user
     - /datalake/raw
     - /datalake/archive
@@ -95,6 +96,7 @@
   loop:
     - { path: /tmp, mode: "1777" }
     - { path: /tmp/hadoop-yarn, mode: "1777" }
+    - { path: /tmp/logs, mode: "1777" }
     - { path: /datalake, mode: "775" }
     - { path: /datalake/raw, mode: "775" }
     - { path: /datalake/archive, mode: "755" }

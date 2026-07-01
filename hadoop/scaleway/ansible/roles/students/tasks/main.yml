@@ -67,6 +67,7 @@
   become_user: "{{ hadoop_user }}"
   changed_when: false
   loop:
+    - /tmp
     - /user
     - /datalake/raw
     - /datalake/archive
@@ -91,6 +92,7 @@
   become_user: "{{ hadoop_user }}"
   changed_when: false
   loop:
+    - { path: /tmp, mode: "1777" }
     - { path: /datalake, mode: "775" }
     - { path: /datalake/raw, mode: "775" }
     - { path: /datalake/archive, mode: "755" }

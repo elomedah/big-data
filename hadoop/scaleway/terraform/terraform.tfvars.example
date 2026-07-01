@@ -1,0 +1,14 @@
+admin_ssh_public_key_path = "~/.ssh/m2-hadoop-scaleway.pub"
+teacher_ssh_cidr          = "0.0.0.0/0"
+student_ssh_cidrs         = ["0.0.0.0/0"]
+
+# Optional overrides:
+# project_name = "m2-hadoop"
+# region       = "fr-par"
+# zone         = "fr-par-1"
+# image        = "ubuntu_jammy"
+
+# Sizing profile:
+# - tiny: test cluster, all data volumes <= 20 GB, very small instances.
+# - large: teaching cluster, preserves the sizing from scaleway-cluster.md.
+cluster_size = "tiny"

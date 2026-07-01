@@ -1,0 +1,38 @@
+---
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - "{{ java_package }}"
+      - curl
+      - rsync
+      - tar
+      - vim
+      - acl
+    state: present
+    update_cache: true
+
+- name: Create Hadoop group
+  ansible.builtin.group:
+    name: "{{ hadoop_group }}"
+    system: true
+
+- name: Create Hadoop user
+  ansible.builtin.user:
+    name: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    shell: /bin/bash
+    home: /home/{{ hadoop_user }}
+    create_home: true
+    system: true
+
+- name: Create student group
+  ansible.builtin.group:
+    name: "{{ student_group }}"
+
+- name: Install Linux resource limits for students
+  ansible.builtin.template:
+    src: student-limits.conf.j2
+    dest: /etc/security/limits.d/90-students.conf
+    owner: root
+    group: root
+    mode: "0644"

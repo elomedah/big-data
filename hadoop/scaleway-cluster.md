@@ -247,6 +247,25 @@ scaleway_instance_volume.worker_2_hdfs
 scaleway_instance_volume.worker_3_hdfs
 ```
 
+Une première implémentation Infrastructure as Code est disponible dans :
+
+- `hadoop/scaleway/terraform` pour la création des ressources Scaleway ;
+- `hadoop/scaleway/ansible` pour l'installation et la configuration Hadoop.
+
+Le flux recommandé est :
+
+```bash
+cd hadoop/scaleway/terraform
+cp terraform.tfvars.example terraform.tfvars
+terraform init
+terraform apply
+terraform output -raw ansible_inventory > ../ansible/inventory.ini
+
+cd ../ansible
+ansible-galaxy collection install -r requirements.yml
+ansible-playbook site.yml
+```
+
 ## Ansible
 
 Ansible installera automatiquement :

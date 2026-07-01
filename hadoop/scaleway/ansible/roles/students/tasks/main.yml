@@ -1,0 +1,77 @@
+---
+- name: Build student account list
+  ansible.builtin.set_fact:
+    student_accounts: "{{ query('sequence', 'start=1 end=' ~ student_count ~ ' format=student%02d') }}"
+
+- name: Create Linux student accounts on gateway
+  ansible.builtin.user:
+    name: "{{ item }}"
+    group: "{{ student_group }}"
+    groups: "{{ student_group }}"
+    append: true
+    shell: /bin/bash
+    create_home: true
+    password_lock: "{{ student_password_lock }}"
+  loop: "{{ student_accounts }}"
+
+- name: Create SSH directory for student accounts
+  ansible.builtin.file:
+    path: "/home/{{ item }}/.ssh"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ student_group }}"
+    mode: "0700"
+  loop: "{{ student_accounts }}"
+
+- name: Install student SSH public keys
+  ansible.posix.authorized_key:
+    user: "{{ item.0.key }}"
+    key: "{{ item.1 }}"
+    state: present
+    exclusive: false
+  loop: "{{ student_ssh_keys | dict2items | subelements('value') }}"
+  when: item.0.key in student_accounts
+
+- name: Wait for HDFS to answer
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -report"
+  become_user: "{{ hadoop_user }}"
+  register: hdfs_report
+  retries: 20
+  delay: 6
+  until: hdfs_report.rc == 0
+  changed_when: false
+
+- name: Create HDFS base directories
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p {{ item }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  loop:
+    - /user
+    - /datalake/raw
+    - /datalake/archive
+    - /datalake/processed
+    - /datalake/audit
+
+- name: Create student HDFS directories
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p /user/{{ item }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  loop: "{{ student_accounts }}"
+
+- name: Assign HDFS ownership to students
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chown {{ item }}:{{ student_group }} /user/{{ item }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  loop: "{{ student_accounts }}"
+
+- name: Apply HDFS space quotas
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -setSpaceQuota {{ student_space_quota }} /user/{{ item }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  loop: "{{ student_accounts }}"
+
+- name: Apply HDFS file quotas
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -setQuota {{ student_file_quota }} /user/{{ item }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  loop: "{{ student_accounts }}"

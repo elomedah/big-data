@@ -1,0 +1,113 @@
+---
+- name: Download Hadoop archive
+  ansible.builtin.get_url:
+    url: "{{ hadoop_download_url }}"
+    dest: /tmp/hadoop-{{ hadoop_version }}.tar.gz
+    mode: "0644"
+
+- name: Extract Hadoop
+  ansible.builtin.unarchive:
+    src: /tmp/hadoop-{{ hadoop_version }}.tar.gz
+    dest: /opt
+    remote_src: true
+    creates: /opt/hadoop-{{ hadoop_version }}
+
+- name: Link Hadoop installation
+  ansible.builtin.file:
+    src: /opt/hadoop-{{ hadoop_version }}
+    dest: "{{ hadoop_home }}"
+    state: link
+
+- name: Set ownership on Hadoop installation
+  ansible.builtin.file:
+    path: /opt/hadoop-{{ hadoop_version }}
+    owner: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    recurse: true
+
+- name: Create Hadoop temporary directory
+  ansible.builtin.file:
+    path: "{{ hadoop_data_dir }}/tmp"
+    state: directory
+    owner: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    mode: "0755"
+
+- name: Install Hadoop environment profile
+  ansible.builtin.template:
+    src: hadoop.sh.j2
+    dest: /etc/profile.d/hadoop.sh
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy Hadoop configuration
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ hadoop_home }}/etc/hadoop/{{ item }}"
+    owner: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    mode: "0644"
+  loop:
+    - hadoop-env.sh
+    - core-site.xml
+    - hdfs-site.xml
+    - yarn-site.xml
+    - mapred-site.xml
+    - workers
+    - capacity-scheduler.xml
+
+- name: Install Hadoop systemd units
+  ansible.builtin.template:
+    src: "{{ item }}.service.j2"
+    dest: /etc/systemd/system/{{ item }}.service
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - hadoop-namenode
+    - hadoop-datanode
+    - hadoop-resourcemanager
+    - hadoop-nodemanager
+    - hadoop-historyserver
+  notify: Reload systemd
+
+- name: Flush handlers before starting services
+  ansible.builtin.meta: flush_handlers
+
+- name: Format NameNode once
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs namenode -format -force -nonInteractive"
+  args:
+    creates: "{{ hdfs_name_dir }}/current/VERSION"
+  become_user: "{{ hadoop_user }}"
+  when: inventory_hostname in groups['masters']
+
+- name: Start master Hadoop services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - hadoop-namenode
+    - hadoop-resourcemanager
+    - hadoop-historyserver
+  when: inventory_hostname in groups['masters']
+
+- name: Start worker Hadoop services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - hadoop-datanode
+    - hadoop-nodemanager
+  when: inventory_hostname in groups['workers']
+
+- name: Install Hadoop client config on gateway
+  ansible.builtin.file:
+    path: "{{ hadoop_home }}/logs"
+    state: directory
+    owner: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    mode: "0755"
+  when: inventory_hostname in groups['gateway']

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>{{ hadoop_replication }}</value>
+  </property>
+  <property>
+    <name>dfs.blocksize</name>
+    <value>{{ hadoop_block_size }}</value>
+  </property>
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>file://{{ hdfs_name_dir }}</value>
+  </property>
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file://{{ hdfs_data_dir }}</value>
+  </property>
+  <property>
+    <name>dfs.namenode.http-address</name>
+    <value>{{ hostvars[namenode_host].private_ip }}:9870</value>
+  </property>
+</configuration>

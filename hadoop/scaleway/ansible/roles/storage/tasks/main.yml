@@ -1,0 +1,45 @@
+---
+- name: Check Hadoop data device
+  ansible.builtin.stat:
+    path: "{{ hadoop_data_device }}"
+  register: hadoop_data_device_stat
+
+- name: Fail when data device is missing
+  ansible.builtin.fail:
+    msg: "Data device {{ hadoop_data_device }} does not exist. Override hadoop_data_device in group_vars/all.yml."
+  when: not hadoop_data_device_stat.stat.exists
+
+- name: Create filesystem on Hadoop data device
+  community.general.filesystem:
+    fstype: ext4
+    dev: "{{ hadoop_data_device }}"
+  when: hadoop_data_device_stat.stat.exists
+
+- name: Create Hadoop data mountpoint
+  ansible.builtin.file:
+    path: "{{ hadoop_data_dir }}"
+    state: directory
+    owner: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    mode: "0755"
+
+- name: Mount Hadoop data volume
+  ansible.posix.mount:
+    path: "{{ hadoop_data_dir }}"
+    src: "{{ hadoop_data_device }}"
+    fstype: ext4
+    opts: defaults,noatime
+    state: mounted
+
+- name: Create Hadoop service directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    mode: "0755"
+  loop:
+    - "{{ hdfs_name_dir }}"
+    - "{{ hdfs_data_dir }}"
+    - "{{ yarn_local_dir }}"
+    - "{{ yarn_log_dir }}"

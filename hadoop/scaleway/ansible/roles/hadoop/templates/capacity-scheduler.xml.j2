@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>yarn.scheduler.capacity.root.queues</name>
+    <value>default,students</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.default.capacity</name>
+    <value>{{ 100 - yarn_students_capacity }}</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.students.capacity</name>
+    <value>{{ yarn_students_capacity }}</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.students.maximum-capacity</name>
+    <value>{{ yarn_students_max_capacity }}</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.students.acl_submit_applications</name>
+    <value>{{ student_group }}</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.students.maximum-applications</name>
+    <value>{{ student_count }}</value>
+  </property>
+</configuration>

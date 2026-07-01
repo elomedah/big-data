@@ -1,0 +1,26 @@
+---
+- name: Prepare all cluster machines
+  hosts: cluster
+  become: true
+  roles:
+    - common
+
+- name: Prepare Hadoop data volumes
+  hosts: masters:workers
+  become: true
+  roles:
+    - storage
+
+- name: Install and configure Hadoop
+  hosts: hadoop
+  become: true
+  roles:
+    - hadoop
+
+- name: Create teaching accounts and quotas
+  hosts: gateway
+  become: true
+  tags:
+    - students
+  roles:
+    - students

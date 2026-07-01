@@ -1,0 +1,24 @@
+---
+hadoop_version: "3.3.6"
+hadoop_download_url: "https://archive.apache.org/dist/hadoop/common/hadoop-{{ hadoop_version }}/hadoop-{{ hadoop_version }}.tar.gz"
+hadoop_home: /opt/hadoop
+hadoop_user: hadoop
+hadoop_group: hadoop
+hadoop_data_dir: /data/hadoop
+hadoop_data_device: /dev/vdb
+hadoop_replication: 3
+hadoop_block_size: 134217728
+
+java_package: openjdk-11-jdk
+
+student_group: student
+student_count: 30
+student_space_quota: 5g
+student_file_quota: 50000
+student_password_lock: true
+student_ssh_keys: {}
+
+yarn_students_capacity: 60
+yarn_students_max_capacity: 70
+yarn_maximum_allocation_mb: 2048
+yarn_maximum_allocation_vcores: 1

@@ -10,6 +10,17 @@ hadoop_data_device: auto
 hadoop_replication: 3
 hadoop_block_size: 134217728
 
+spark_version: "3.5.8"
+spark_package: "spark-{{ spark_version }}-bin-hadoop3"
+spark_download_url: "https://dlcdn.apache.org/spark/spark-{{ spark_version }}/{{ spark_package }}.tgz"
+spark_download_fallback_url: "https://archive.apache.org/dist/spark/spark-{{ spark_version }}/{{ spark_package }}.tgz"
+spark_home: /opt/spark
+spark_event_log_dir: /spark-logs
+spark_jars_dir: /spark-jars
+spark_driver_memory: 512m
+spark_executor_memory: 768m
+spark_executor_cores: 1
+
 java_package: openjdk-11-jdk
 
 student_group: student

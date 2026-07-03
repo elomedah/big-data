@@ -30,6 +30,7 @@
       - tar
       - vim
       - acl
+      - python3
     state: present
     update_cache: true
 

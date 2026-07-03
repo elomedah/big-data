@@ -1,0 +1,7 @@
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export HADOOP_HOME={{ hadoop_home }}
+export HADOOP_CONF_DIR={{ hadoop_home }}/etc/hadoop
+export YARN_CONF_DIR={{ hadoop_home }}/etc/hadoop
+export SPARK_HOME={{ spark_home }}
+export PYSPARK_PYTHON=python3
+export PATH=$PATH:{{ spark_home }}/bin:{{ spark_home }}/sbin

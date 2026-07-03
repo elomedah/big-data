@@ -1,0 +1,146 @@
+---
+- name: Check existing Spark archive on Ansible controller
+  ansible.builtin.stat:
+    path: /tmp/{{ spark_package }}.tgz
+  delegate_to: localhost
+  run_once: true
+  register: spark_archive_stat
+
+- name: Validate existing Spark archive on Ansible controller
+  ansible.builtin.command:
+    argv:
+      - tar
+      - -tzf
+      - /tmp/{{ spark_package }}.tgz
+  delegate_to: localhost
+  run_once: true
+  register: spark_archive_validation
+  changed_when: false
+  failed_when: false
+  when: spark_archive_stat.stat.exists
+
+- name: Remove invalid Spark archive from Ansible controller
+  ansible.builtin.file:
+    path: /tmp/{{ spark_package }}.tgz
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  when:
+    - spark_archive_stat.stat.exists
+    - spark_archive_validation.rc != 0
+
+- name: Download Spark archive from Apache CDN on Ansible controller
+  ansible.builtin.get_url:
+    url: "{{ spark_download_url }}"
+    dest: /tmp/{{ spark_package }}.tgz
+    mode: "0644"
+    timeout: 180
+  delegate_to: localhost
+  run_once: true
+  register: spark_cdn_download
+  ignore_errors: true
+
+- name: Download Spark archive from Apache archive fallback
+  ansible.builtin.get_url:
+    url: "{{ spark_download_fallback_url }}"
+    dest: /tmp/{{ spark_package }}.tgz
+    mode: "0644"
+    timeout: 180
+  delegate_to: localhost
+  run_once: true
+  when: spark_cdn_download is failed
+
+- name: Validate downloaded Spark archive on Ansible controller
+  ansible.builtin.command:
+    argv:
+      - tar
+      - -tzf
+      - /tmp/{{ spark_package }}.tgz
+  delegate_to: localhost
+  run_once: true
+  changed_when: false
+
+- name: Copy and extract Spark
+  ansible.builtin.unarchive:
+    src: /tmp/{{ spark_package }}.tgz
+    dest: /opt
+    remote_src: false
+    creates: /opt/{{ spark_package }}
+
+- name: Link Spark installation
+  ansible.builtin.file:
+    src: /opt/{{ spark_package }}
+    dest: "{{ spark_home }}"
+    state: link
+
+- name: Set ownership on Spark installation
+  ansible.builtin.file:
+    path: /opt/{{ spark_package }}
+    owner: root
+    group: root
+    recurse: true
+
+- name: Deploy Spark configuration
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ spark_home }}/conf/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - spark-env.sh
+    - spark-defaults.conf
+
+- name: Install Spark environment profile
+  ansible.builtin.template:
+    src: spark.sh.j2
+    dest: /etc/profile.d/spark.sh
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Wait for HDFS before creating Spark directories
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -report"
+  become_user: "{{ hadoop_user }}"
+  register: spark_hdfs_report
+  retries: 20
+  delay: 6
+  until: spark_hdfs_report.rc == 0
+  changed_when: false
+  when: inventory_hostname in groups['gateway']
+
+- name: Create Spark event log directory in HDFS
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p {{ spark_event_log_dir }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  when: inventory_hostname in groups['gateway']
+
+- name: Create Spark jars directory in HDFS
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p {{ spark_jars_dir }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  when: inventory_hostname in groups['gateway']
+
+- name: Upload Spark jars to HDFS
+  ansible.builtin.shell: "{{ hadoop_home }}/bin/hdfs dfs -put -f {{ spark_home }}/jars/*.jar {{ spark_jars_dir }}/"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  when: inventory_hostname in groups['gateway']
+
+- name: Set Spark event log ownership in HDFS
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chown {{ hadoop_user }}:{{ student_group }} {{ spark_event_log_dir }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  when: inventory_hostname in groups['gateway']
+
+- name: Set Spark event log permissions in HDFS
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chmod 1777 {{ spark_event_log_dir }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  when: inventory_hostname in groups['gateway']
+
+- name: Set Spark jars permissions in HDFS
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chmod -R 755 {{ spark_jars_dir }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  when: inventory_hostname in groups['gateway']

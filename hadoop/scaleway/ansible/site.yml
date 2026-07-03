@@ -17,6 +17,12 @@
   roles:
     - hadoop
 
+- name: Install and configure Spark on YARN
+  hosts: hadoop
+  become: true
+  roles:
+    - spark
+
 - name: Expose Hadoop web UIs through the gateway
   hosts: gateway
   become: true

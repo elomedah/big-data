@@ -1,0 +1,13 @@
+spark.master                       yarn
+spark.submit.deployMode            client
+spark.yarn.jars                    hdfs://{{ spark_jars_dir }}/*
+spark.eventLog.enabled             true
+spark.eventLog.dir                 hdfs://{{ spark_event_log_dir }}
+spark.history.fs.logDirectory      hdfs://{{ spark_event_log_dir }}
+spark.driver.memory                {{ spark_driver_memory }}
+spark.executor.memory              {{ spark_executor_memory }}
+spark.executor.cores               {{ spark_executor_cores }}
+spark.yarn.appMasterEnv.JAVA_HOME  /usr/lib/jvm/java-11-openjdk-amd64
+spark.executorEnv.JAVA_HOME        /usr/lib/jvm/java-11-openjdk-amd64
+spark.yarn.appMasterEnv.HADOOP_CONF_DIR {{ hadoop_home }}/etc/hadoop
+spark.executorEnv.HADOOP_CONF_DIR  {{ hadoop_home }}/etc/hadoop

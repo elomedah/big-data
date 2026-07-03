@@ -11,6 +11,7 @@ It installs and configures:
 - Mounted data disks on the master and workers.
 - Hadoop HDFS, YARN and MapReduce.
 - NameNode, DataNode, ResourceManager, NodeManager and History Server services.
+- Spark configured to submit jobs on YARN.
 - Student Linux accounts on the gateway.
 - Student HDFS home directories and quotas.
 
@@ -85,6 +86,62 @@ Then run:
 cd hadoop/scaleway/ansible
 ansible-galaxy collection install -r requirements.yml
 ansible-playbook site.yml
+```
+
+## Spark On YARN
+
+Spark is installed on the gateway, master and workers under:
+
+```text
+/opt/spark
+```
+
+The playbook also installs:
+
+```text
+/etc/profile.d/spark.sh
+```
+
+Students and teachers should submit Spark jobs from the gateway:
+
+```bash
+source /etc/profile.d/hadoop.sh
+source /etc/profile.d/spark.sh
+```
+
+Run a first YARN test:
+
+```bash
+spark-submit \
+  --master yarn \
+  --deploy-mode client \
+  --class org.apache.spark.examples.SparkPi \
+  $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.8.jar \
+  10
+```
+
+Check the application in YARN:
+
+```bash
+yarn application -list
+```
+
+Then open the YARN ResourceManager UI:
+
+```text
+http://<gateway_public_ip>:8088
+```
+
+Spark event logs are stored in HDFS:
+
+```text
+/spark-logs
+```
+
+Spark runtime jars are stored in HDFS:
+
+```text
+/spark-jars
 ```
 
 ## SSH Validation

@@ -1,0 +1,23 @@
+[Unit]
+Description=HiveServer2
+After=network-online.target hive-metastore.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ hadoop_user }}
+Group={{ hadoop_group }}
+Environment=JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+Environment=HADOOP_HOME={{ hadoop_home }}
+Environment=HADOOP_CONF_DIR={{ hadoop_home }}/etc/hadoop
+Environment=HIVE_HOME={{ hive_home }}
+Environment=HIVE_CONF_DIR={{ hive_home }}/conf
+Environment=HIVE_AUX_JARS_PATH={{ hive_home }}/lib/postgresql-jdbc.jar
+Environment=HIVE_LOG_DIR=/var/log/hive
+Environment=HIVE_PID_DIR=/run/hive
+RuntimeDirectory=hive
+ExecStart={{ hive_home }}/bin/hiveserver2
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

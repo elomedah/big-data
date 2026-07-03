@@ -12,6 +12,7 @@ It installs and configures:
 - Hadoop HDFS, YARN and MapReduce.
 - NameNode, DataNode, ResourceManager, NodeManager and History Server services.
 - Spark configured to submit jobs on YARN.
+- Hive Metastore and HiveServer2 on the gateway.
 - Student Linux accounts on the gateway.
 - Student HDFS home directories and quotas.
 

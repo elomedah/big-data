@@ -1,0 +1,243 @@
+---
+- name: Check existing Hive archive on Ansible controller
+  ansible.builtin.stat:
+    path: /tmp/{{ hive_package }}.tar.gz
+  delegate_to: localhost
+  run_once: true
+  register: hive_archive_stat
+
+- name: Validate existing Hive archive on Ansible controller
+  ansible.builtin.command:
+    argv:
+      - tar
+      - -tzf
+      - /tmp/{{ hive_package }}.tar.gz
+  delegate_to: localhost
+  run_once: true
+  register: hive_archive_validation
+  changed_when: false
+  failed_when: false
+  when: hive_archive_stat.stat.exists
+
+- name: Remove invalid Hive archive from Ansible controller
+  ansible.builtin.file:
+    path: /tmp/{{ hive_package }}.tar.gz
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  when:
+    - hive_archive_stat.stat.exists
+    - hive_archive_validation.rc != 0
+
+- name: Download Hive archive from Apache CDN on Ansible controller
+  ansible.builtin.get_url:
+    url: "{{ hive_download_url }}"
+    dest: /tmp/{{ hive_package }}.tar.gz
+    mode: "0644"
+    timeout: 180
+  delegate_to: localhost
+  run_once: true
+  register: hive_cdn_download
+  ignore_errors: true
+
+- name: Download Hive archive from Apache archive fallback
+  ansible.builtin.get_url:
+    url: "{{ hive_download_fallback_url }}"
+    dest: /tmp/{{ hive_package }}.tar.gz
+    mode: "0644"
+    timeout: 180
+  delegate_to: localhost
+  run_once: true
+  when: hive_cdn_download is failed
+
+- name: Validate downloaded Hive archive on Ansible controller
+  ansible.builtin.command:
+    argv:
+      - tar
+      - -tzf
+      - /tmp/{{ hive_package }}.tar.gz
+  delegate_to: localhost
+  run_once: true
+  changed_when: false
+
+- name: Install Hive dependencies
+  ansible.builtin.apt:
+    name:
+      - postgresql
+      - libpostgresql-jdbc-java
+    state: present
+    update_cache: true
+
+- name: Start PostgreSQL
+  ansible.builtin.systemd:
+    name: postgresql
+    enabled: true
+    state: started
+
+- name: Copy and extract Hive
+  ansible.builtin.unarchive:
+    src: /tmp/{{ hive_package }}.tar.gz
+    dest: /opt
+    remote_src: false
+    creates: /opt/{{ hive_package }}
+
+- name: Link Hive installation
+  ansible.builtin.file:
+    src: /opt/{{ hive_package }}
+    dest: "{{ hive_home }}"
+    state: link
+
+- name: Set ownership on Hive installation
+  ansible.builtin.file:
+    path: /opt/{{ hive_package }}
+    owner: root
+    group: root
+    recurse: true
+
+- name: Link PostgreSQL JDBC driver into Hive
+  ansible.builtin.file:
+    src: /usr/share/java/postgresql.jar
+    dest: "{{ hive_home }}/lib/postgresql-jdbc.jar"
+    state: link
+
+- name: Create Hive local log directory
+  ansible.builtin.file:
+    path: /var/log/hive
+    state: directory
+    owner: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    mode: "0755"
+
+- name: Create Hive runtime directory
+  ansible.builtin.file:
+    path: /run/hive
+    state: directory
+    owner: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    mode: "0755"
+
+- name: Install Hive environment profile
+  ansible.builtin.template:
+    src: hive.sh.j2
+    dest: /etc/profile.d/hive.sh
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy Hive configuration
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ hive_home }}/conf/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - hive-env.sh
+    - hive-site.xml
+
+- name: Install Hive configuration for Spark
+  ansible.builtin.template:
+    src: hive-site.xml.j2
+    dest: "{{ spark_home }}/conf/hive-site.xml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Check Hive PostgreSQL role
+  ansible.builtin.command: psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='{{ hive_metastore_user }}'"
+  become_user: postgres
+  register: hive_pg_role
+  changed_when: false
+
+- name: Create Hive PostgreSQL role
+  ansible.builtin.command: psql -c "CREATE ROLE {{ hive_metastore_user }} WITH LOGIN PASSWORD '{{ hive_metastore_password }}'"
+  become_user: postgres
+  when: hive_pg_role.stdout | trim != "1"
+
+- name: Ensure Hive PostgreSQL role password
+  ansible.builtin.command: psql -c "ALTER ROLE {{ hive_metastore_user }} WITH PASSWORD '{{ hive_metastore_password }}'"
+  become_user: postgres
+  changed_when: false
+
+- name: Check Hive metastore database
+  ansible.builtin.command: psql -tAc "SELECT 1 FROM pg_database WHERE datname='{{ hive_metastore_db }}'"
+  become_user: postgres
+  register: hive_pg_db
+  changed_when: false
+
+- name: Create Hive metastore database
+  ansible.builtin.command: createdb -O {{ hive_metastore_user }} {{ hive_metastore_db }}
+  become_user: postgres
+  when: hive_pg_db.stdout | trim != "1"
+
+- name: Wait for HDFS before creating Hive directories
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -report"
+  become_user: "{{ hadoop_user }}"
+  register: hive_hdfs_report
+  retries: 20
+  delay: 6
+  until: hive_hdfs_report.rc == 0
+  changed_when: false
+
+- name: Create Hive HDFS directories
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p {{ item }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  loop:
+    - /tmp/hive
+    - /user/hive
+    - "{{ hive_warehouse_dir }}"
+
+- name: Set Hive HDFS ownership
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chown -R {{ hadoop_user }}:{{ student_group }} {{ item }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  loop:
+    - /tmp/hive
+    - /user/hive
+
+- name: Set Hive HDFS permissions
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chmod {{ item.mode }} {{ item.path }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  loop:
+    - { path: /tmp/hive, mode: "1777" }
+    - { path: "{{ hive_warehouse_dir }}", mode: "1777" }
+
+- name: Check Hive metastore schema
+  ansible.builtin.shell: |
+    PGPASSWORD='{{ hive_metastore_password }}' psql -h localhost -U {{ hive_metastore_user }} -d {{ hive_metastore_db }} -tAc "SELECT 1 FROM information_schema.tables WHERE lower(table_name)='version'"
+  register: hive_schema_check
+  changed_when: false
+
+- name: Initialize Hive metastore schema
+  ansible.builtin.command: "{{ hive_home }}/bin/schematool -dbType postgres -initSchema"
+  become_user: "{{ hadoop_user }}"
+  environment:
+    JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+    HADOOP_HOME: "{{ hadoop_home }}"
+    HADOOP_CONF_DIR: "{{ hadoop_home }}/etc/hadoop"
+    HIVE_HOME: "{{ hive_home }}"
+    HIVE_CONF_DIR: "{{ hive_home }}/conf"
+  when: hive_schema_check.stdout | trim != "1"
+
+- name: Install Hive systemd units
+  ansible.builtin.template:
+    src: "{{ item }}.service.j2"
+    dest: /etc/systemd/system/{{ item }}.service
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - hive-metastore
+    - hive-server2
+
+- name: Start Hive services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  loop:
+    - hive-metastore
+    - hive-server2

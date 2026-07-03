@@ -1,0 +1,7 @@
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export HADOOP_HOME={{ hadoop_home }}
+export HADOOP_CONF_DIR={{ hadoop_home }}/etc/hadoop
+export HIVE_HOME={{ hive_home }}
+export HIVE_CONF_DIR={{ hive_home }}/conf
+export HIVE_AUX_JARS_PATH={{ hive_home }}/lib/postgresql-jdbc.jar
+export PATH=$PATH:{{ hive_home }}/bin

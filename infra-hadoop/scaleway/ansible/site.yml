@@ -23,6 +23,12 @@
   roles:
     - spark
 
+- name: Install and configure Hive
+  hosts: gateway
+  become: true
+  roles:
+    - hive
+
 - name: Expose Hadoop web UIs through the gateway
   hosts: gateway
   become: true

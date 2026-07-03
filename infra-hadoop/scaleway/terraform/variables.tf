@@ -31,30 +31,55 @@ variable "admin_ssh_public_key_path" {
 variable "teacher_ssh_cidr" {
   description = "CIDR allowed to SSH to the bastion."
   type        = string
+
+  validation {
+    condition     = can(cidrhost(var.teacher_ssh_cidr, 0))
+    error_message = "teacher_ssh_cidr must be a valid CIDR, for example \"0.0.0.0/0\" or \"203.0.113.10/32\"."
+  }
 }
 
 variable "student_ssh_cidrs" {
   description = "CIDRs allowed to SSH to the student gateway."
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.student_ssh_cidrs : can(cidrhost(cidr, 0))])
+    error_message = "student_ssh_cidrs must contain only valid CIDRs, for example [\"0.0.0.0/0\"]."
+  }
 }
 
 variable "student_web_cidrs" {
   description = "CIDRs allowed to access Hadoop web UIs through the gateway."
   type        = list(string)
   default     = ["0.0.0.0/0"]
+
+  validation {
+    condition     = alltrue([for cidr in var.student_web_cidrs : can(cidrhost(cidr, 0))])
+    error_message = "student_web_cidrs must contain only valid CIDRs, for example [\"0.0.0.0/0\"]."
+  }
 }
 
 variable "private_cidr" {
   description = "Private network CIDR used for security group rules."
   type        = string
   default     = "10.42.0.0/16"
+
+  validation {
+    condition     = can(cidrhost(var.private_cidr, 0))
+    error_message = "private_cidr must be a valid CIDR, for example \"10.42.0.0/16\"."
+  }
 }
 
 variable "private_subnet" {
   description = "Private subnet reserved in Scaleway IPAM for the Hadoop cluster."
   type        = string
   default     = "10.42.0.0/24"
+
+  validation {
+    condition     = can(cidrhost(var.private_subnet, 0))
+    error_message = "private_subnet must be a valid CIDR, for example \"10.42.0.0/24\"."
+  }
 }
 
 variable "allocate_public_ip_to_private_nodes" {

@@ -123,48 +123,6 @@ terraform apply
 terraform output -raw ansible_inventory > ../ansible/inventory.ini
 ```
 
-## Scaleway IAM Permissions
-
-Use an API key attached to the same Scaleway project as
-`SCW_DEFAULT_PROJECT_ID`.
-
-For a short-lived teaching or test project, the simplest option is to use a
-project Owner/Admin API key while creating and destroying the cluster.
-
-If you use a restricted IAM policy, it must allow Terraform to read, create and
-delete at least these resources:
-
-- Compute instances.
-- Public IPs.
-- Security groups.
-- Block volumes.
-- VPC private networks.
-- IPAM private IPs.
-
-If `terraform destroy` fails with:
-
-```text
-insufficient permissions: read compute_private_networks
-insufficient permissions: read compute_security_groups
-```
-
-Terraform is probably not using the expected Scaleway credentials in the
-current shell. Verify the environment variables before running Terraform:
-
-```bash
-echo "$SCW_DEFAULT_PROJECT_ID"
-echo "$SCW_ACCESS_KEY"
-```
-
-Then export the correct credentials and rerun:
-
-```bash
-export SCW_ACCESS_KEY="..."
-export SCW_SECRET_KEY="..."
-export SCW_DEFAULT_PROJECT_ID="..."
-terraform destroy
-```
-
 Get the bastion public IP:
 
 ```bash

@@ -1,13 +1,7 @@
 ---
-- name: Check optional student SSH keys file
-  ansible.builtin.stat:
-    path: "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
-  register: student_ssh_keys_file
-
-- name: Load optional student SSH keys file
+- name: Load student SSH keys file
   ansible.builtin.include_vars:
     file: "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
-  when: student_ssh_keys_file.stat.exists
 
 - name: Build student account list
   ansible.builtin.set_fact:
@@ -55,6 +49,13 @@
   when:
     - inventory_hostname in groups['gateway']
     - item.0.key in student_accounts
+
+- name: Fail when no student SSH keys were loaded
+  ansible.builtin.fail:
+    msg: "No student SSH keys loaded. Create group_vars/student_ssh_keys.yml on the Ansible controller."
+  when:
+    - inventory_hostname in groups['gateway']
+    - (student_ssh_keys | default({}) | length) == 0
 
 - name: Refresh NameNode user to group mappings
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -refreshUserToGroupsMappings"

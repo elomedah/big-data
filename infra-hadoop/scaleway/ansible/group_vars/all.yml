@@ -21,9 +21,9 @@ spark_driver_memory: 512m
 spark_executor_memory: 768m
 spark_executor_cores: 1
 
-hive_version: "4.2.0"
+hive_version: "4.0.1"
 hive_package: "apache-hive-{{ hive_version }}-bin"
-hive_download_url: "https://downloads.apache.org/hive/hive-{{ hive_version }}/{{ hive_package }}.tar.gz"
+hive_download_url: "https://archive.apache.org/dist/hive/hive-{{ hive_version }}/{{ hive_package }}.tar.gz"
 hive_download_fallback_url: "https://archive.apache.org/dist/hive/hive-{{ hive_version }}/{{ hive_package }}.tar.gz"
 hive_home: /opt/hive
 hive_warehouse_dir: /user/hive/warehouse

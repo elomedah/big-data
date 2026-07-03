@@ -9,10 +9,6 @@
     <value>{{ hostvars[resourcemanager_host].private_ip }}:8088</value>
   </property>
   <property>
-    <name>yarn.web-proxy.address</name>
-    <value>{{ hostvars[groups['gateway'][0]].public_ip }}:8088</value>
-  </property>
-  <property>
     <name>yarn.nodemanager.aux-services</name>
     <value>mapreduce_shuffle</value>
   </property>

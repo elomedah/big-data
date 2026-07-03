@@ -28,12 +28,23 @@ server {
         sub_filter_types text/html text/plain application/json;
         sub_filter 'http://master:8088' 'http://$http_host';
         sub_filter 'http://{{ hostvars[groups['masters'][0]].private_ip }}:8088' 'http://$http_host';
+        sub_filter 'master:8088' '$http_host';
+        sub_filter '{{ hostvars[groups['masters'][0]].private_ip }}:8088' '$http_host';
     }
 }
 
 server {
     listen 0.0.0.0:19888;
     server_name _;
+
+    location /cluster/ {
+        return 302 $scheme://$host:8088$request_uri;
+    }
+
+    location /proxy/ {
+        return 302 $scheme://$host:8088$request_uri;
+    }
+
     location / {
         proxy_pass http://{{ hostvars[groups['masters'][0]].private_ip }}:19888;
         proxy_redirect http://master:19888/ http://$http_host/;
@@ -48,6 +59,8 @@ server {
         sub_filter_types text/html text/plain application/json;
         sub_filter 'http://master:19888' 'http://$http_host';
         sub_filter 'http://{{ hostvars[groups['masters'][0]].private_ip }}:19888' 'http://$http_host';
+        sub_filter 'master:19888' '$http_host';
+        sub_filter '{{ hostvars[groups['masters'][0]].private_ip }}:19888' '$http_host';
     }
 }
 

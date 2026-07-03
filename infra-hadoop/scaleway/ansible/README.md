@@ -19,7 +19,7 @@ It installs and configures:
 
 Terraform must be applied first from `../terraform`.
 
-From `hadoop/scaleway/terraform`:
+From `infra-hadoop/scaleway/terraform`:
 
 ```bash
 terraform apply
@@ -28,7 +28,7 @@ terraform apply
 Install required Ansible collections:
 
 ```bash
-cd hadoop/scaleway/ansible
+cd infra-hadoop/scaleway/ansible
 ansible-galaxy collection install -r requirements.yml
 ```
 
@@ -43,11 +43,11 @@ admin_ssh_public_key_path = "~/.ssh/m2-hadoop-scaleway.pub"
 Use this when Ansible is installed directly on the bastion.
 
 From your local machine, prepare the bastion. This copies the whole
-`hadoop/scaleway` project, installs the bastion inventory, and copies the
+`infra-hadoop/scaleway` project, installs the bastion inventory, and copies the
 private SSH key needed to reach private nodes:
 
 ```bash
-cd hadoop/scaleway/terraform
+cd infra-hadoop/scaleway/terraform
 chmod +x prepare-bastion.sh
 ./prepare-bastion.sh
 ```
@@ -55,13 +55,13 @@ chmod +x prepare-bastion.sh
 The script copies the project to:
 
 ```text
-~/hadoop/scaleway
+~/infra-hadoop/scaleway
 ```
 
 and installs the bastion inventory as:
 
 ```text
-~/hadoop/scaleway/ansible/inventory.ini
+~/infra-hadoop/scaleway/ansible/inventory.ini
 ```
 
 Connect to the bastion:
@@ -83,7 +83,7 @@ sudo apt-get install -y ansible
 Then run:
 
 ```bash
-cd hadoop/scaleway/ansible
+cd infra-hadoop/scaleway/ansible
 ansible-galaxy collection install -r requirements.yml
 ansible-playbook site.yml
 ```
@@ -174,21 +174,21 @@ Hadoop web UIs through the gateway public IP.
 First apply Terraform so the gateway security group opens the web UI ports:
 
 ```bash
-cd hadoop/scaleway/terraform
+cd infra-hadoop/scaleway/terraform
 terraform apply
 ```
 
 Then rerun Ansible:
 
 ```bash
-cd hadoop/scaleway/ansible
+cd infra-hadoop/scaleway/ansible
 ansible-playbook site.yml
 ```
 
 Get the gateway public IP:
 
 ```bash
-cd hadoop/scaleway/terraform
+cd infra-hadoop/scaleway/terraform
 terraform output -raw gateway_public_ip
 ```
 
@@ -205,6 +205,12 @@ Worker 1 NodeManager:    http://<gateway_public_ip>:8042
 Worker 2 NodeManager:    http://<gateway_public_ip>:8043
 Worker 3 NodeManager:    http://<gateway_public_ip>:8044
 ```
+
+YARN application and log links are configured to use the gateway public IP.
+After changing this configuration, rerun the playbook and launch a new
+application. Existing applications can keep old links such as
+`http://master:8088/proxy/...` because YARN already generated their tracking
+URL.
 
 ### Option 2: SSH port forwarding
 
@@ -374,7 +380,7 @@ If the NameNode UI shows no DataNodes, the NameNode is running but no worker
 has registered as a DataNode. From the bastion, check:
 
 ```bash
-cd hadoop/scaleway/ansible
+cd infra-hadoop/scaleway/ansible
 ansible workers -m shell -a "systemctl status hadoop-datanode --no-pager"
 ansible workers -m shell -a "jps"
 ansible masters -m shell -a "/opt/hadoop/bin/hdfs dfsadmin -report" -b

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 KEY_PATH="${1:-$HOME/.ssh/m2-hadoop-scaleway}"
-REMOTE_PROJECT_DIR="${2:-hadoop/scaleway}"
+REMOTE_PROJECT_DIR="${2:-infra-hadoop/scaleway}"
 SSH_USER="${SSH_USER:-ubuntu}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCALEWAY_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"

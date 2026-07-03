@@ -171,7 +171,7 @@ Get the bastion public IP:
 terraform output -raw bastion_public_ip
 ```
 
-Prepare the bastion for Ansible. This copies the whole `hadoop/scaleway`
+Prepare the bastion for Ansible. This copies the whole `infra-hadoop/scaleway`
 project, installs the bastion inventory, and copies the private SSH key needed
 to reach private nodes:
 
@@ -183,7 +183,7 @@ chmod +x prepare-bastion.sh
 By default, the script copies the project to:
 
 ```text
-ubuntu@<bastion_public_ip>:hadoop/scaleway
+ubuntu@<bastion_public_ip>:infra-hadoop/scaleway
 ```
 
 It excludes local Terraform state and secrets:
@@ -198,13 +198,13 @@ terraform/terraform.tfvars
 It also installs the bastion inventory as:
 
 ```text
-hadoop/scaleway/ansible/inventory.ini
+infra-hadoop/scaleway/ansible/inventory.ini
 ```
 
 To use another private key or remote project directory:
 
 ```bash
-./prepare-bastion.sh ~/.ssh/my-scaleway-key hadoop/scaleway
+./prepare-bastion.sh ~/.ssh/my-scaleway-key infra-hadoop/scaleway
 ```
 
 Then run Ansible from `../ansible`, either from your local machine through the

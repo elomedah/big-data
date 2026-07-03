@@ -2,7 +2,7 @@
 set -euo pipefail
 
 KEY_PATH="${1:-$HOME/.ssh/m2-hadoop-scaleway}"
-REMOTE_PROJECT_DIR="${2:-hadoop/scaleway}"
+REMOTE_PROJECT_DIR="${2:-infra-hadoop/scaleway}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 "$SCRIPT_DIR/copy-inventory-to-bastion.sh" "$KEY_PATH" "$REMOTE_PROJECT_DIR"

@@ -111,7 +111,7 @@ locals {
   }
 
   gateway_cidrs = length(var.student_ssh_cidrs) > 0 ? var.student_ssh_cidrs : [var.teacher_ssh_cidr]
-  gateway_web_ports = concat([9870, 8088, 19888, 18080, 10002, 9864, 9865, 9866, 8042, 8043, 8044], range(4040, 4051))
+  gateway_web_ports = concat([9870, 8088, 19888, 18080, 10002, 16010, 16030, 16031, 16032, 9864, 9865, 9866, 8042, 8043, 8044], range(4040, 4051))
 
   private_ip_offsets = {
     bastion  = 10

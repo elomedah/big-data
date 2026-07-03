@@ -1,0 +1,201 @@
+---
+- name: Check existing HBase archive on Ansible controller
+  ansible.builtin.stat:
+    path: /tmp/{{ hbase_archive }}.tar.gz
+  delegate_to: localhost
+  run_once: true
+  register: hbase_archive_stat
+
+- name: Validate existing HBase archive on Ansible controller
+  ansible.builtin.command:
+    argv:
+      - tar
+      - -tzf
+      - /tmp/{{ hbase_archive }}.tar.gz
+  delegate_to: localhost
+  run_once: true
+  register: hbase_archive_validation
+  changed_when: false
+  failed_when: false
+  when: hbase_archive_stat.stat.exists
+
+- name: Remove invalid HBase archive from Ansible controller
+  ansible.builtin.file:
+    path: /tmp/{{ hbase_archive }}.tar.gz
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  when:
+    - hbase_archive_stat.stat.exists
+    - hbase_archive_validation.rc != 0
+
+- name: Download HBase archive from Apache CDN on Ansible controller
+  ansible.builtin.get_url:
+    url: "{{ hbase_download_url }}"
+    dest: /tmp/{{ hbase_archive }}.tar.gz
+    mode: "0644"
+    timeout: 240
+  delegate_to: localhost
+  run_once: true
+  register: hbase_cdn_download
+  ignore_errors: true
+
+- name: Download HBase archive from Apache archive fallback
+  ansible.builtin.get_url:
+    url: "{{ hbase_download_fallback_url }}"
+    dest: /tmp/{{ hbase_archive }}.tar.gz
+    mode: "0644"
+    timeout: 240
+  delegate_to: localhost
+  run_once: true
+  when: hbase_cdn_download is failed
+
+- name: Validate downloaded HBase archive on Ansible controller
+  ansible.builtin.command:
+    argv:
+      - tar
+      - -tzf
+      - /tmp/{{ hbase_archive }}.tar.gz
+  delegate_to: localhost
+  run_once: true
+  changed_when: false
+
+- name: Create HBase installation directory
+  ansible.builtin.file:
+    path: /opt/{{ hbase_package }}
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy and extract HBase
+  ansible.builtin.unarchive:
+    src: /tmp/{{ hbase_archive }}.tar.gz
+    dest: /opt/{{ hbase_package }}
+    remote_src: false
+    extra_opts:
+      - --strip-components=1
+    creates: /opt/{{ hbase_package }}/bin/hbase
+
+- name: Link HBase installation
+  ansible.builtin.file:
+    src: /opt/{{ hbase_package }}
+    dest: "{{ hbase_home }}"
+    state: link
+
+- name: Set ownership on HBase installation
+  ansible.builtin.file:
+    path: /opt/{{ hbase_package }}
+    owner: root
+    group: root
+    recurse: true
+
+- name: Create HBase local directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: /var/log/hbase, mode: "0755" }
+    - { path: /run/hbase, mode: "0755" }
+    - { path: "{{ hbase_zookeeper_data_dir }}", mode: "0755" }
+
+- name: Install HBase environment profile
+  ansible.builtin.template:
+    src: hbase.sh.j2
+    dest: /etc/profile.d/hbase.sh
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy HBase configuration
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ hbase_home }}/conf/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - hbase-env.sh
+    - hbase-site.xml
+    - regionservers
+
+- name: Wait for HDFS before creating HBase directory
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -report"
+  become_user: "{{ hadoop_user }}"
+  register: hbase_hdfs_report
+  retries: 20
+  delay: 6
+  until: hbase_hdfs_report.rc == 0
+  changed_when: false
+  when: inventory_hostname == groups['gateway'][0]
+
+- name: Create HBase HDFS root directory
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -mkdir -p {{ hbase_root_dir }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  when: inventory_hostname == groups['gateway'][0]
+
+- name: Set HBase HDFS root ownership
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chown {{ hadoop_user }}:{{ hadoop_group }} {{ hbase_root_dir }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  when: inventory_hostname == groups['gateway'][0]
+
+- name: Set HBase HDFS root permissions
+  ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chmod 755 {{ hbase_root_dir }}"
+  become_user: "{{ hadoop_user }}"
+  changed_when: false
+  when: inventory_hostname == groups['gateway'][0]
+
+- name: Install HBase systemd units
+  ansible.builtin.template:
+    src: "{{ item }}.service.j2"
+    dest: /etc/systemd/system/{{ item }}.service
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - hbase-zookeeper
+    - hbase-master
+    - hbase-regionserver
+
+- name: Start HBase ZooKeeper
+  ansible.builtin.systemd:
+    name: hbase-zookeeper
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  when: inventory_hostname in groups['masters']
+
+- name: Wait for HBase ZooKeeper
+  ansible.builtin.wait_for:
+    host: "{{ hostvars[groups['masters'][0]].private_ip }}"
+    port: 2181
+    timeout: 60
+  when: inventory_hostname in groups['masters']
+
+- name: Start HBase Master
+  ansible.builtin.systemd:
+    name: hbase-master
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  when: inventory_hostname in groups['masters']
+
+- name: Wait for HBase Master RPC
+  ansible.builtin.wait_for:
+    host: "{{ hostvars[groups['masters'][0]].private_ip }}"
+    port: 16000
+    timeout: 90
+  run_once: true
+
+- name: Start HBase RegionServers
+  ansible.builtin.systemd:
+    name: hbase-regionserver
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  when: inventory_hostname in groups['workers']

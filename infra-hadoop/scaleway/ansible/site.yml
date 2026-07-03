@@ -29,6 +29,12 @@
   roles:
     - hive
 
+- name: Install and configure HBase
+  hosts: hadoop
+  become: true
+  roles:
+    - hbase
+
 - name: Expose Hadoop web UIs through the gateway
   hosts: gateway
   become: true

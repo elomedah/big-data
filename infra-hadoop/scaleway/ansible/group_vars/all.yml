@@ -34,6 +34,17 @@ hive_metastore_port: 9083
 hive_server2_port: 10000
 hive_server2_webui_port: 10002
 
+hbase_version: "2.5.15"
+hbase_archive: "hbase-{{ hbase_version }}-hadoop3-bin"
+hbase_package: "hbase-{{ hbase_version }}-hadoop3"
+hbase_download_url: "https://downloads.apache.org/hbase/{{ hbase_version }}/{{ hbase_archive }}.tar.gz"
+hbase_download_fallback_url: "https://archive.apache.org/dist/hbase/{{ hbase_version }}/{{ hbase_archive }}.tar.gz"
+hbase_home: /opt/hbase
+hbase_root_dir: /hbase
+hbase_zookeeper_data_dir: "{{ hadoop_data_dir }}/zookeeper"
+hbase_master_web_port: 16010
+hbase_regionserver_web_port: 16030
+
 java_package: openjdk-11-jdk
 
 student_group: student

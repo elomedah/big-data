@@ -52,6 +52,7 @@ After login:
 source /etc/profile.d/hadoop.sh
 source /etc/profile.d/spark.sh
 source /etc/profile.d/hive.sh
+source /etc/profile.d/hbase.sh
 ```
 
 Check Hadoop:
@@ -70,4 +71,10 @@ Check Hive:
 
 ```bash
 beeline --version
+```
+
+Check HBase:
+
+```bash
+hbase version
 ```

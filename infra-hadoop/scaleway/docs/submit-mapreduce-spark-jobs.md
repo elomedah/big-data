@@ -6,6 +6,7 @@ Run all commands from the gateway after connecting with SSH.
 source /etc/profile.d/hadoop.sh
 source /etc/profile.d/spark.sh
 source /etc/profile.d/hive.sh
+source /etc/profile.d/hbase.sh
 ```
 
 ## Prepare HDFS Input
@@ -160,14 +161,14 @@ spark-submit \
 Connect to HiveServer2:
 
 ```bash
-beeline -u 'jdbc:hive2://localhost:10000/default;auth=noSasl' -n $USER
+beeline -u 'jdbc:hive2://localhost:10000/default;auth=noSasl' -n $USER --hivevar student=$USER
 ```
 
 Create a database and an external table:
 
 ```sql
-CREATE DATABASE IF NOT EXISTS student;
-USE student;
+CREATE DATABASE IF NOT EXISTS ${hivevar:student};
+USE ${hivevar:student};
 
 DROP TABLE IF EXISTS words;
 
@@ -175,7 +176,7 @@ CREATE EXTERNAL TABLE words (
   line STRING
 )
 STORED AS TEXTFILE
-LOCATION '/user/${env:USER}/input';
+LOCATION '/user/${hivevar:student}/input';
 
 SELECT * FROM words;
 ```
@@ -184,6 +185,33 @@ Exit Beeline:
 
 ```sql
 !quit
+```
+
+## Run HBase Commands
+
+Open the HBase shell:
+
+```bash
+hbase shell
+```
+
+Create a table, insert rows, and read them:
+
+```ruby
+create 'student_words', 'cf'
+put 'student_words', 'row1', 'cf:word', 'hadoop'
+put 'student_words', 'row2', 'cf:word', 'spark'
+put 'student_words', 'row3', 'cf:word', 'hbase'
+scan 'student_words'
+get 'student_words', 'row1'
+```
+
+Delete the example table:
+
+```ruby
+disable 'student_words'
+drop 'student_words'
+exit
 ```
 
 ## Follow Applications
@@ -205,4 +233,5 @@ Open the web interfaces:
 ```text
 YARN ResourceManager: http://<gateway_public_ip>:8088
 Spark History Server: http://<gateway_public_ip>:18080
+HBase Master UI: http://<gateway_public_ip>:16010
 ```

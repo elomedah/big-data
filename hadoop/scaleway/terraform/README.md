@@ -123,12 +123,6 @@ terraform apply
 terraform output -raw ansible_inventory > ../ansible/inventory.ini
 ```
 
-Edit `terraform.tfvars` and set `project_id` to the same project:
-
-```hcl
-project_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-```
-
 ## Scaleway IAM Permissions
 
 Use an API key attached to the same Scaleway project as
@@ -154,18 +148,20 @@ insufficient permissions: read compute_private_networks
 insufficient permissions: read compute_security_groups
 ```
 
-the current API key cannot read the project resources Terraform must destroy.
-First verify that Terraform is using the expected project:
+Terraform is probably not using the expected Scaleway credentials in the
+current shell. Verify the environment variables before running Terraform:
 
 ```bash
 echo "$SCW_DEFAULT_PROJECT_ID"
-grep project_id terraform.tfvars
+echo "$SCW_ACCESS_KEY"
 ```
 
-Both values must match. Then add the missing read/delete permissions to the key
-policy, or switch to an Owner/Admin key for the project, then rerun:
+Then export the correct credentials and rerun:
 
 ```bash
+export SCW_ACCESS_KEY="..."
+export SCW_SECRET_KEY="..."
+export SCW_DEFAULT_PROJECT_ID="..."
 terraform destroy
 ```
 

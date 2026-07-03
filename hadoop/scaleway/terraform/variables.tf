@@ -4,11 +4,6 @@ variable "project_name" {
   default     = "m2-hadoop"
 }
 
-variable "project_id" {
-  description = "Scaleway project ID. Set this to the same value as SCW_DEFAULT_PROJECT_ID."
-  type        = string
-}
-
 variable "region" {
   description = "Scaleway region."
   type        = string

@@ -3,13 +3,11 @@
   ansible.builtin.stat:
     path: "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
   register: student_ssh_keys_file
-  run_once: true
 
 - name: Load optional student SSH keys file
   ansible.builtin.include_vars:
     file: "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
   when: student_ssh_keys_file.stat.exists
-  run_once: true
 
 - name: Build student account list
   ansible.builtin.set_fact:
@@ -53,7 +51,7 @@
     key: "{{ item.1 }}"
     state: present
     exclusive: false
-  loop: "{{ student_ssh_keys | dict2items | subelements('value') }}"
+  loop: "{{ student_ssh_keys | default({}) | dict2items | subelements('value') }}"
   when:
     - inventory_hostname in groups['gateway']
     - item.0.key in student_accounts

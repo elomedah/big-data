@@ -130,21 +130,28 @@
     - hadoop-historyserver
   notify: Reload systemd
 
-- name: Flush handlers before starting services
-  ansible.builtin.meta: flush_handlers
+- name: Check whether NameNode is already running
+  ansible.builtin.command: systemctl is-active hadoop-namenode
+  register: hadoop_namenode_active
+  changed_when: false
+  failed_when: false
+  when: inventory_hostname in groups['masters']
 
 - name: Format NameNode once
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs namenode -format -force -nonInteractive"
   args:
     creates: "{{ hdfs_name_dir }}/current/VERSION"
   become_user: "{{ hadoop_user }}"
-  when: inventory_hostname in groups['masters']
+  when:
+    - inventory_hostname in groups['masters']
+    - hadoop_namenode_active.stdout != "active"
 
 - name: Start master Hadoop services
   ansible.builtin.systemd:
     name: "{{ item }}"
     enabled: true
     state: started
+    daemon_reload: true
   loop:
     - hadoop-namenode
     - hadoop-resourcemanager
@@ -156,10 +163,14 @@
     name: "{{ item }}"
     enabled: true
     state: started
+    daemon_reload: true
   loop:
     - hadoop-datanode
     - hadoop-nodemanager
   when: inventory_hostname in groups['workers']
+
+- name: Flush Hadoop handlers after services are started
+  ansible.builtin.meta: flush_handlers
 
 - name: Install Hadoop client config on gateway
   ansible.builtin.file:

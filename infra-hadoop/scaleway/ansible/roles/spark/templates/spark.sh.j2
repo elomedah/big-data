@@ -4,4 +4,6 @@ export HADOOP_CONF_DIR={{ hadoop_home }}/etc/hadoop
 export YARN_CONF_DIR={{ hadoop_home }}/etc/hadoop
 export SPARK_HOME={{ spark_home }}
 export PYSPARK_PYTHON=python3
+export SPARK_LOG_DIR=/var/log/spark
+export SPARK_PID_DIR=/run/spark
 export PATH=$PATH:{{ spark_home }}/bin:{{ spark_home }}/sbin

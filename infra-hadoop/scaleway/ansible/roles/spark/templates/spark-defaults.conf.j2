@@ -4,6 +4,7 @@ spark.yarn.jars                    hdfs://{{ spark_jars_dir }}/*
 spark.eventLog.enabled             true
 spark.eventLog.dir                 hdfs://{{ spark_event_log_dir }}
 spark.history.fs.logDirectory      hdfs://{{ spark_event_log_dir }}
+spark.ui.reverseProxy              true
 spark.driver.memory                {{ spark_driver_memory }}
 spark.executor.memory              {{ spark_executor_memory }}
 spark.executor.cores               {{ spark_executor_cores }}

@@ -99,6 +99,24 @@
     group: root
     mode: "0644"
 
+- name: Create Spark local log directory
+  ansible.builtin.file:
+    path: /var/log/spark
+    state: directory
+    owner: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    mode: "0755"
+  when: inventory_hostname in groups['gateway']
+
+- name: Install Spark History Server systemd unit
+  ansible.builtin.template:
+    src: spark-historyserver.service.j2
+    dest: /etc/systemd/system/spark-historyserver.service
+    owner: root
+    group: root
+    mode: "0644"
+  when: inventory_hostname in groups['gateway']
+
 - name: Wait for HDFS before creating Spark directories
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -report"
   become_user: "{{ hadoop_user }}"
@@ -143,4 +161,12 @@
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfs -chmod -R 755 {{ spark_jars_dir }}"
   become_user: "{{ hadoop_user }}"
   changed_when: false
+  when: inventory_hostname in groups['gateway']
+
+- name: Start Spark History Server
+  ansible.builtin.systemd:
+    name: spark-historyserver
+    enabled: true
+    state: restarted
+    daemon_reload: true
   when: inventory_hostname in groups['gateway']

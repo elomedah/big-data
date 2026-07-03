@@ -1,4 +1,16 @@
 ---
+- name: Check optional student SSH keys file
+  ansible.builtin.stat:
+    path: "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
+  register: student_ssh_keys_file
+  run_once: true
+
+- name: Load optional student SSH keys file
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
+  when: student_ssh_keys_file.stat.exists
+  run_once: true
+
 - name: Build student account list
   ansible.builtin.set_fact:
     student_accounts: "{{ query('sequence', 'start=1 end=' ~ student_count ~ ' format=student%02d') }}"

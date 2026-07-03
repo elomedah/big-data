@@ -25,8 +25,12 @@
     <value>{{ hostvars[inventory_hostname].private_ip }}:8040</value>
   </property>
   <property>
+    <name>yarn.nodemanager.bind-host</name>
+    <value>0.0.0.0</value>
+  </property>
+  <property>
     <name>yarn.nodemanager.webapp.address</name>
-    <value>{{ hostvars[inventory_hostname].private_ip }}:8042</value>
+    <value>{% if inventory_hostname in groups['workers'] %}{{ hostvars[groups['gateway'][0]].public_ip }}:{{ 8042 + groups['workers'].index(inventory_hostname) }}{% else %}{{ hostvars[inventory_hostname].private_ip }}:8042{% endif %}</value>
   </property>
   <property>
     <name>yarn.application.classpath</name>

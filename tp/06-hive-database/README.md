@@ -1,0 +1,557 @@
+# TP 06 - Hive : bases, tables externes et partitionnement
+
+## Objectifs
+
+À la fin de ce TP, vous devez être capable de :
+
+- démarrer un environnement Hive local avec Docker ;
+- vous connecter à Hive avec `beeline` ;
+- créer une base Hive dédiée au projet fil rouge ;
+- distinguer base, table interne, table externe et partition ;
+- créer des tables externes sur des données stockées hors du warehouse Hive ;
+- exposer dans Hive les zones `raw`, `processed` et `audit` du Data Lake ;
+- charger ou détecter des partitions avec `ALTER TABLE` et `MSCK REPAIR TABLE` ;
+- écrire des requêtes analytiques HiveQL sur des logs partitionnés ;
+- relier les choix de modélisation Hive au contexte DORA.
+
+## Ressource d'installation
+
+Ce TP s'appuie sur la logique d'installation locale présentée dans :
+
+```text
+https://github.com/elomedah/iris-big-data/blob/master/TP-hive/01-install-hive-docker.md
+```
+
+Si vous travaillez sur le cluster du cours plutôt qu'en local Docker, utilisez les mêmes commandes HiveQL, mais connectez-vous depuis le gateway Hadoop.
+
+## Contexte
+
+Dans les TP précédents, vous avez construit progressivement une zone de stockage pour le projet fil rouge :
+
+- `raw` : logs bruts déposés par les équipes ;
+- `processed` : données enrichies ou agrégées par Spark ;
+- `audit` : traces de contrôle, rejets et indicateurs d'audit.
+
+Hive permet maintenant de donner une couche SQL à ces fichiers. L'objectif n'est pas de déplacer toutes les données dans Hive, mais de créer des métadonnées qui pointent vers les fichiers déjà présents dans le Data Lake.
+
+Dans ce TP, les tables principales seront donc des tables externes partitionnées.
+
+## Prérequis
+
+### Option A - Installation locale Docker
+
+Suivez d'abord le TP d'installation Hive Docker indiqué dans la ressource d'installation.
+
+Vérifiez que les conteneurs sont démarrés.
+
+```bash
+docker ps
+```
+
+Connectez-vous à Hive avec `beeline`.
+
+```bash
+beeline -u jdbc:hive2://localhost:10000
+```
+
+Si `beeline` est exécuté depuis un conteneur, adaptez la commande au nom du service Hive utilisé dans votre installation.
+
+```bash
+docker exec -it hive-server beeline -u jdbc:hive2://localhost:10000
+```
+
+### Option B - Gateway Hadoop du cours
+
+Connectez-vous au gateway.
+
+```bash
+ssh -i ~/.ssh/m2-hadoop-student identifiant@<gateway_public_ip>
+```
+
+Chargez les environnements Hadoop et Hive.
+
+```bash
+source /etc/profile.d/hadoop.sh
+source /etc/profile.d/hive.sh
+```
+
+Vérifiez que HDFS et Hive répondent.
+
+```bash
+hdfs dfs -ls /
+beeline -u jdbc:hive2://localhost:10000
+```
+
+Interfaces utiles :
+
+```text
+NameNode UI:          http://<gateway_public_ip>:9870
+YARN ResourceManager: http://<gateway_public_ip>:8088
+HiveServer2:          jdbc:hive2://<gateway_public_ip>:10000
+```
+
+## Exercice 1 - Comprendre le rôle de Hive
+
+Hive est une couche SQL au-dessus d'un stockage distribué. Les données peuvent rester dans HDFS, tandis que Hive conserve les métadonnées dans le metastore :
+
+- nom des bases ;
+- nom des tables ;
+- colonnes et types ;
+- formats de fichiers ;
+- emplacements HDFS ;
+- partitions ;
+- propriétés des tables.
+
+Répondez aux questions suivantes.
+
+1. Pourquoi Hive est-il utile au-dessus de HDFS ?
+2. Quelle différence faites-vous entre HDFS et Hive ?
+3. Quel est le rôle du metastore ?
+4. Pourquoi Hive est-il adapté à des analyses batch plutôt qu'à des requêtes transactionnelles très fréquentes ?
+5. Dans le projet DORA, quels utilisateurs pourraient interroger les données avec Hive ?
+
+## Exercice 2 - Préparer les données du projet fil rouge
+
+Si vous avez terminé le TP 05, vous pouvez réutiliser les données déjà créées dans `/user/$USER/datalake`.
+
+Sinon, créez un jeu minimal de logs bruts.
+
+```bash
+hdfs dfs -mkdir -p /user/$USER/datalake/raw/team_payments/application_logs/year=2026/month=01/day=15
+hdfs dfs -mkdir -p /user/$USER/datalake/raw/team_security/application_logs/year=2026/month=01/day=15
+hdfs dfs -mkdir -p /user/$USER/datalake/processed/logs/daily_app_metrics_orc/event_date=2026-01-15/app_id=payment-api
+hdfs dfs -mkdir -p /user/$USER/datalake/audit/hive
+```
+
+Créez un fichier local de logs bruts.
+
+```bash
+cat > hive_raw_logs.csv <<'EOF'
+event_ts,app_id,env,level,status_code,response_time_ms,request_id,message
+2026-01-15T08:00:00Z,payment-api,prod,INFO,200,120,req-001,payment accepted
+2026-01-15T08:01:10Z,payment-api,prod,WARN,200,920,req-002,slow acquirer response
+2026-01-15T08:02:15Z,payment-api,prod,ERROR,504,2100,req-003,acquirer timeout
+2026-01-15T08:00:11Z,auth-service,prod,INFO,200,80,req-101,token issued
+2026-01-15T08:01:28Z,auth-service,prod,ERROR,401,95,req-102,invalid credentials
+EOF
+```
+
+Déposez le fichier dans la zone `raw`.
+
+```bash
+hdfs dfs -put -f hive_raw_logs.csv /user/$USER/datalake/raw/team_payments/application_logs/year=2026/month=01/day=15/
+```
+
+Vérifiez l'arborescence.
+
+```bash
+hdfs dfs -ls -R /user/$USER/datalake
+```
+
+
+## Exercice 3 - Se connecter à Hive et inspecter l'environnement
+
+Connectez-vous avec `beeline`.
+
+```bash
+beeline -u jdbc:hive2://localhost:10000
+```
+
+Dans Hive, affichez les bases existantes.
+
+```sql
+SHOW DATABASES;
+```
+
+Affichez la configuration du warehouse.
+
+```sql
+SET hive.metastore.warehouse.dir;
+```
+
+Affichez l'utilisateur courant.
+
+```sql
+SELECT current_user();
+```
+
+## Exercice 4 - Créer une base Hive pour le projet
+
+Créez une base dédiée. Remplacez `identifiant` par votre identifiant si la variable n'est pas disponible dans votre environnement Hive.
+
+```sql
+CREATE DATABASE IF NOT EXISTS dora_fil_rouge_identifiant
+COMMENT 'Base Hive du projet fil rouge DORA'
+LOCATION '/user/identifiant/hive/dora_fil_rouge.db';
+```
+
+Utilisez la base.
+
+```sql
+USE dora_fil_rouge_identifiant;
+```
+
+Vérifiez.
+
+```sql
+SHOW DATABASES LIKE 'dora*';
+DESCRIBE DATABASE EXTENDED dora_fil_rouge_identifiant;
+```
+
+Répondez aux questions suivantes.
+
+1. Pourquoi créer une base par étudiant ou par équipe ?
+2. À quoi sert la clause `LOCATION` dans `CREATE DATABASE` ?
+3. Que se passerait-il si toutes les équipes utilisaient la même base ?
+4. Quelles conventions de nommage appliqueriez-vous pour les bases Hive d'un projet réel ?
+
+## Exercice 5 - Créer une table externe sur les logs bruts
+
+Créez une table externe partitionnée sur les logs bruts.
+
+```sql
+CREATE EXTERNAL TABLE IF NOT EXISTS raw_application_logs (
+  event_ts STRING,
+  app_id STRING,
+  env STRING,
+  level STRING,
+  status_code INT,
+  response_time_ms INT,
+  request_id STRING,
+  message STRING
+)
+PARTITIONED BY (
+  source_team STRING,
+  year STRING,
+  month STRING,
+  day STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/user/identifiant/datalake/raw';
+```
+
+Ajoutez explicitement une partition.
+
+```sql
+ALTER TABLE raw_application_logs ADD IF NOT EXISTS
+PARTITION (
+  source_team='team_payments',
+  year='2026',
+  month='01',
+  day='15'
+)
+LOCATION '/user/identifiant/datalake/raw/team_payments/application_logs/year=2026/month=01/day=15';
+```
+
+Listez les partitions.
+
+```sql
+SHOW PARTITIONS raw_application_logs;
+```
+
+Interrogez les données.
+
+```sql
+SELECT app_id, level, status_code, response_time_ms, source_team, year, month, day
+FROM raw_application_logs
+WHERE year = '2026'
+  AND month = '01'
+  AND day = '15'
+LIMIT 20;
+```
+
+Répondez aux questions suivantes.
+
+1. Pourquoi la table est-elle externe ?
+2. Que signifie la clause `LOCATION` au niveau de la table ?
+3. Que signifie la clause `LOCATION` au niveau de la partition ?
+4. Pourquoi `source_team`, `year`, `month` et `day` ne sont-ils pas dans les colonnes du CSV ?
+5. Quel problème voyez-vous avec l'en-tête CSV dans une table Hive simple ?
+
+## Exercice 6 - Corriger la lecture de l'en-tête CSV
+
+Ajoutez une propriété pour ignorer la première ligne des fichiers CSV.
+
+```sql
+ALTER TABLE raw_application_logs
+SET TBLPROPERTIES ('skip.header.line.count'='1');
+```
+
+Relancez une requête de contrôle.
+
+```sql
+SELECT app_id, COUNT(*) AS event_count
+FROM raw_application_logs
+WHERE year = '2026'
+  AND month = '01'
+  AND day = '15'
+GROUP BY app_id
+ORDER BY event_count DESC;
+```
+
+Répondez aux questions suivantes.
+
+1. Pourquoi l'en-tête CSV peut-il poser problème ?
+2. Pourquoi cette solution reste-t-elle fragile sur des fichiers CSV complexes ?
+3. Quels formats sont plus adaptés pour la zone `processed` ?
+4. Pourquoi Spark a-t-il écrit en Parquet ou ORC dans le TP 05 ?
+
+## Exercice 7 - Créer une table externe sur les indicateurs traités
+
+Si vous avez produit la sortie ORC du TP 05, créez une table externe dessus.
+
+```sql
+CREATE EXTERNAL TABLE IF NOT EXISTS processed_daily_app_metrics (
+  app_name STRING,
+  owner_team STRING,
+  criticality STRING,
+  business_domain STRING,
+  event_count BIGINT,
+  error_count BIGINT,
+  warning_count BIGINT,
+  avg_response_time_ms DOUBLE,
+  max_response_time_ms INT,
+  sla_breach_count BIGINT,
+  error_rate DOUBLE
+)
+PARTITIONED BY (
+  event_date STRING,
+  app_id STRING
+)
+STORED AS ORC
+LOCATION '/user/identifiant/datalake/processed/logs/daily_app_metrics_orc';
+```
+
+Demandez à Hive de découvrir les partitions existantes.
+
+```sql
+MSCK REPAIR TABLE processed_daily_app_metrics;
+SHOW PARTITIONS processed_daily_app_metrics;
+```
+
+Interrogez les indicateurs.
+
+```sql
+SELECT event_date, app_id, event_count, error_count, error_rate, sla_breach_count
+FROM processed_daily_app_metrics
+WHERE event_date = '2026-01-15'
+ORDER BY error_rate DESC;
+```
+
+Si vos sorties sont en Parquet au lieu d'ORC, utilisez `STORED AS PARQUET` et pointez vers le dossier Parquet produit dans le TP 05.
+
+Répondez aux questions suivantes.
+
+1. Pourquoi la zone `processed` est-elle plus adaptée à Hive que la zone `raw` ?
+2. Pourquoi les formats colonnes accélèrent-ils certaines requêtes analytiques ?
+3. À quoi sert `MSCK REPAIR TABLE` ?
+4. Dans quel cas préféreriez-vous `ALTER TABLE ADD PARTITION` à `MSCK REPAIR TABLE` ?
+
+## Exercice 8 - Créer une table d'audit Hive
+
+Créez une table externe pour historiser des contrôles Hive.
+
+```sql
+CREATE EXTERNAL TABLE IF NOT EXISTS audit_hive_checks (
+  check_ts STRING,
+  check_name STRING,
+  table_name STRING,
+  partition_filter STRING,
+  row_count BIGINT,
+  status STRING,
+  comment STRING
+)
+PARTITIONED BY (
+  check_date STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/user/identifiant/datalake/audit/hive/checks';
+```
+
+Créez un fichier local de contrôle.
+
+```bash
+cat > hive_audit_check.csv <<'EOF'
+2026-01-15T09:00:00Z,row_count_raw,raw_application_logs,year=2026/month=01/day=15,5,OK,raw partition readable
+EOF
+```
+
+Déposez-le dans HDFS.
+
+```bash
+hdfs dfs -mkdir -p /user/$USER/datalake/audit/hive/checks/check_date=2026-01-15
+hdfs dfs -put -f hive_audit_check.csv /user/$USER/datalake/audit/hive/checks/check_date=2026-01-15/
+```
+
+Dans Hive, réparez la table et interrogez l'audit.
+
+```sql
+MSCK REPAIR TABLE audit_hive_checks;
+
+SELECT *
+FROM audit_hive_checks
+WHERE check_date = '2026-01-15';
+```
+
+Répondez aux questions suivantes.
+
+1. Pourquoi conserver des résultats de contrôle dans `audit` ?
+2. Quelles informations manquent pour rendre le contrôle totalement reproductible ?
+3. Pourquoi faut-il historiser les contrôles plutôt que conserver seulement le dernier résultat ?
+4. Comment utiliseriez-vous cette table lors d'un audit DORA ?
+
+## Exercice 9 - Requêtes analytiques sur le projet fil rouge
+
+Comptez les événements par application et par niveau.
+
+```sql
+SELECT app_id, level, COUNT(*) AS event_count
+FROM raw_application_logs
+WHERE year = '2026'
+  AND month = '01'
+  AND day = '15'
+GROUP BY app_id, level
+ORDER BY app_id, level;
+```
+
+Identifiez les applications avec des erreurs.
+
+```sql
+SELECT app_id, COUNT(*) AS error_count
+FROM raw_application_logs
+WHERE year = '2026'
+  AND month = '01'
+  AND day = '15'
+  AND level = 'ERROR'
+GROUP BY app_id
+ORDER BY error_count DESC;
+```
+
+Analysez les indicateurs traités si la table `processed_daily_app_metrics` est disponible.
+
+```sql
+SELECT
+  event_date,
+  app_id,
+  owner_team,
+  event_count,
+  error_count,
+  ROUND(error_rate * 100, 2) AS error_rate_percent,
+  sla_breach_count
+FROM processed_daily_app_metrics
+WHERE event_date = '2026-01-15'
+ORDER BY error_rate DESC, sla_breach_count DESC;
+```
+
+Répondez aux questions suivantes.
+
+1. Quelle requête est la plus proche d'un besoin d'exploitation ?
+2. Quelle requête est la plus proche d'un besoin d'audit ?
+3. Pourquoi filtrer sur les colonnes de partition ?
+4. Que se passerait-il sur plusieurs années de logs sans filtre de partition ?
+5. Quels indicateurs ajouteriez-vous pour suivre la résilience opérationnelle ?
+
+## Exercice 10 - Observer le plan d'exécution
+
+Activez l'affichage du plan.
+
+```sql
+EXPLAIN
+SELECT app_id, COUNT(*) AS error_count
+FROM raw_application_logs
+WHERE year = '2026'
+  AND month = '01'
+  AND day = '15'
+  AND level = 'ERROR'
+GROUP BY app_id;
+```
+
+Comparez avec une requête sans filtre de partition.
+
+```sql
+EXPLAIN
+SELECT app_id, COUNT(*) AS error_count
+FROM raw_application_logs
+WHERE level = 'ERROR'
+GROUP BY app_id;
+```
+
+Répondez aux questions suivantes.
+
+1. Où voyez-vous l'effet du filtre de partition ?
+2. Pourquoi le partition pruning est-il important ?
+3. Pourquoi une table très partitionnée peut-elle aussi devenir difficile à gérer ?
+4. Comment choisiriez-vous les colonnes de partition dans un Data Warehouse Hive ?
+
+## Exercice 11 - Tables internes et externes
+
+Créez une petite table interne de démonstration.
+
+```sql
+CREATE TABLE IF NOT EXISTS demo_internal_table (
+  id INT,
+  label STRING
+);
+
+INSERT INTO demo_internal_table VALUES
+(1, 'created by hive'),
+(2, 'managed table');
+```
+
+Comparez les métadonnées.
+
+```sql
+DESCRIBE FORMATTED demo_internal_table;
+DESCRIBE FORMATTED raw_application_logs;
+```
+
+Ne supprimez pas encore les tables.
+
+Répondez aux questions suivantes.
+
+1. Quelle différence voyez-vous dans le type de table ?
+2. Où sont stockées les données de la table interne ?
+3. Pourquoi une suppression de table interne peut-elle être plus dangereuse ?
+4. Pourquoi les tables externes sont-elles préférées pour exposer les zones du Data Lake ?
+
+## Exercice 12 - Livrable projet
+
+Préparez un court livrable avec :
+
+- le nom de votre base Hive ;
+- la liste des tables créées ;
+- le schéma de `raw_application_logs` ;
+- le schéma de `processed_daily_app_metrics` si disponible ;
+- la liste des partitions ;
+- trois requêtes HiveQL utiles pour le projet DORA ;
+- une justification du choix des partitions ;
+- une explication de la différence entre `raw`, `processed` et `audit`.
+
+Commandes utiles :
+
+```sql
+SHOW TABLES;
+DESCRIBE raw_application_logs;
+SHOW PARTITIONS raw_application_logs;
+DESCRIBE FORMATTED raw_application_logs;
+```
+
+
+## À retenir
+
+Hive transforme des fichiers HDFS en tables SQL grâce au metastore.
+
+Les points importants de cette séance sont :
+
+- une base Hive organise les tables d'un projet ou d'une équipe ;
+- une table externe référence des données existantes sans les posséder ;
+- une partition Hive correspond souvent à un sous-dossier HDFS ;
+- `ALTER TABLE ADD PARTITION` ajoute une partition précise ;
+- `MSCK REPAIR TABLE` découvre les partitions déjà présentes dans l'arborescence ;
+- les formats ORC et Parquet sont adaptés aux analyses SQL ;
+- filtrer sur les colonnes de partition réduit les données lues ;
+- les zones `raw`, `processed` et `audit` n'ont pas le même rôle dans le projet fil rouge.

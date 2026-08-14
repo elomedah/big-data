@@ -8,6 +8,11 @@ locals {
     }
   }
 
+  worker_nodes = {
+    for name, node in local.nodes : name => node
+    if node.role == "worker"
+  }
+
   bastion_ip = scaleway_instance_ip.public["bastion"].address
 }
 
@@ -29,14 +34,16 @@ output "gateway_public_ip" {
 output "ansible_inventory" {
   description = "Inventory to write to ../ansible/inventory.ini."
   value = templatefile("${path.module}/inventory.ini.tftpl", {
-    nodes      = local.nodes
-    bastion_ip = local.bastion_ip
+    nodes        = local.nodes
+    worker_nodes = local.worker_nodes
+    bastion_ip   = local.bastion_ip
   })
 }
 
 output "bastion_ansible_inventory" {
   description = "Inventory to copy to the bastion when Ansible runs from the bastion."
   value = templatefile("${path.module}/inventory-bastion.ini.tftpl", {
-    nodes = local.nodes
+    nodes        = local.nodes
+    worker_nodes = local.worker_nodes
   })
 }

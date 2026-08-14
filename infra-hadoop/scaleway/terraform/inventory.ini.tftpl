@@ -8,9 +8,9 @@ gateway ansible_host=${nodes["gateway"].private_ip} public_ip=${nodes["gateway"]
 master ansible_host=${nodes["master"].private_ip} private_ip=${nodes["master"].private_ip}
 
 [workers]
-worker-1 ansible_host=${nodes["worker-1"].private_ip} private_ip=${nodes["worker-1"].private_ip}
-worker-2 ansible_host=${nodes["worker-2"].private_ip} private_ip=${nodes["worker-2"].private_ip}
-worker-3 ansible_host=${nodes["worker-3"].private_ip} private_ip=${nodes["worker-3"].private_ip}
+%{ for name in sort(keys(worker_nodes)) ~}
+${name} ansible_host=${worker_nodes[name].private_ip} private_ip=${worker_nodes[name].private_ip}
+%{ endfor ~}
 
 [hadoop:children]
 gateway

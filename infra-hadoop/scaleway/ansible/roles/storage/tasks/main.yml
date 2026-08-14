@@ -45,6 +45,7 @@
   community.general.filesystem:
     fstype: ext4
     dev: "{{ effective_hadoop_data_device }}"
+    resizefs: true
   when: hadoop_data_device_stat.stat.exists
 
 - name: Create Hadoop data mountpoint

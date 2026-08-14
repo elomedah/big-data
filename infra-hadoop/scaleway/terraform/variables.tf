@@ -88,10 +88,60 @@ variable "allocate_public_ip_to_private_nodes" {
   default     = true
 }
 
-variable "student_count" {
-  description = "Number of student Linux/HDFS accounts to prepare."
+variable "worker_mode" {
+  description = "Worker compute mode: active for TP sessions, reduced outside TP while keeping data volumes."
+  type        = string
+  default     = "active"
+
+  validation {
+    condition     = contains(["active", "reduced"], var.worker_mode)
+    error_message = "worker_mode must be either active or reduced."
+  }
+}
+
+variable "worker_active_commercial_type" {
+  description = "Scaleway instance type used by Hadoop workers during TP sessions."
+  type        = string
+  default     = "DEV1-XL"
+}
+
+variable "worker_reduced_commercial_type" {
+  description = "Scaleway instance type used by Hadoop workers outside TP sessions."
+  type        = string
+  default     = "DEV1-L"
+}
+
+variable "large_worker_data_size_gb" {
+  description = "HDFS Block Storage size in GB attached to each worker in the large teaching profile."
   type        = number
-  default     = 30
+  default     = 100
+
+  validation {
+    condition     = var.large_worker_data_size_gb >= 5
+    error_message = "large_worker_data_size_gb must be at least 5 GB."
+  }
+}
+
+variable "tiny_worker_count" {
+  description = "Number of Hadoop workers created by the tiny test profile."
+  type        = number
+  default     = 3
+
+  validation {
+    condition     = var.tiny_worker_count >= 1 && var.tiny_worker_count <= 20
+    error_message = "tiny_worker_count must be between 1 and 20."
+  }
+}
+
+variable "large_worker_count" {
+  description = "Number of Hadoop workers created by the large teaching profile."
+  type        = number
+  default     = 5
+
+  validation {
+    condition     = var.large_worker_count >= 1 && var.large_worker_count <= 20
+    error_message = "large_worker_count must be between 1 and 20."
+  }
 }
 
 variable "cluster_size" {

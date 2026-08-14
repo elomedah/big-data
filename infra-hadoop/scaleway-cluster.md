@@ -24,7 +24,7 @@ L'objectif est également de :
 
 ## Budget maximum
 
-**300 € HT / mois**
+**1 800 € HT / mois**
 
 Ce budget suppose que les machines virtuelles sont démarrées uniquement pendant :
 
@@ -38,12 +38,13 @@ Les instances seront arrêtées automatiquement en dehors des créneaux pédagog
 
 | Poste | Budget estimé |
 |-------|--------------:|
-| Machines virtuelles Hadoop | 120 € |
-| Block Storage HDFS (~1,5 To bruts) | 140 € |
+| Bastion, Gateway et Hadoop Master | 282 € |
+| Workers Hadoop x5 avec redimensionnement 75 % du temps | 1 183 € |
 | Object Storage sauvegarde (~500 Go) | 4 € |
-| Réserve technique (IP, marge) | 10 € |
-| **Total estimé** | **264 € HT** |
-| **Budget plafond recommandé** | **300 € HT** |
+| Réserve technique (IP, snapshots, marge) | 100 € |
+| **Total estimé en fonctionnement continu** | **~2 531 € HT** |
+| **Total estimé avec redimensionnement 75 % du temps** | **~1 570 € HT** |
+| **Budget plafond recommandé** | **1 800 € HT** |
 
 > Le budget exact dépendra du type d'instances Scaleway choisi, de la région, de la durée réelle d'utilisation et du volume de stockage provisionné. Les machines doivent être arrêtées automatiquement hors séance pour rester dans le budget.
 
@@ -62,7 +63,7 @@ Les instances seront arrêtées automatiquement en dehors des créneaux pédagog
                                |
         -------------------------------------
         |                 |                |
-    Worker 1          Worker 2        Worker 3
+    Workers 1-2      Workers 3-4       Worker 5
 ```
 
 ---
@@ -75,24 +76,31 @@ Les instances seront arrêtées automatiquement en dehors des créneaux pédagog
 |--------|-------:|------|----:|----:|---------------:|---------------:|--------------|
 | Bastion / Ansible | 1 | Administration, Terraform, Ansible | 2 vCPU | 4 Go | 40 Go | Aucun | Oui, IP enseignant uniquement |
 | Gateway étudiants | 1 | Connexion SSH des étudiants, clients Hadoop/Hive/HBase | 4 vCPU | 8 Go | 80 Go | Aucun | Oui, SSH étudiants uniquement |
-| Hadoop Master | 1 | NameNode, ResourceManager, JobHistory Server, Hive Metastore | 4 vCPU | 16 Go | 100 Go | 100 Go | Non |
-| Worker 1 | 1 | DataNode, NodeManager | 4 vCPU | 16 Go | 80 Go | 500 Go | Non |
-| Worker 2 | 1 | DataNode, NodeManager | 4 vCPU | 16 Go | 80 Go | 500 Go | Non |
-| Worker 3 | 1 | DataNode, NodeManager | 4 vCPU | 16 Go | 80 Go | 500 Go | Non |
+| Hadoop Master | 1 | NameNode, ResourceManager, JobHistory Server, Hive Metastore | 8 vCPU | 32 Go | 200 Go | 500 Go | Non |
+| Workers Hadoop | 5 | DataNode, NodeManager | 16 vCPU par worker | 32 Go par worker | 100 Go par worker | 600 Go par worker | Non |
 
 ## Capacité globale
 
 | Ressource | Capacité |
 |----------|---------:|
-| Nombre total de VM | 6 |
-| CPU total | 22 vCPU |
-| RAM totale | 76 Go |
-| Stockage HDFS brut | 1,5 To |
-| Stockage HDFS utile avec réplication x3 | ~500 Go |
-| Nombre d'étudiants | 30 |
+| Nombre total de VM | 8 |
+| CPU total | 94 vCPU |
+| RAM totale | 204 Go |
+| CPU total en mode réduit hors TP | 34 vCPU |
+| RAM totale en mode réduit hors TP | 84 Go |
+| Stockage HDFS brut | 3 To |
+| Stockage HDFS utile avec réplication x3 | ~1 To |
+| Nombre d'étudiants | 160 |
+| Ressources cibles par étudiant | 1 vCPU, 1 Go RAM, 5 Go SSD utiles |
+| CPU étudiant total théorique | 160 vCPU |
+| RAM étudiante totale réservée | 160 Go |
 | Quota HDFS par étudiant | 5 Go |
-| Stockage étudiant total réservé | 150 Go |
-| Marge restante pour datasets, résultats et administration | ~350 Go utiles |
+| Stockage étudiant total réservé | 800 Go utiles |
+| Marge restante pour datasets, résultats et administration | ~200 Go utiles, à compléter par nettoyage régulier ou stockage objet pour les datasets volumineux |
+
+Ce dimensionnement repose sur la mutualisation de la plateforme : tous les étudiants ne lanceront pas en permanence un traitement consommant leur quota CPU et mémoire complet. Les limites sont donc pensées comme des plafonds pédagogiques, pas comme une réservation dédiée et isolée pour chaque compte. La capacité physique CPU est volontairement inférieure au cumul théorique des quotas étudiants.
+
+Pendant les séances de TP, les Workers sont dimensionnés en mode actif. En dehors des séances, environ 75 % du temps, ils peuvent être redimensionnés en mode réduit avec 4 vCPU et 8 Go RAM par Worker, tout en conservant les volumes Block Storage attachés.
 
 ---
 
@@ -142,7 +150,7 @@ Configuration recommandée :
 80 Go disque système
 ```
 
-La Gateway ne stocke pas les données Hadoop. Elle sert de point d'entrée pédagogique.
+La Gateway ne stocke pas les données Hadoop et ne doit pas exécuter les traitements lourds. Elle sert de point d'entrée pédagogique pour les connexions SSH, les clients Hadoop et la soumission des jobs vers YARN.
 
 ---
 
@@ -161,10 +169,10 @@ Services installés :
 Configuration recommandée :
 
 ```text
-4 vCPU
-16 Go RAM
-100 Go disque système
-100 Go disque données / métadonnées
+8 vCPU
+32 Go RAM
+200 Go disque système
+500 Go disque données / métadonnées
 ```
 
 Justification :
@@ -187,29 +195,29 @@ Services installés :
 Configuration recommandée par Worker :
 
 ```text
-4 vCPU
-16 Go RAM
-80 Go disque système
-500 Go disque HDFS
+16 vCPU
+32 Go RAM
+100 Go disque système
+600 Go disque HDFS
 ```
 
-Avec 3 Workers :
+Avec 5 Workers :
 
 ```text
-12 vCPU
-48 Go RAM
-1,5 To de stockage HDFS brut
+80 vCPU
+160 Go RAM
+3 To de stockage HDFS brut
 ```
 
 Avec un facteur de réplication HDFS de 3, la capacité réellement utilisable est d'environ :
 
 ```text
-1,5 To / 3 = 500 Go utiles
+3 To / 3 = 1 To utile
 ```
 
 Cette capacité est suffisante pour :
 
-- 30 étudiants ;
+- 160 étudiants ;
 - un quota de 5 Go par étudiant ;
 - des jeux de données de TP ;
 - des résultats MapReduce ;
@@ -240,12 +248,18 @@ scaleway_instance_server.hadoop_master
 scaleway_instance_server.worker_1
 scaleway_instance_server.worker_2
 scaleway_instance_server.worker_3
+scaleway_instance_server.worker_4
+scaleway_instance_server.worker_5
 
 scaleway_instance_volume.master_metadata
 scaleway_instance_volume.worker_1_hdfs
 scaleway_instance_volume.worker_2_hdfs
 scaleway_instance_volume.worker_3_hdfs
+scaleway_instance_volume.worker_4_hdfs
+scaleway_instance_volume.worker_5_hdfs
 ```
+
+Dans l'implémentation Terraform, les Workers peuvent être déclarés avec `count` ou `for_each` afin d'éviter de dupliquer manuellement les cinq blocs.
 
 Une première implémentation Infrastructure as Code est disponible dans :
 
@@ -286,13 +300,13 @@ Ansible installera automatiquement :
 
 # Gestion des étudiants
 
-30 comptes seront créés automatiquement :
+160 comptes seront créés automatiquement :
 
 ```text
 student01
 student02
 ...
-student30
+student160
 ```
 
 Chaque étudiant disposera :
@@ -308,7 +322,7 @@ Exemple d'arborescence HDFS :
 /user/student01
 /user/student02
 ...
-/user/student30
+/user/student160
 /datalake/raw
 /datalake/archive
 /datalake/processed
@@ -343,9 +357,9 @@ Configuration recommandée :
 Queue dédiée : students
 Capacité de la queue : 60 %
 Capacité maximale : 70 %
-Mémoire max par container : 2 Go
+Mémoire max par container : 1 Go
 vCore max par container : 1
-Applications simultanées : 30
+Applications simultanées : 160
 ```
 
 Objectif :
@@ -404,7 +418,8 @@ Les interfaces d'administration du cluster ne seront accessibles qu'à l'enseign
 Le cluster sera :
 
 - démarré automatiquement avant les séances ;
-- arrêté automatiquement après les séances ;
+- redimensionné automatiquement après les séances ;
+- éventuellement arrêté complètement pendant les longues périodes sans TP ;
 - recréé si nécessaire avec Terraform.
 
 Des alertes de consommation seront configurées afin de suivre le budget.
@@ -414,7 +429,8 @@ Des alertes de consommation seront configurées afin de suivre le budget.
 - Définir une alerte à 50 % du budget.
 - Définir une alerte à 80 % du budget.
 - Définir une alerte à 100 % du budget.
-- Arrêter les instances hors créneaux pédagogiques.
+- Redimensionner les Workers hors créneaux pédagogiques.
+- Arrêter les instances pendant les longues périodes d'inactivité.
 - Supprimer les volumes inutilisés.
 - Nettoyer régulièrement les répertoires temporaires HDFS.
 
@@ -428,7 +444,7 @@ Des alertes de consommation seront configurées afin de suivre le budget.
 
 Cette estimation prend en compte :
 
-- 6 machines virtuelles allumées en permanence ;
+- 8 machines virtuelles allumées en permanence ;
 - les volumes Block Storage attachés ;
 - le stockage HDFS provisionné ;
 - une marge technique pour les IP, snapshots éventuels et trafic.
@@ -437,24 +453,40 @@ Cette estimation prend en compte :
 
 | Poste | Estimation mensuelle HT |
 |-------|------------------------:|
-| Bastion / Ansible | ~25 € |
-| Gateway étudiants | ~60 € |
-| Hadoop Master | ~160 € |
-| Worker 1 | ~180 € |
-| Worker 2 | ~180 € |
-| Worker 3 | ~180 € |
-| Block Storage HDFS et métadonnées | ~140 € |
+| Bastion / Ansible | ~21 € |
+| Gateway étudiants | ~39 € |
+| Hadoop Master | ~223 € |
+| Workers Hadoop x5 | ~2 418 € |
 | Object Storage sauvegarde | ~4 € |
-| Réserve technique | ~20 € |
-| **Total indicatif si tout reste allumé** | **~949 € HT / mois** |
+| Réserve technique | ~100 € |
+| **Total indicatif si tout reste allumé** | **~2 531 € HT / mois** |
+
+## Estimation avec redimensionnement 75 % du temps
+
+Hypothèse :
+
+- 25 % du temps : Workers en mode TP actif, avec 16 vCPU et 32 Go RAM par Worker ;
+- 75 % du temps : Workers en mode réduit, avec 4 vCPU et 8 Go RAM par Worker ;
+- les volumes Block Storage restent conservés et facturés pendant toute la période.
+
+| Poste | Estimation mensuelle HT |
+|-------|------------------------:|
+| Bastion / Ansible | ~21 € |
+| Gateway étudiants | ~39 € |
+| Hadoop Master | ~223 € |
+| Workers Hadoop x5, 25 % en mode TP actif | ~536 € |
+| Workers Hadoop x5, 75 % en mode réduit | ~647 € |
+| Object Storage sauvegarde | ~4 € |
+| Réserve technique | ~100 € |
+| **Total indicatif avec redimensionnement** | **~1 570 € HT / mois** |
 
 ## Comparaison
 
 | Mode d'utilisation | Coût mensuel estimé HT |
 |--------------------|-----------------------:|
-| Utilisation pédagogique avec arrêt automatique | ~264 € HT |
-| Budget plafond recommandé | 300 € HT |
-| Fonctionnement continu 24h/24 | ~949 € HT |
+| Utilisation pédagogique avec Workers réduits 75 % du temps | ~1 570 € HT |
+| Budget plafond recommandé | 1 800 € HT |
+| Fonctionnement continu 24h/24 | ~2 531 € HT |
 
 ## Conclusion
 
@@ -462,11 +494,12 @@ Pour maîtriser les coûts, il est indispensable de mettre en place :
 
 - l'arrêt automatique des machines après les séances ;
 - le démarrage automatique avant les TP ;
+- le redimensionnement automatique des Workers en mode réduit hors TP ;
 - des alertes de facturation Scaleway ;
 - une supervision régulière des volumes non utilisés ;
 - une suppression des ressources inutiles après le module.
 
-Le fonctionnement continu peut multiplier le coût mensuel par **3 à 4** par rapport à une utilisation pédagogique maîtrisée.
+Le fonctionnement continu peut augmenter fortement le coût mensuel par rapport à une utilisation pédagogique maîtrisée. Pour ce dimensionnement, l'écart estimé est d'environ **960 € HT par mois** entre des Workers toujours en mode TP actif et des Workers réduits 75 % du temps.
 
 ---
 
@@ -478,22 +511,22 @@ Le fonctionnement continu peut multiplier le coût mensuel par **3 à 4** par ra
 1 Bastion / Ansible
 1 Gateway étudiants
 1 Hadoop Master
-3 Workers Hadoop
+5 Workers Hadoop
 ```
 
 ## Stockage
 
 ```text
-1,5 To HDFS brut
-~500 Go HDFS utiles avec réplication x3
+3 To HDFS brut
+~1 To HDFS utile avec réplication x3
 5 Go HDFS par étudiant
 ```
 
 ## Étudiants
 
 ```text
-30 comptes Linux
-30 espaces HDFS
+160 comptes Linux
+160 espaces HDFS
 1 queue YARN partagée
 quotas HDFS
 limites Linux
@@ -545,7 +578,7 @@ https://docs.ansible.com/projects/ansible/latest/collections/community/general/d
 
 # Conclusion
 
-Cette architecture permet de fournir aux 30 étudiants une véritable expérience cloud Hadoop tout en gardant un budget maîtrisé.
+Cette architecture permet de fournir aux 160 étudiants une véritable expérience cloud Hadoop tout en gardant un budget maîtrisé.
 
 Le choix d'un cluster partagé avec quotas HDFS, file YARN dédiée et accès via Gateway permet de :
 

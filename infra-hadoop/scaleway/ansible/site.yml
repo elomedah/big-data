@@ -8,6 +8,8 @@
 - name: Prepare Hadoop data volumes
   hosts: masters:workers
   become: true
+  tags:
+    - storage
   roles:
     - storage
 

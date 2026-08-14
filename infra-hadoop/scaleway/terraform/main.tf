@@ -1,6 +1,8 @@
 locals {
+  worker_commercial_type = var.worker_mode == "active" ? var.worker_active_commercial_type : var.worker_reduced_commercial_type
+
   server_profiles = {
-    tiny = {
+    tiny = merge({
       bastion = {
         commercial_type = "DEV1-S"
         root_size_gb    = 20
@@ -22,30 +24,17 @@ locals {
         public          = false
         role            = "master"
       }
-      worker-1 = {
+    }, {
+      for i in range(1, var.tiny_worker_count + 1) : "worker-${i}" => {
         commercial_type = "DEV1-S"
         root_size_gb    = 20
         data_size_gb    = 20
         public          = false
         role            = "worker"
       }
-      worker-2 = {
-        commercial_type = "DEV1-S"
-        root_size_gb    = 20
-        data_size_gb    = 20
-        public          = false
-        role            = "worker"
-      }
-      worker-3 = {
-        commercial_type = "DEV1-S"
-        root_size_gb    = 20
-        data_size_gb    = 20
-        public          = false
-        role            = "worker"
-      }
-    }
+    })
 
-    large = {
+    large = merge({
       bastion = {
         commercial_type = "DEV1-M"
         root_size_gb    = 40
@@ -62,33 +51,20 @@ locals {
       }
       master = {
         commercial_type = "DEV1-XL"
-        root_size_gb    = 100
-        data_size_gb    = 100
+        root_size_gb    = 200
+        data_size_gb    = 500
         public          = false
         role            = "master"
       }
-      worker-1 = {
-        commercial_type = "DEV1-XL"
-        root_size_gb    = 80
-        data_size_gb    = 500
+    }, {
+      for i in range(1, var.large_worker_count + 1) : "worker-${i}" => {
+        commercial_type = local.worker_commercial_type
+        root_size_gb    = 100
+        data_size_gb    = var.large_worker_data_size_gb
         public          = false
         role            = "worker"
       }
-      worker-2 = {
-        commercial_type = "DEV1-XL"
-        root_size_gb    = 80
-        data_size_gb    = 500
-        public          = false
-        role            = "worker"
-      }
-      worker-3 = {
-        commercial_type = "DEV1-XL"
-        root_size_gb    = 80
-        data_size_gb    = 500
-        public          = false
-        role            = "worker"
-      }
-    }
+    })
   }
 
   servers = local.server_profiles[var.cluster_size]
@@ -113,14 +89,13 @@ locals {
   gateway_cidrs = length(var.student_ssh_cidrs) > 0 ? var.student_ssh_cidrs : [var.teacher_ssh_cidr]
   gateway_web_ports = concat([9870, 8088, 19888, 18080, 10002, 16010, 16030, 16031, 16032, 9864, 9865, 9866, 8042, 8043, 8044], range(4040, 4051))
 
-  private_ip_offsets = {
+  private_ip_offsets = merge({
     bastion  = 10
     gateway  = 11
     master   = 12
-    worker-1 = 21
-    worker-2 = 22
-    worker-3 = 23
-  }
+  }, {
+    for i in range(1, max(var.tiny_worker_count, var.large_worker_count) + 1) : "worker-${i}" => 20 + i
+  })
 }
 
 resource "scaleway_vpc_private_network" "hadoop" {
@@ -205,6 +180,10 @@ resource "scaleway_block_volume" "data" {
   zone       = var.zone
   iops       = 5000
   size_in_gb = each.value.data_size_gb
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "scaleway_ipam_ip" "private" {

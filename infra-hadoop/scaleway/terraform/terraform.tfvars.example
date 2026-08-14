@@ -15,3 +15,20 @@ student_web_cidrs         = ["0.0.0.0/0"]
 # - tiny: test cluster, all data volumes <= 20 GB, very small instances.
 # - large: teaching cluster, preserves the sizing from scaleway-cluster.md.
 cluster_size = "tiny"
+
+# Worker counts:
+# tiny_worker_count  = 3
+# large_worker_count = 5
+
+# Worker compute mode:
+# - active: full worker resources during TP sessions.
+# - reduced: smaller worker instances outside TP sessions.
+# Data volumes are kept separately and protected from accidental deletion.
+# worker_mode = "active"
+# worker_active_commercial_type  = "DEV1-XL"
+# worker_reduced_commercial_type = "DEV1-L"
+
+# HDFS data disk size per worker for the large profile.
+# large_worker_count x large_worker_data_size_gb = raw HDFS capacity.
+# Increase this value progressively as student needs grow.
+# large_worker_data_size_gb = 100

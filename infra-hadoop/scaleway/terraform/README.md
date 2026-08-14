@@ -6,7 +6,8 @@ This Terraform project creates the Scaleway infrastructure described in
 - 1 public bastion for administration.
 - 1 public student gateway.
 - 1 private Hadoop master.
-- 3 private Hadoop workers.
+- Private Hadoop workers. The default is 3 workers in the `tiny` profile and
+  5 workers in the `large` teaching profile.
 - A private network.
 - Reserved private IPs through Scaleway IPAM.
 - Optional public IPs on private nodes for outbound internet during
@@ -203,6 +204,144 @@ For the full teaching cluster:
 cluster_size = "large"
 ```
 
+The number of workers is configurable per profile:
+
+```hcl
+tiny_worker_count  = 3
+large_worker_count = 5
+```
+
+## Worker active and reduced modes
+
+The `worker_mode` variable changes only the compute profile used by Hadoop
+workers. It is intended for the pedagogical cost model where workers run with
+full resources during TP sessions, about 25% of the time, and smaller resources
+outside TP sessions, about 75% of the time.
+
+```hcl
+cluster_size = "large"
+worker_mode  = "active"
+```
+
+Outside TP sessions:
+
+```hcl
+cluster_size = "large"
+worker_mode  = "reduced"
+```
+
+The default instance type variables are:
+
+```hcl
+worker_active_commercial_type  = "DEV1-XL"
+worker_reduced_commercial_type = "DEV1-L"
+```
+
+Adjust these values to the exact Scaleway offers validated in the quote. The
+HDFS data volumes are separate `scaleway_block_volume` resources, so changing
+`worker_mode` does not change their declared size.
+
+## Worker HDFS disk size
+
+For the `large` profile, the HDFS data disk size attached to each worker is
+configurable:
+
+```hcl
+large_worker_data_size_gb = 100
+```
+
+With the default 5 large workers, this gives:
+
+```text
+5 x 100 GB = 500 GB raw HDFS capacity
+```
+
+You can increase this value later to grow the attached Block Storage volumes.
+Do not decrease it for an existing cluster: shrinking a filesystem/HDFS data
+volume is not a safe operation and can lead to data loss.
+
+Example: increase workers from 100 GB to 200 GB each.
+
+```hcl
+cluster_size = "large"
+large_worker_data_size_gb = 200
+```
+
+Apply the Terraform change:
+
+```bash
+terraform plan
+terraform apply
+```
+
+After Scaleway has increased the Block Storage volumes, rerun the Ansible
+storage role. It is configured to resize the existing ext4 filesystem
+idempotently.
+
+```bash
+cd ../ansible
+ansible-playbook site.yml --tags storage
+```
+
+Then verify HDFS and rebalance if needed:
+
+```bash
+hdfs dfsadmin -report
+hdfs balancer
+```
+
+Recommended workflow:
+
+```bash
+# Before TP
+terraform apply -var='cluster_size=large' -var='worker_mode=active'
+
+# After TP
+terraform apply -var='cluster_size=large' -var='worker_mode=reduced'
+```
+
+Stop Hadoop/YARN cleanly before reducing workers, then rerun the Ansible
+playbook if the VM replacement changes the operating system state.
+
+## Final teardown
+
+At the end of the module, Terraform can destroy the full infrastructure,
+including VMs, public IPs, private network resources, security groups and Block
+Storage data volumes.
+
+This permanently deletes HDFS data.
+
+Data volumes are protected by default with `prevent_destroy = true` in
+`main.tf`. Terraform does not allow `prevent_destroy` to be controlled by a
+variable, so final deletion requires an explicit code change.
+
+Before destroying the infrastructure, stop the Hadoop services cleanly if the
+cluster is still running:
+
+```bash
+cd ../ansible
+ansible hadoop -b -m shell -a "systemctl stop hbase-regionserver hbase-master hbase-zookeeper spark-historyserver hive-server2 hive-metastore hadoop-historyserver hadoop-nodemanager hadoop-resourcemanager hadoop-datanode hadoop-namenode 2>/dev/null || true"
+```
+
+Then remove the protection block from `scaleway_block_volume.data` in `main.tf`:
+
+```hcl
+lifecycle {
+  prevent_destroy = true
+}
+```
+
+Finally, destroy the Scaleway infrastructure from the Terraform directory:
+
+```bash
+cd ../terraform
+terraform plan -destroy
+terraform destroy
+```
+
+After the command completes, verify in the Scaleway console that no unexpected
+instances, Block Storage volumes, snapshots or public IPs remain.
+
 ## Notes
 
 - `teacher_ssh_cidr = "0.0.0.0/0"` and `student_ssh_cidrs = ["0.0.0.0/0"]`
@@ -218,6 +357,10 @@ cluster_size = "large"
   gateway public IP. It defaults to `["0.0.0.0/0"]` for tests and includes
   NameNode `9870`, YARN ResourceManager `8088`, HistoryServer `19888`,
   DataNode `9864-9866`, and NodeManager `8042-8044`.
-- Data disks are attached to the master and workers. The Ansible storage role
-  defaults to `/dev/vdb`; override `hadoop_data_device` if Scaleway exposes a
-  different device path.
+- Data disks are attached to the master and workers as separate Block Storage
+  volumes. They survive worker compute resizing and are protected by default
+  with `prevent_destroy = true`. Terraform lifecycle settings cannot be driven
+  by variables, so intentional final deletion requires removing that lifecycle
+  block before running `terraform destroy`.
+- The Ansible storage role defaults to `/dev/vdb`; override
+  `hadoop_data_device` if Scaleway exposes a different device path.

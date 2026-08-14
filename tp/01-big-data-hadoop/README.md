@@ -159,39 +159,7 @@ Remplacez aussi :
 
 par l’adresse IP publique du gateway.
 
-## Exercice 1 - Analyser le besoin Big Data
-
-Répondez aux questions suivantes en argumentant vos réponses.
-
-1. Les 5V du Big Data sont souvent présentés comme une définition générale. En quoi cette grille d’analyse peut-elle être insuffisante pour décider si une architecture Big Data est réellement nécessaire ?
-2. Pour une entreprise financière qui conserve plusieurs années de logs techniques, quels critères permettent de décider entre une base relationnelle classique, un stockage objet, un cluster Hadoop ou une architecture hybride ?
-3. Expliquez pourquoi le volume de données n’est pas le seul facteur de complexité. Discutez aussi la variété, la vélocité, la qualité des données, la gouvernance et les exigences réglementaires.
-4. Dans quels cas le scale up peut-il rester pertinent malgré les avantages du scale out ?
-5. Quels compromis introduit une architecture distribuée en matière de coût, de performance, d’exploitation, de sécurité et de tolérance aux pannes ?
-
-## Exercice 2 - Situer Hadoop dans une architecture de données
-
-Les outils suivants seront utilisés ou étudiés dans le module.
-
-```text
-HDFS
-YARN
-MapReduce
-Spark
-Hive
-HBase
-```
-
-Pour chaque outil, indiquez son rôle général, puis répondez aux questions de réflexion.
-
-1. Pourquoi Hadoop sépare-t-il le stockage, la gestion des ressources et les moteurs de traitement ?
-2. Quelle différence faites-vous entre un système de fichiers distribué, un moteur de calcul distribué et une base NoSQL distribuée ?
-3. Pourquoi MapReduce reste-t-il intéressant à étudier alors que Spark est souvent préféré en production ?
-4. Hive permet d’interroger des données avec une syntaxe proche du SQL. Quels avantages et quelles limites cela introduit-il pour des équipes habituées aux bases relationnelles ?
-5. HBase permet un accès NoSQL par clé. Dans quels cas ce modèle est-il plus adapté qu’une table Hive ou qu’un fichier dans HDFS ?
-6. Proposez une architecture logique simple indiquant où vous placeriez HDFS, YARN, Spark, Hive et HBase dans une plateforme de stockage à froid.
-
-## Exercice 3 - Générer votre clé SSH
+## Exercice 1 - Générer votre clé SSH
 
 Chaque étudiant doit générer sa propre clé SSH sur son ordinateur.
 
@@ -225,7 +193,7 @@ Questions de réflexion :
 3. Pourquoi le commentaire placé à la fin de la clé, par exemple `jean.dupont`, est-il utile pour l’administration ?
 4. Que faudrait-il prévoir dans une organisation réelle lorsqu’un collaborateur quitte un projet ou perd sa clé privée ?
 
-## Exercice 4 - Transmettre votre clé publique
+## Exercice 2 - Transmettre votre clé publique
 
 Affichez votre clé publique.
 
@@ -241,7 +209,7 @@ Elle doit ressembler à ceci :
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... identifiant
 ```
 
-## Exercice 5 - Connexion au gateway Hadoop
+## Exercice 3 - Connexion au gateway Hadoop
 
 Une fois votre clé publique installée par l’enseignant, connectez-vous au gateway.
 
@@ -271,7 +239,7 @@ Questions de réflexion :
 4. Dans une architecture de production, quels mécanismes complémentaires pourraient renforcer ce point d’entrée ?
 5. Expliquez la différence entre accéder à un cluster pour l’administrer et accéder à un cluster pour soumettre des traitements.
 
-## Exercice 6 - Charger l’environnement de travail
+## Exercice 4 - Charger l’environnement de travail
 
 Chargez les variables d’environnement disponibles sur le gateway.
 
@@ -298,7 +266,7 @@ Questions de réflexion :
 3. Quels problèmes peuvent apparaître si deux versions différentes de Spark, Hive ou Hadoop sont présentes sur la même machine ?
 4. Pourquoi la reproductibilité de l’environnement est-elle importante dans un contexte data engineering ?
 
-## Exercice 7 - Découverte des interfaces Web
+## Exercice 5 - Découverte des interfaces Web
 
 Ouvrez les interfaces suivantes dans votre navigateur.
 
@@ -320,7 +288,7 @@ Questions de réflexion :
 5. Quelles différences faites-vous entre monitoring, observabilité et audit ?
 6. En cas d’incident sur un traitement distribué, quelles interfaces consulteriez-vous en premier et pourquoi ?
 
-## Exercice 8 - Préparer le projet fil rouge
+## Exercice 6 - Préparer le projet fil rouge
 
 Le projet du module porte sur une plateforme de stockage à froid destinée à conserver plusieurs années de logs techniques dans un contexte inspiré du règlement DORA.
 
@@ -334,6 +302,16 @@ Répondez aux questions suivantes en vous plaçant dans le rôle d’une équipe
 6. Comment arbitrer entre coût de stockage, performance d’accès, sécurité et durée de conservation ?
 7. Quels indicateurs permettraient de démontrer que la plateforme est fiable et exploitable ?
 8. Quelles limites voyez-vous à l’utilisation d’un cluster Hadoop pour ce type de besoin par rapport à des solutions cloud managées ?
+
+## Exercice 7 - Analyser le besoin Big Data
+
+Répondez aux questions suivantes en argumentant vos réponses.
+
+1. Les 5V du Big Data sont souvent présentés comme une définition générale. En quoi cette grille d’analyse peut-elle être insuffisante pour décider si une architecture Big Data est réellement nécessaire ?
+2. Pour une entreprise financière qui conserve plusieurs années de logs techniques, quels critères permettent de décider entre une base relationnelle classique, un stockage objet, un cluster Hadoop ou une architecture hybride ?
+3. Expliquez pourquoi le volume de données n’est pas le seul facteur de complexité. Discutez aussi la variété, la vélocité, la qualité des données, la gouvernance et les exigences réglementaires.
+4. Dans quels cas le scale up peut-il rester pertinent malgré les avantages du scale out ?
+5. Quels compromis introduit une architecture distribuée en matière de coût, de performance, d’exploitation, de sécurité et de tolérance aux pannes ?
 
 ## À retenir
 

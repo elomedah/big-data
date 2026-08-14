@@ -51,8 +51,8 @@ locals {
       }
       master = {
         commercial_type = "DEV1-XL"
-        root_size_gb    = 200
-        data_size_gb    = 500
+        root_size_gb    = 100
+        data_size_gb    = 100
         public          = false
         role            = "master"
       }

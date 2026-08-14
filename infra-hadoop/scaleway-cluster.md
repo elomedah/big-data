@@ -24,7 +24,7 @@ L'objectif est également de :
 
 ## Budget maximum
 
-**1 800 € HT / mois**
+**1 700 € HT / mois**
 
 Ce budget suppose que les machines virtuelles sont démarrées uniquement pendant :
 
@@ -38,13 +38,13 @@ Les instances seront arrêtées automatiquement en dehors des créneaux pédagog
 
 | Poste | Budget estimé |
 |-------|--------------:|
-| Bastion, Gateway et Hadoop Master | 282 € |
+| Bastion, Gateway et Hadoop Master | 222 € |
 | Workers Hadoop x5 avec redimensionnement 75 % du temps | 1 183 € |
 | Object Storage sauvegarde (~500 Go) | 4 € |
 | Réserve technique (IP, snapshots, marge) | 100 € |
-| **Total estimé en fonctionnement continu** | **~2 531 € HT** |
-| **Total estimé avec redimensionnement 75 % du temps** | **~1 570 € HT** |
-| **Budget plafond recommandé** | **1 800 € HT** |
+| **Total estimé en fonctionnement continu** | **~2 471 € HT** |
+| **Total estimé avec redimensionnement 75 % du temps** | **~1 510 € HT** |
+| **Budget plafond recommandé** | **1 700 € HT** |
 
 > Le budget exact dépendra du type d'instances Scaleway choisi, de la région, de la durée réelle d'utilisation et du volume de stockage provisionné. Les machines doivent être arrêtées automatiquement hors séance pour rester dans le budget.
 
@@ -76,7 +76,7 @@ Les instances seront arrêtées automatiquement en dehors des créneaux pédagog
 |--------|-------:|------|----:|----:|---------------:|---------------:|--------------|
 | Bastion / Ansible | 1 | Administration, Terraform, Ansible | 2 vCPU | 4 Go | 40 Go | Aucun | Oui, IP enseignant uniquement |
 | Gateway étudiants | 1 | Connexion SSH des étudiants, clients Hadoop/Hive/HBase | 4 vCPU | 8 Go | 80 Go | Aucun | Oui, SSH étudiants uniquement |
-| Hadoop Master | 1 | NameNode, ResourceManager, JobHistory Server, Hive Metastore | 8 vCPU | 32 Go | 200 Go | 500 Go | Non |
+| Hadoop Master | 1 | NameNode, ResourceManager, JobHistory Server, Hive Metastore | 8 vCPU | 32 Go | 100 Go | 100 Go | Non |
 | Workers Hadoop | 5 | DataNode, NodeManager | 16 vCPU par worker | 32 Go par worker | 100 Go par worker | 600 Go par worker | Non |
 
 ## Capacité globale
@@ -171,8 +171,8 @@ Configuration recommandée :
 ```text
 8 vCPU
 32 Go RAM
-200 Go disque système
-500 Go disque données / métadonnées
+100 Go disque système
+100 Go disque données / métadonnées
 ```
 
 Justification :
@@ -455,11 +455,11 @@ Cette estimation prend en compte :
 |-------|------------------------:|
 | Bastion / Ansible | ~21 € |
 | Gateway étudiants | ~39 € |
-| Hadoop Master | ~223 € |
+| Hadoop Master | ~163 € |
 | Workers Hadoop x5 | ~2 418 € |
 | Object Storage sauvegarde | ~4 € |
 | Réserve technique | ~100 € |
-| **Total indicatif si tout reste allumé** | **~2 531 € HT / mois** |
+| **Total indicatif si tout reste allumé** | **~2 471 € HT / mois** |
 
 ## Estimation avec redimensionnement 75 % du temps
 
@@ -473,20 +473,20 @@ Hypothèse :
 |-------|------------------------:|
 | Bastion / Ansible | ~21 € |
 | Gateway étudiants | ~39 € |
-| Hadoop Master | ~223 € |
+| Hadoop Master | ~163 € |
 | Workers Hadoop x5, 25 % en mode TP actif | ~536 € |
 | Workers Hadoop x5, 75 % en mode réduit | ~647 € |
 | Object Storage sauvegarde | ~4 € |
 | Réserve technique | ~100 € |
-| **Total indicatif avec redimensionnement** | **~1 570 € HT / mois** |
+| **Total indicatif avec redimensionnement** | **~1 510 € HT / mois** |
 
 ## Comparaison
 
 | Mode d'utilisation | Coût mensuel estimé HT |
 |--------------------|-----------------------:|
-| Utilisation pédagogique avec Workers réduits 75 % du temps | ~1 570 € HT |
-| Budget plafond recommandé | 1 800 € HT |
-| Fonctionnement continu 24h/24 | ~2 531 € HT |
+| Utilisation pédagogique avec Workers réduits 75 % du temps | ~1 510 € HT |
+| Budget plafond recommandé | 1 700 € HT |
+| Fonctionnement continu 24h/24 | ~2 471 € HT |
 
 ## Conclusion
 

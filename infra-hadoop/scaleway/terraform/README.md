@@ -62,6 +62,9 @@ ansible --version
 ssh -V
 ```
 
+Terraform `>= 1.10.0` is required because the Scaleway Object Storage backend
+uses native S3 lock files with `use_lockfile = true`.
+
 Terraform creates the Scaleway infrastructure. Ansible then connects to the
 servers over SSH and installs Hadoop.
 
@@ -110,15 +113,123 @@ Then set the matching public key path:
 admin_ssh_public_key_path = "~/.ssh/my-scaleway-key.pub"
 ```
 
+## Remote Terraform state
+
+This project stores Terraform state in Scaleway Object Storage through the
+Terraform `s3` backend. Native S3 lock files are enabled with
+`use_lockfile = true`, so concurrent `terraform apply` runs do not corrupt the
+state.
+
+The backend is defined in:
+
+```text
+backend.tf
+```
+
+The bucket name is intentionally not committed because Object Storage bucket
+names must be globally unique. Create a local backend config from the example:
+
+```bash
+cp backend.hcl.example backend.hcl
+```
+
+Edit `backend.hcl`:
+
+```hcl
+bucket = "m2-hadoop-terraform-state-your-unique-suffix"
+```
+
+Create the bucket in Scaleway Object Storage before running `terraform init`.
+You can do it from the Scaleway console, or with an S3-compatible CLI.
+
+Install AWS CLI on Ubuntu/WSL:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y unzip curl
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+  -o "awscliv2.zip"
+
+unzip awscliv2.zip
+sudo ./aws/install
+
+aws --version
+```
+
+Then configure AWS-compatible environment variables for Scaleway Object
+Storage:
+
+```bash
+export AWS_ACCESS_KEY_ID="$SCW_ACCESS_KEY"
+export AWS_SECRET_ACCESS_KEY="$SCW_SECRET_KEY"
+export AWS_DEFAULT_REGION="fr-par"
+```
+
+Create the bucket:
+
+```bash
+aws --endpoint-url https://s3.fr-par.scw.cloud \
+  s3api create-bucket \
+  --bucket m2-hadoop-terraform-state-your-unique-suffix \
+  --region fr-par
+```
+
+Enable bucket versioning so an older state can be recovered after a bad write
+or accidental deletion:
+
+```bash
+aws --endpoint-url https://s3.fr-par.scw.cloud \
+  s3api put-bucket-versioning \
+  --bucket m2-hadoop-terraform-state-your-unique-suffix \
+  --versioning-configuration Status=Enabled
+```
+
+Initialize Terraform with the remote backend:
+
+```bash
+terraform init -backend-config=backend.hcl
+```
+
+If you already have a local `terraform.tfstate`, migrate it to Scaleway Object
+Storage:
+
+```bash
+terraform init -backend-config=backend.hcl -migrate-state
+```
+
+After migration, run:
+
+```bash
+terraform plan
+```
+
+Review the plan carefully. Terraform should not try to recreate the existing
+cluster just because the state was moved.
+
+Do not commit these local files:
+
+```text
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+backend.hcl
+.terraform/
+```
+
 ## Usage
 
 ```bash
 export SCW_ACCESS_KEY="..."
 export SCW_SECRET_KEY="..."
 export SCW_DEFAULT_PROJECT_ID="..."
+export AWS_ACCESS_KEY_ID="$SCW_ACCESS_KEY"
+export AWS_SECRET_ACCESS_KEY="$SCW_SECRET_KEY"
+export AWS_DEFAULT_REGION="fr-par"
 
 cp terraform.tfvars.example terraform.tfvars
-terraform init
+cp backend.hcl.example backend.hcl
+terraform init -backend-config=backend.hcl
 terraform plan
 terraform apply
 terraform output -raw ansible_inventory > ../ansible/inventory.ini
@@ -152,6 +263,7 @@ terraform/.terraform
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 terraform/terraform.tfvars
+terraform/backend.hcl
 ```
 
 It also installs the bastion inventory as:
@@ -318,6 +430,14 @@ cluster_size = "large"
 large_worker_data_size_gb = 200
 ```
 
+Before running `terraform plan` or `terraform apply` for a VM resize, stop the
+cluster services with Ansible:
+
+```bash
+cd infra-hadoop/scaleway/ansible
+ansible-playbook stop-services.yml
+```
+
 Apply the Terraform change:
 
 ```bash
@@ -330,8 +450,13 @@ storage role. It is configured to resize the existing ext4 filesystem
 idempotently.
 
 ```bash
-cd ../ansible
+cd infra-hadoop/scaleway/ansible
 ansible-playbook site.yml --tags storage
+```
+
+```bash
+cd infra-hadoop/scaleway/ansible
+ansible-playbook start-services.yml
 ```
 
 Then verify HDFS and rebalance if needed:

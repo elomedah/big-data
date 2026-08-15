@@ -35,6 +35,7 @@ tar \
   --exclude="terraform/terraform.tfstate" \
   --exclude="terraform/terraform.tfstate.backup" \
   --exclude="terraform/terraform.tfvars" \
+  --exclude="terraform/backend.hcl" \
   -C "$SCALEWAY_DIR" \
   -czf - . | ssh -i "$KEY_PATH" "${SSH_USER}@${BASTION_IP}" \
   "mkdir -p '$REMOTE_PROJECT_DIR' && tar -xzf - -C '$REMOTE_PROJECT_DIR' && cp '$REMOTE_PROJECT_DIR/ansible/inventory-bastion.ini' '$REMOTE_PROJECT_DIR/ansible/inventory.ini'"

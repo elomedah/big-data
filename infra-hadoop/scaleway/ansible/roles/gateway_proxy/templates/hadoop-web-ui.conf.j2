@@ -103,26 +103,6 @@ server {
     }
 }
 
-{% for port in range(4040, 4051) %}
-server {
-    listen 0.0.0.0:{{ port }};
-    server_name _;
-    location / {
-        proxy_pass http://127.0.0.1:{{ port }};
-        proxy_set_header Accept-Encoding "";
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-Host $http_host;
-        proxy_set_header X-Forwarded-Port $server_port;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        sub_filter_once off;
-        sub_filter_types text/html text/plain application/json;
-        sub_filter 'http://localhost:{{ port }}' 'http://$http_host';
-        sub_filter 'localhost:{{ port }}' '$http_host';
-    }
-}
-{% endfor %}
-
 server {
     listen 0.0.0.0:19888;
     server_name _;

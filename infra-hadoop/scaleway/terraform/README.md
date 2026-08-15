@@ -366,9 +366,11 @@ instances, Block Storage volumes, snapshots or public IPs remain.
   still blocks public inbound access.
 - `student_web_cidrs` controls who can access Hadoop web UIs through the
   gateway public IP. It defaults to `["0.0.0.0/0"]` for tests and includes
-  NameNode `9870`, YARN ResourceManager `8088`, HistoryServer `19888`,
-  Spark `4040-4050`, and per-worker DataNode, NodeManager and HBase
-  RegionServer ports derived from the configured worker count.
+  NameNode `9870`, YARN ResourceManager `8088`, HistoryServer `19888`, and
+  per-worker DataNode, NodeManager and HBase RegionServer ports derived from
+  the configured worker count. Spark application UIs on `4040-4050` are not
+  proxied because those ports are ephemeral and may be owned directly by Spark
+  drivers on the gateway.
 - Data disks are attached to the master and workers as separate Block Storage
   volumes. They survive worker compute resizing and are protected by default
   with `prevent_destroy = true`. Terraform lifecycle settings cannot be driven

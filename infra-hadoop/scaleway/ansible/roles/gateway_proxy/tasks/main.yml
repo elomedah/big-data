@@ -41,7 +41,7 @@
 
 - name: Build gateway web UI listening port list
   ansible.builtin.set_fact:
-    gateway_web_ui_ports: "{{ [9870, 8088, 19888, 18080, 10002, 16010] + (range(4040, 4051) | list) }}"
+    gateway_web_ui_ports: "{{ [9870, 8088, 19888, 18080, 10002, 16010] }}"
 
 - name: Add worker web UI listening ports
   ansible.builtin.set_fact:
@@ -50,7 +50,7 @@
 
 - name: Check gateway web UI listening ports
   ansible.builtin.wait_for:
-    host: 0.0.0.0
+    host: 127.0.0.1
     port: "{{ item }}"
     timeout: 5
   loop: "{{ gateway_web_ui_ports }}"

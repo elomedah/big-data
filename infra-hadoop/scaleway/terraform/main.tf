@@ -90,7 +90,6 @@ locals {
   max_worker_count = max(var.tiny_worker_count, var.large_worker_count)
   gateway_web_ports = concat(
     [9870, 8088, 19888, 18080, 10002, 16010],
-    range(4040, 4051),
     [for i in range(local.max_worker_count) : 9864 + i],
     [for i in range(local.max_worker_count) : 8042 + i],
     [for i in range(local.max_worker_count) : 16030 + i],

@@ -30,7 +30,7 @@ cluster_size = "tiny"
 
 # For the large teaching cluster, override the same variables with the quoted
 # Scaleway instance types, for example:
-# worker_active_commercial_type  = "DEV1-XL"
+# worker_active_commercial_type  = "BASIC3-X16C-32G"
 # worker_reduced_commercial_type = "DEV1-L"
 
 # HDFS data disk size per worker for the large profile.

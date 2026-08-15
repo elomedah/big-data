@@ -19,11 +19,18 @@ running.
 In Terraform, CPU and RAM are not configured directly as numeric values. They
 are controlled by the Scaleway instance type, called `commercial_type`.
 
-Examples:
+Default low-cost example:
 
 ```hcl
 worker_active_commercial_type  = "DEV1-S"
 worker_reduced_commercial_type = "DEV1-S"
+```
+
+Recommended teaching example when a worker must provide 16 vCPU during TP:
+
+```hcl
+worker_active_commercial_type  = "BASIC3-X16C-32G"
+worker_reduced_commercial_type = "DEV1-L"
 ```
 
 Check the Scaleway quote or console for the exact CPU/RAM attached to each
@@ -31,7 +38,7 @@ instance type before changing these values.
 
 ## DEV1 quick reference
 
-The current Terraform examples use the DEV1 family by default:
+The tiny and reduced examples use the DEV1 family to keep costs low:
 
 | Type | vCPU | RAM |
 | --- | ---: | ---: |
@@ -41,6 +48,19 @@ The current Terraform examples use the DEV1 family by default:
 | `DEV1-XL` | 4 vCPU | 12 GiB |
 
 Source: Scaleway Instances datasheet.
+
+## 16 vCPU worker reference
+
+The syllabus requires one node with 16 vCPU. The DEV1 family cannot provide
+that size because `DEV1-XL` has only 4 vCPU. For the active TP worker profile,
+use a larger Scaleway instance type, for example:
+
+| Type | vCPU | RAM | Usage |
+| --- | ---: | ---: | --- |
+| `BASIC3-X16C-32G` | 16 vCPU | 32 GiB | Recommended active worker profile for TP |
+
+Keep the reduced mode on a smaller type such as `DEV1-L` when the platform is
+idle or lightly used.
 
 ## Variables to change
 
@@ -88,7 +108,7 @@ Large example for the teaching cluster:
 ```hcl
 cluster_size                   = "large"
 worker_mode                    = "active"
-worker_active_commercial_type  = "DEV1-XL"
+worker_active_commercial_type  = "BASIC3-X16C-32G"
 worker_reduced_commercial_type = "DEV1-L"
 ```
 
@@ -190,7 +210,7 @@ worker_mode  = "reduced"
 If needed, adjust the instance types:
 
 ```hcl
-worker_active_commercial_type  = "DEV1-XL"
+worker_active_commercial_type  = "BASIC3-X16C-32G"
 worker_reduced_commercial_type = "DEV1-L"
 ```
 
@@ -224,7 +244,7 @@ Large active mode:
 terraform apply \
   -var='cluster_size=large' \
   -var='worker_mode=active' \
-  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 ```
 
@@ -234,7 +254,7 @@ Large reduced mode:
 terraform apply \
   -var='cluster_size=large' \
   -var='worker_mode=reduced' \
-  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 ```
 
@@ -248,7 +268,7 @@ cd terraform
 terraform plan \
   -var='cluster_size=large' \
   -var='worker_mode=active' \
-  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 ```
 
@@ -270,7 +290,7 @@ Run this only after the cluster services have been stopped.
 terraform apply \
   -var='cluster_size=large' \
   -var='worker_mode=active' \
-  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 ```
 
@@ -390,7 +410,7 @@ cd ../terraform
 terraform apply \
   -var='cluster_size=large' \
   -var='worker_mode=active' \
-  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 terraform output -raw ansible_inventory > ../ansible/inventory.ini
 
@@ -408,7 +428,7 @@ cd ../terraform
 terraform apply \
   -var='cluster_size=large' \
   -var='worker_mode=reduced' \
-  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 terraform output -raw ansible_inventory > ../ansible/inventory.ini
 

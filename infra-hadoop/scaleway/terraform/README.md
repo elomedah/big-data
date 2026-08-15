@@ -379,7 +379,7 @@ Large active mode for TP sessions:
 terraform apply \
   -var='cluster_size=large' \
   -var='worker_mode=active' \
-  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 ```
 
@@ -389,7 +389,7 @@ Large reduced mode outside TP sessions:
 terraform apply \
   -var='cluster_size=large' \
   -var='worker_mode=reduced' \
-  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 ```
 
@@ -405,9 +405,13 @@ cluster, override the same variables with the exact Scaleway offers validated
 in the quote, for example:
 
 ```hcl
-worker_active_commercial_type  = "DEV1-XL"
+worker_active_commercial_type  = "BASIC3-X16C-32G"
 worker_reduced_commercial_type = "DEV1-L"
 ```
+
+`BASIC3-X16C-32G` is the preferred active worker type when the syllabus
+requires one 16 vCPU node. The DEV1 family is useful for tests and reduced
+mode, but `DEV1-XL` only provides 4 vCPU.
 
 The HDFS data volumes are separate `scaleway_block_volume` resources, so
 changing `worker_mode` does not change their declared size.
@@ -493,14 +497,14 @@ cd ../terraform
 terraform apply \
   -var='cluster_size=large' \
   -var='worker_mode=active' \
-  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 
 # After TP, switch workers to reduced size
 terraform apply \
   -var='cluster_size=large' \
   -var='worker_mode=reduced' \
-  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 
 # Reconfigure and restart services after the resize

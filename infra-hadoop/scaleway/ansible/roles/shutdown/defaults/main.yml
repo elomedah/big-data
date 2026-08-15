@@ -1,0 +1,3 @@
+---
+shutdown_bastion: false
+shutdown_poweroff: true

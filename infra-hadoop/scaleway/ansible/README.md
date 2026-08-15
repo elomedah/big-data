@@ -15,6 +15,8 @@ It installs and configures:
 - Hive Metastore and HiveServer2 on the gateway.
 - Student Linux accounts on the gateway.
 - Student HDFS home directories and quotas.
+- Service stop/start playbooks for maintenance and resize operations.
+- A shutdown playbook to stop services and power off the cluster.
 
 ## Prerequisites
 
@@ -340,3 +342,65 @@ Students connect to the gateway:
 ```bash
 ssh -i ~/.ssh/m2-hadoop-student student01@<gateway_public_ip>
 ```
+
+## Stop And Start Services
+
+Before resizing workers with Terraform, stop the cluster services cleanly:
+
+```bash
+ansible-playbook stop-services.yml
+```
+
+The stop playbook uses this order:
+
+- gateway services: HiveServer2, Hive Metastore, Nginx;
+- worker services: HBase RegionServer, YARN NodeManager, HDFS DataNode;
+- master services: HBase Master, ZooKeeper, Spark History Server, MapReduce
+  History Server, YARN ResourceManager, HDFS NameNode.
+
+After the resize, either rerun the full configuration:
+
+```bash
+ansible-playbook site.yml
+```
+
+or restart only the services:
+
+```bash
+ansible-playbook start-services.yml
+```
+
+The start playbook uses the reverse dependency order: master services first,
+then worker services, then gateway services.
+
+## Shutdown The Cluster
+
+Use the dedicated shutdown playbook to stop Hadoop services cleanly and power
+off the machines.
+
+From `infra-hadoop/scaleway/ansible`:
+
+```bash
+ansible-playbook shutdown.yml
+```
+
+By default, this shuts down:
+
+- the gateway;
+- the workers;
+- the master.
+
+The bastion stays up so you can still reconnect and operate the infrastructure.
+
+To also shut down the bastion, run:
+
+```bash
+ansible-playbook shutdown.yml -e shutdown_bastion=true
+```
+
+If you run Ansible from the bastion itself, this last command will terminate
+your SSH session once the bastion powers off.
+
+After shutdown, verify the instance state in the Scaleway console. Block Storage
+volumes, snapshots, Object Storage and reserved IPs can still generate costs
+while the machines are powered off.

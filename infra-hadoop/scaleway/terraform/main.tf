@@ -87,14 +87,21 @@ locals {
   }
 
   gateway_cidrs = length(var.student_ssh_cidrs) > 0 ? var.student_ssh_cidrs : [var.teacher_ssh_cidr]
-  gateway_web_ports = concat([9870, 8088, 19888, 18080, 10002, 16010, 16030, 16031, 16032, 9864, 9865, 9866, 8042, 8043, 8044], range(4040, 4051))
+  max_worker_count = max(var.tiny_worker_count, var.large_worker_count)
+  gateway_web_ports = concat(
+    [9870, 8088, 19888, 18080, 10002, 16010],
+    range(4040, 4051),
+    [for i in range(local.max_worker_count) : 9864 + i],
+    [for i in range(local.max_worker_count) : 8042 + i],
+    [for i in range(local.max_worker_count) : 16030 + i],
+  )
 
   private_ip_offsets = merge({
     bastion  = 10
     gateway  = 11
     master   = 12
   }, {
-    for i in range(1, max(var.tiny_worker_count, var.large_worker_count) + 1) : "worker-${i}" => 20 + i
+    for i in range(1, local.max_worker_count + 1) : "worker-${i}" => 20 + i
   })
 }
 

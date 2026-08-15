@@ -293,15 +293,26 @@ hdfs balancer
 Recommended workflow:
 
 ```bash
-# Before TP
+# Stop cluster services before any worker compute resize
+cd ../ansible
+ansible-playbook stop-services.yml
+
+# Before TP, switch workers to active size
+cd ../terraform
 terraform apply -var='cluster_size=large' -var='worker_mode=active'
 
-# After TP
+# After TP, switch workers to reduced size
 terraform apply -var='cluster_size=large' -var='worker_mode=reduced'
+
+# Reconfigure and restart services after the resize
+cd ../ansible
+ansible-playbook site.yml
+# Or, if the machines were only resized and are already configured:
+ansible-playbook start-services.yml
 ```
 
-Stop Hadoop/YARN cleanly before reducing workers, then rerun the Ansible
-playbook if the VM replacement changes the operating system state.
+`stop-services.yml` stops Hive, HBase, Spark history, YARN and HDFS services in
+a clean order before Terraform resizes the workers.
 
 ## Final teardown
 
@@ -320,7 +331,7 @@ cluster is still running:
 
 ```bash
 cd ../ansible
-ansible hadoop -b -m shell -a "systemctl stop hbase-regionserver hbase-master hbase-zookeeper spark-historyserver hive-server2 hive-metastore hadoop-historyserver hadoop-nodemanager hadoop-resourcemanager hadoop-datanode hadoop-namenode 2>/dev/null || true"
+ansible-playbook shutdown.yml
 ```
 
 Then remove the protection block from `scaleway_block_volume.data` in `main.tf`:
@@ -356,7 +367,8 @@ instances, Block Storage volumes, snapshots or public IPs remain.
 - `student_web_cidrs` controls who can access Hadoop web UIs through the
   gateway public IP. It defaults to `["0.0.0.0/0"]` for tests and includes
   NameNode `9870`, YARN ResourceManager `8088`, HistoryServer `19888`,
-  DataNode `9864-9866`, and NodeManager `8042-8044`.
+  Spark `4040-4050`, and per-worker DataNode, NodeManager and HBase
+  RegionServer ports derived from the configured worker count.
 - Data disks are attached to the master and workers as separate Block Storage
   volumes. They survive worker compute resizing and are protected by default
   with `prevent_destroy = true`. Terraform lifecycle settings cannot be driven

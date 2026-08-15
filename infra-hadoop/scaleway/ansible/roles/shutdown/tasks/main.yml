@@ -1,0 +1,29 @@
+---
+- name: Build shutdown service list
+  ansible.builtin.set_fact:
+    shutdown_services: >-
+      {{
+        []
+        + (['hive-server2', 'hive-metastore', 'nginx'] if inventory_hostname in groups.get('gateway', []) else [])
+        + (['hbase-regionserver', 'hadoop-nodemanager', 'hadoop-datanode'] if inventory_hostname in groups.get('workers', []) else [])
+        + (['hbase-master', 'hbase-zookeeper', 'spark-historyserver', 'hadoop-historyserver', 'hadoop-resourcemanager', 'hadoop-namenode'] if inventory_hostname in groups.get('masters', []) else [])
+      }}
+
+- name: Stop cluster services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+  loop: "{{ shutdown_services }}"
+  register: stopped_cluster_services
+  failed_when: false
+
+- name: Shutdown host
+  ansible.builtin.shell: "sleep 2 && shutdown -h now"
+  args:
+    executable: /bin/bash
+  async: 1
+  poll: 0
+  changed_when: true
+  when:
+    - shutdown_poweroff | bool
+    - inventory_hostname not in groups.get('bastion', []) or shutdown_bastion | bool

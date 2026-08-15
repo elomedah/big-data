@@ -1,0 +1,9 @@
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export HADOOP_HOME=/opt/hadoop
+export HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+export HADOOP_LOG_DIR=/var/log/hadoop
+export HADOOP_PID_DIR=/data/hadoop/pids
+export HDFS_NAMENODE_USER=hadoop
+export HDFS_DATANODE_USER=hadoop
+export YARN_RESOURCEMANAGER_USER=hadoop
+export YARN_NODEMANAGER_USER=hadoop

@@ -56,5 +56,7 @@ teacher_user: teacher
 
 yarn_students_capacity: 60
 yarn_students_max_capacity: 70
+yarn_nodemanager_resource_memory_mb: 2048
+yarn_nodemanager_resource_cpu_vcores: 2
 yarn_maximum_allocation_mb: 2048
 yarn_maximum_allocation_vcores: 1

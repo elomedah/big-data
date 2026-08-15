@@ -1,66 +1,39 @@
 services:
-  namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
-    container_name: namenode
-    hostname: namenode
+  tp-hadoop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tp01-bigdata-hadoop:latest
+    container_name: tp-hadoop
+    hostname: tp-hadoop
     restart: unless-stopped
+    shm_size: "1g"
     ports:
-      - "9870:9870"
-      - "9000:9000"
+      - "9000:9000"     # HDFS RPC
+      - "9870:9870"     # NameNode UI
+      - "9864:9864"     # DataNode UI
+      - "9866:9866"     # DataNode transfer
+      - "8088:8088"     # YARN ResourceManager UI
+      - "8042:8042"     # YARN NodeManager UI
+      - "19888:19888"   # MapReduce HistoryServer UI
+      - "18080:18080"   # Spark History Server UI
+      - "10000:10000"   # HiveServer2 JDBC
+      - "10002:10002"   # HiveServer2 Web UI
+      - "9083:9083"     # Hive Metastore Thrift
+      - "16010:16010"   # HBase Master UI
+      - "16030:16030"   # HBase RegionServer UI
+      - "2181:2181"     # HBase ZooKeeper
+      - "4040-4050:4040-4050" # Spark live UIs
     volumes:
-      - hadoop_namenode:/hadoop/dfs/name
-    environment:
-      CLUSTER_NAME: tp-hadoop
-    env_file:
-      - ./hadoop.env
-
-  datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode
-    hostname: datanode
-    restart: unless-stopped
-    ports:
-      - "9864:9864"
-    volumes:
-      - hadoop_datanode:/hadoop/dfs/data
-    environment:
-      SERVICE_PRECONDITION: "namenode:9870"
-    env_file:
-      - ./hadoop.env
-    depends_on:
-      - namenode
-
-  resourcemanager:
-    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
-    container_name: resourcemanager
-    hostname: resourcemanager
-    restart: unless-stopped
-    ports:
-      - "8088:8088"
-    environment:
-      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
-    env_file:
-      - ./hadoop.env
-    depends_on:
-      - namenode
-      - datanode
-
-  nodemanager:
-    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
-    container_name: nodemanager
-    hostname: nodemanager
-    restart: unless-stopped
-    ports:
-      - "8042:8042"
-    environment:
-      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
-    env_file:
-      - ./hadoop.env
-    depends_on:
-      - namenode
-      - datanode
-      - resourcemanager
+      - tp_hadoop_data:/data
+      - tp_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/tp-hadoop/bin/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
 
 volumes:
-  hadoop_namenode:
-  hadoop_datanode:
+  tp_hadoop_data:
+  tp_postgres_data:

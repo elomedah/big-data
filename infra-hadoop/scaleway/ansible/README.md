@@ -135,6 +135,25 @@ Then open the YARN ResourceManager UI:
 http://<gateway_public_ip>:8088
 ```
 
+The YARN ResourceManager UI should show worker resources based on these
+variables from `group_vars/all.yml`:
+
+```yaml
+yarn_nodemanager_resource_memory_mb: 2048
+yarn_nodemanager_resource_cpu_vcores: 2
+yarn_maximum_allocation_mb: 2048
+yarn_maximum_allocation_vcores: 1
+```
+
+If the UI still shows auto-detected values, rerun the Hadoop role and restart
+YARN services:
+
+```bash
+ansible-playbook site.yml --tags hadoop
+ansible-playbook stop-services.yml
+ansible-playbook start-services.yml
+```
+
 Spark event logs are stored in HDFS:
 
 ```text

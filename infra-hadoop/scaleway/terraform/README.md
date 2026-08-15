@@ -218,6 +218,10 @@ workers. It is intended for the pedagogical cost model where workers run with
 full resources during TP sessions, about 25% of the time, and smaller resources
 outside TP sessions, about 75% of the time.
 
+The same `worker_mode` workflow applies to both `tiny` and `large`. This makes
+it possible to test the resize procedure cheaply with `cluster_size = "tiny"`
+before applying it to the full teaching cluster.
+
 ```hcl
 cluster_size = "large"
 worker_mode  = "active"
@@ -230,16 +234,63 @@ cluster_size = "large"
 worker_mode  = "reduced"
 ```
 
+You can also pass these values directly on the command line.
+
+Low-cost tiny test:
+
+```bash
+terraform apply \
+  -var='cluster_size=tiny' \
+  -var='worker_mode=active' \
+  -var='worker_active_commercial_type=DEV1-S' \
+  -var='worker_reduced_commercial_type=DEV1-S'
+```
+
+Large active mode for TP sessions:
+
+```bash
+terraform apply \
+  -var='cluster_size=large' \
+  -var='worker_mode=active' \
+  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_reduced_commercial_type=DEV1-L'
+```
+
+Large reduced mode outside TP sessions:
+
+```bash
+terraform apply \
+  -var='cluster_size=large' \
+  -var='worker_mode=reduced' \
+  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_reduced_commercial_type=DEV1-L'
+```
+
 The default instance type variables are:
+
+```hcl
+worker_active_commercial_type  = "DEV1-S"
+worker_reduced_commercial_type = "DEV1-S"
+```
+
+These conservative defaults keep `tiny` cheap. For the `large` teaching
+cluster, override the same variables with the exact Scaleway offers validated
+in the quote, for example:
 
 ```hcl
 worker_active_commercial_type  = "DEV1-XL"
 worker_reduced_commercial_type = "DEV1-L"
 ```
 
-Adjust these values to the exact Scaleway offers validated in the quote. The
-HDFS data volumes are separate `scaleway_block_volume` resources, so changing
-`worker_mode` does not change their declared size.
+The HDFS data volumes are separate `scaleway_block_volume` resources, so
+changing `worker_mode` does not change their declared size.
+
+For the full CPU/RAM resize procedure, including when to stop services and when
+to rerun Ansible, see:
+
+```text
+../docs/cpu-ram-resizing.md
+```
 
 ## Worker HDFS disk size
 
@@ -299,10 +350,18 @@ ansible-playbook stop-services.yml
 
 # Before TP, switch workers to active size
 cd ../terraform
-terraform apply -var='cluster_size=large' -var='worker_mode=active'
+terraform apply \
+  -var='cluster_size=large' \
+  -var='worker_mode=active' \
+  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_reduced_commercial_type=DEV1-L'
 
 # After TP, switch workers to reduced size
-terraform apply -var='cluster_size=large' -var='worker_mode=reduced'
+terraform apply \
+  -var='cluster_size=large' \
+  -var='worker_mode=reduced' \
+  -var='worker_active_commercial_type=DEV1-XL' \
+  -var='worker_reduced_commercial_type=DEV1-L'
 
 # Reconfigure and restart services after the resize
 cd ../ansible

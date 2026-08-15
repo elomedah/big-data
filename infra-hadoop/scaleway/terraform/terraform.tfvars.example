@@ -25,6 +25,11 @@ cluster_size = "tiny"
 # - reduced: smaller worker instances outside TP sessions.
 # Data volumes are kept separately and protected from accidental deletion.
 # worker_mode = "active"
+# worker_active_commercial_type  = "DEV1-S"
+# worker_reduced_commercial_type = "DEV1-S"
+
+# For the large teaching cluster, override the same variables with the quoted
+# Scaleway instance types, for example:
 # worker_active_commercial_type  = "DEV1-XL"
 # worker_reduced_commercial_type = "DEV1-L"
 

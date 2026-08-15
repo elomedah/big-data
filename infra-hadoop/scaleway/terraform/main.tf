@@ -26,7 +26,7 @@ locals {
       }
     }, {
       for i in range(1, var.tiny_worker_count + 1) : "worker-${i}" => {
-        commercial_type = "DEV1-S"
+        commercial_type = local.worker_commercial_type
         root_size_gb    = 20
         data_size_gb    = 20
         public          = false

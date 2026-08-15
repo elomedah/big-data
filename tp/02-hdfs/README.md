@@ -243,32 +243,31 @@ Affichez le fichier local.
 cat logs-applications.csv
 ```
 
-Chargez le fichier dans HDFS.
+Chargez le fichier dans HDFS dans le repertoire /user/$USER/tp02/input/.
 
 ```bash
-hdfs dfs -put -f logs-applications.csv /user/$USER/tp02/input/
+hdfs dfs à vous de compléter 
 ```
 
 Vérifiez que le fichier est présent.
 
 ```bash
-hdfs dfs -ls /user/$USER/tp02/input
-hdfs dfs -cat /user/$USER/tp02/input/logs-applications.csv
+hdfs dfs à vous de compléter 
 ```
 
 
 ## Exercice 4 - Manipuler les fichiers dans HDFS
 
-Copiez le fichier dans un autre dossier HDFS.
+Copiez le fichier dans un autre dossier HDFS par exemple /user/$USER/tp02/tmp/.
 
 ```bash
-hdfs dfs -cp /user/$USER/tp02/input/logs-applications.csv /user/$USER/tp02/tmp/
+hdfs dfs à vous de compléter 
 ```
 
-Renommez la copie.
+Renommez la copie en logs-applications-copy.csv
 
 ```bash
-hdfs dfs -mv /user/$USER/tp02/tmp/logs-applications.csv /user/$USER/tp02/tmp/logs-applications-copy.csv
+hdfs dfs à vous de compléter 
 ```
 
 Affichez la taille des fichiers.
@@ -277,16 +276,16 @@ Affichez la taille des fichiers.
 hdfs dfs -du -h /user/$USER/tp02
 ```
 
-Affichez l’arborescence complète.
+Affichez l’arborescence complète de /user/$USER/tp02.
 
 ```bash
-hdfs dfs -ls -R /user/$USER/tp02
+hdfs dfs à vous de compléter 
 ```
 
-Supprimez la copie.
+Supprimez la copie logs-applications-copy.csv
 
 ```bash
-hdfs dfs -rm -f /user/$USER/tp02/tmp/logs-applications-copy.csv
+hdfs dfs à vous de compléter 
 ```
 
 

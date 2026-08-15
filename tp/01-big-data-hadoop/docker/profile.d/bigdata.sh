@@ -1,0 +1,17 @@
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export HADOOP_HOME=/opt/hadoop
+export HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+export HADOOP_COMMON_HOME=/opt/hadoop
+export HADOOP_HDFS_HOME=/opt/hadoop
+export HADOOP_MAPRED_HOME=/opt/hadoop
+export YARN_HOME=/opt/hadoop
+export YARN_CONF_DIR=/opt/hadoop/etc/hadoop
+export SPARK_HOME=/opt/spark
+export SPARK_CONF_DIR=/opt/spark/conf
+export HIVE_HOME=/opt/hive
+export HIVE_CONF_DIR=/opt/hive/conf
+export HIVE_LOG_DIR=/var/log/hive
+export HIVE_PID_DIR=/data/hive
+export HBASE_HOME=/opt/hbase
+export HBASE_CONF_DIR=/opt/hbase/conf
+export PATH=/opt/hadoop/bin:/opt/hadoop/sbin:/opt/spark/bin:/opt/spark/sbin:/opt/hive/bin:/opt/hbase/bin:$PATH

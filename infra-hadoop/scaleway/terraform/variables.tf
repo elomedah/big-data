@@ -100,15 +100,15 @@ variable "worker_mode" {
 }
 
 variable "worker_active_commercial_type" {
-  description = "Scaleway instance type used by Hadoop workers during TP sessions."
+  description = "Scaleway instance type used by Hadoop workers when worker_mode is active."
   type        = string
-  default     = "DEV1-XL"
+  default     = "DEV1-S"
 }
 
 variable "worker_reduced_commercial_type" {
-  description = "Scaleway instance type used by Hadoop workers outside TP sessions."
+  description = "Scaleway instance type used by Hadoop workers when worker_mode is reduced."
   type        = string
-  default     = "DEV1-L"
+  default     = "DEV1-S"
 }
 
 variable "large_worker_data_size_gb" {

@@ -14,11 +14,20 @@
 
 Ce TP ne vise pas encore à manipuler HDFS, YARN, Hive ou HBase en détail. Ces outils feront l’objet de TP spécifiques dans les séances suivantes.
 
-## Option locale - Installation d’un mini-cluster Hadoop avec Docker
+## Option locale - Image Docker tout-en-un
 
-Cette section permet de démarrer un mini-cluster Hadoop local pour découvrir les services principaux sans utiliser le cluster cloud.
+Cette section permet de démarrer un environnement Hadoop local dans un seul conteneur Docker.
 
-Cette installation est utile pour observer les composants Hadoop, mais elle ne remplace pas le cluster partagé du cours. Pour les TP suivants, les consignes préciseront si vous devez travailler sur Docker ou sur le gateway fourni par l’enseignant.
+L’image contient les services nécessaires aux TP du module :
+
+- HDFS : NameNode et DataNode ;
+- YARN : ResourceManager et NodeManager ;
+- MapReduce : JobHistory Server ;
+- Spark : client Spark et Spark History Server ;
+- Hive : Metastore et HiveServer2 ;
+- HBase : ZooKeeper, Master et RegionServer.
+
+Cette installation est utile pour observer les composants Hadoop et travailler hors du cluster cloud. Elle reste un environnement pédagogique mono-machine : elle ne remplace pas un vrai cluster distribué.
 
 ### Prérequis Docker
 
@@ -35,19 +44,29 @@ docker --version
 docker compose version
 ```
 
+Prévoyez idéalement au moins 6 Go de RAM disponibles pour Docker Desktop. L’image démarre plusieurs services Big Data dans le même conteneur.
+
 Placez-vous dans le dossier du TP.
 
 ```bash
 cd tp/01-big-data-hadoop
 ```
 
-Démarrez le mini-cluster.
+Construisez l’image Docker.
+
+```bash
+docker compose build
+```
+
+Le premier build peut prendre plusieurs minutes, car l’image télécharge Hadoop, Spark, Hive et HBase.
+
+Démarrez l’environnement.
 
 ```bash
 docker compose up -d
 ```
 
-Vérifiez que les conteneurs sont démarrés.
+Vérifiez que le conteneur est démarré.
 
 ```bash
 docker compose ps
@@ -56,9 +75,15 @@ docker compose ps
 Ouvrez les interfaces Web locales.
 
 ```text
-NameNode UI:          http://localhost:9870
-YARN ResourceManager: http://localhost:8088
-NodeManager UI:       http://localhost:8042
+HDFS NameNode:          http://localhost:9870
+HDFS DataNode:          http://localhost:9864
+YARN ResourceManager:   http://localhost:8088
+YARN NodeManager:       http://localhost:8042
+MapReduce History:      http://localhost:19888
+Spark History Server:   http://localhost:18080
+HiveServer2 Web UI:     http://localhost:10002
+HBase Master:           http://localhost:16010
+HBase RegionServer:     http://localhost:16030
 ```
 
 Si l’interface NameNode s’affiche sans mise en page correcte, essayez d’abord :
@@ -68,7 +93,7 @@ Si l’interface NameNode s’affiche sans mise en page correcte, essayez d’ab
 - tester dans une fenêtre de navigation privée ;
 - utiliser un navigateur à jour, par exemple Firefox, Chrome ou Edge.
 
-Vous pouvez aussi redémarrer les conteneurs.
+Vous pouvez aussi redémarrer le conteneur.
 
 ```bash
 docker compose restart
@@ -81,17 +106,50 @@ docker compose down -v
 docker compose up -d
 ```
 
-Entrez dans le conteneur `namenode`.
+Entrez dans le conteneur `tp-hadoop`.
 
 ```bash
-docker exec -it namenode bash
+docker exec -it tp-hadoop bash
 ```
 
-Vérifiez que Hadoop répond.
+Vérifiez que les commandes principales répondent.
 
 ```bash
 hadoop version
+hdfs dfsadmin -report
 hdfs dfs -ls /
+yarn node -list
+spark-submit --version
+beeline --version
+hbase version
+```
+
+Vérifiez MapReduce.
+
+```bash
+hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 2 10
+```
+
+Vérifiez Spark sur YARN.
+
+```bash
+spark-submit \
+  --master yarn \
+  --class org.apache.spark.examples.SparkPi \
+  $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.8.jar \
+  10
+```
+
+Vérifiez Hive.
+
+```bash
+beeline -u 'jdbc:hive2://localhost:10000/default;auth=noSasl' -e 'SHOW DATABASES;'
+```
+
+Vérifiez HBase.
+
+```bash
+echo "status 'simple'" | hbase shell -n
 ```
 
 Quittez le conteneur.
@@ -103,12 +161,10 @@ exit
 Consultez les logs si nécessaire.
 
 ```bash
-docker compose logs -f namenode
-docker compose logs -f datanode
-docker compose logs -f resourcemanager
+docker compose logs -f tp-hadoop
 ```
 
-Arrêtez le mini-cluster.
+Arrêtez l’environnement.
 
 ```bash
 docker compose down
@@ -285,8 +341,7 @@ Questions de réflexion :
 2. Pourquoi les interfaces Web sont-elles utiles pour l’exploitation d’un cluster distribué ?
 3. Quelles informations visibles dans ces interfaces pourraient être sensibles dans un contexte professionnel ?
 4. Pourquoi ne faudrait-il pas exposer directement toutes les interfaces internes d’un cluster Hadoop sur Internet ?
-5. Quelles différences faites-vous entre monitoring, observabilité et audit ?
-6. En cas d’incident sur un traitement distribué, quelles interfaces consulteriez-vous en premier et pourquoi ?
+
 
 ## Exercice 6 - Préparer le projet fil rouge
 
@@ -298,10 +353,7 @@ Répondez aux questions suivantes en vous plaçant dans le rôle d’une équipe
 2. Quelles contraintes réglementaires, opérationnelles et techniques doivent être prises en compte dès la conception ?
 3. Proposez une première séparation logique entre données brutes, données archivées, données transformées et données d’audit. Justifiez cette séparation.
 4. Quels risques introduit une mauvaise gestion des droits d’accès sur un lac de données ?
-5. Quelles métadonnées faudrait-il conserver pour rendre les données exploitables plusieurs années après leur ingestion ?
-6. Comment arbitrer entre coût de stockage, performance d’accès, sécurité et durée de conservation ?
-7. Quels indicateurs permettraient de démontrer que la plateforme est fiable et exploitable ?
-8. Quelles limites voyez-vous à l’utilisation d’un cluster Hadoop pour ce type de besoin par rapport à des solutions cloud managées ?
+
 
 ## Exercice 7 - Analyser le besoin Big Data
 

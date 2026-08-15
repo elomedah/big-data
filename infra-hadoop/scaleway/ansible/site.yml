@@ -16,6 +16,8 @@
 - name: Install and configure Hadoop
   hosts: hadoop
   become: true
+  tags:
+    - hadoop
   roles:
     - hadoop
 

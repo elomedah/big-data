@@ -2,7 +2,9 @@ terraform {
   backend "s3" {
     key                         = "scaleway/hadoop/terraform.tfstate"
     region                      = "fr-par"
-    endpoint                    = "https://s3.fr-par.scw.cloud"
+    endpoints = {
+      s3 = "https://s3.fr-par.scw.cloud"
+    }
     force_path_style            = true
     skip_credentials_validation = true
     skip_region_validation      = true

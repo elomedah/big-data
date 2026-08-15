@@ -158,12 +158,20 @@ aws --version
 ```
 
 Then configure AWS-compatible environment variables for Scaleway Object
-Storage:
+Storage. This step is required by Terraform's `s3` backend; it does not read
+`SCW_ACCESS_KEY` and `SCW_SECRET_KEY` directly.
 
 ```bash
 export AWS_ACCESS_KEY_ID="$SCW_ACCESS_KEY"
 export AWS_SECRET_ACCESS_KEY="$SCW_SECRET_KEY"
 export AWS_DEFAULT_REGION="fr-par"
+```
+
+If Terraform reports `No valid credential sources found`, check that the AWS
+variables are present in the same shell where you run `terraform init`:
+
+```bash
+env | grep '^AWS_'
 ```
 
 Create the bucket:
@@ -189,6 +197,13 @@ Initialize Terraform with the remote backend:
 
 ```bash
 terraform init -backend-config=backend.hcl
+```
+
+If the backend configuration was already initialized before this repository
+used `endpoints.s3`, reconfigure it:
+
+```bash
+terraform init -backend-config=backend.hcl -reconfigure
 ```
 
 If you already have a local `terraform.tfstate`, migrate it to Scaleway Object

@@ -42,42 +42,6 @@ server {
 }
 
 server {
-    listen 0.0.0.0:18080;
-    server_name _;
-    location / {
-        proxy_pass http://127.0.0.1:18080;
-        proxy_set_header Accept-Encoding "";
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-Host $http_host;
-        proxy_set_header X-Forwarded-Port $server_port;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        sub_filter_once off;
-        sub_filter_types text/html text/plain application/json;
-        sub_filter 'http://localhost:18080' 'http://$http_host';
-        sub_filter 'localhost:18080' '$http_host';
-    }
-}
-
-server {
-    listen 0.0.0.0:10002;
-    server_name _;
-    location / {
-        proxy_pass http://127.0.0.1:10002;
-        proxy_set_header Accept-Encoding "";
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-Host $http_host;
-        proxy_set_header X-Forwarded-Port $server_port;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        sub_filter_once off;
-        sub_filter_types text/html text/plain application/json;
-        sub_filter 'http://localhost:10002' 'http://$http_host';
-        sub_filter 'localhost:10002' '$http_host';
-    }
-}
-
-server {
     listen 0.0.0.0:16010;
     server_name _;
     location / {

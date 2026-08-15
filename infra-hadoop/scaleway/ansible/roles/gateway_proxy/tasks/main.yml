@@ -39,16 +39,26 @@
 - name: Flush Nginx reload before port checks
   ansible.builtin.meta: flush_handlers
 
-- name: Build gateway web UI listening port list
+- name: Reload Nginx so the rendered proxy configuration is active
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+  changed_when: false
+
+- name: Build Nginx-owned gateway web UI listening port list
   ansible.builtin.set_fact:
-    gateway_web_ui_ports: "{{ [9870, 8088, 19888, 18080, 10002, 16010] }}"
+    gateway_web_ui_ports:
+      - 9870
+      - 8088
+      - 19888
+      - 16010
 
 - name: Add worker web UI listening ports
   ansible.builtin.set_fact:
     gateway_web_ui_ports: "{{ gateway_web_ui_ports + [9864 + item, 8042 + item, 16030 + item] }}"
   loop: "{{ range(groups['workers'] | length) | list }}"
 
-- name: Check gateway web UI listening ports
+- name: Check Nginx-owned gateway web UI listening ports
   ansible.builtin.wait_for:
     host: 127.0.0.1
     port: "{{ item }}"

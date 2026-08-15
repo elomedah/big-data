@@ -364,13 +364,16 @@ instances, Block Storage volumes, snapshots or public IPs remain.
 - `allocate_public_ip_to_private_nodes = true` gives master and workers
   outbound internet access for `apt` and Hadoop downloads. Their security group
   still blocks public inbound access.
-- `student_web_cidrs` controls who can access Hadoop web UIs through the
-  gateway public IP. It defaults to `["0.0.0.0/0"]` for tests and includes
-  NameNode `9870`, YARN ResourceManager `8088`, HistoryServer `19888`, and
-  per-worker DataNode, NodeManager and HBase RegionServer ports derived from
-  the configured worker count. Spark application UIs on `4040-4050` are not
-  proxied because those ports are ephemeral and may be owned directly by Spark
-  drivers on the gateway.
+- `student_web_cidrs` controls who can access web UIs through the gateway
+  public IP. It defaults to `["0.0.0.0/0"]` for tests. Terraform opens the
+  Nginx reverse-proxy ports for NameNode `9870`, YARN ResourceManager `8088`,
+  MapReduce HistoryServer `19888`, HBase Master `16010`, and per-worker
+  DataNode, NodeManager and HBase RegionServer ports derived from the
+  configured worker count. It also opens Spark History Server `18080` and
+  HiveServer2 Web UI `10002`, which are served directly by services running on
+  the gateway and are not handled by Nginx. Spark application UIs on
+  `4040-4050` are not proxied because those ports are ephemeral and may be
+  owned directly by Spark drivers on the gateway.
 - Data disks are attached to the master and workers as separate Block Storage
   volumes. They survive worker compute resizing and are protected by default
   with `prevent_destroy = true`. Terraform lifecycle settings cannot be driven

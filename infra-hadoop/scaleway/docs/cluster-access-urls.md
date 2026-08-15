@@ -13,6 +13,10 @@ HiveServer2 Web UI:      http://<gateway_public_ip>:10002
 HBase Master UI:         http://<gateway_public_ip>:16010
 ```
 
+Spark History Server `18080` and HiveServer2 Web UI `10002` run directly on the
+gateway. The other main interfaces above are exposed by the gateway Nginx
+reverse proxy.
+
 ## Worker Web Interfaces
 
 ```text

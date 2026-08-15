@@ -40,6 +40,8 @@
 - name: Expose Hadoop web UIs through the gateway
   hosts: gateway
   become: true
+  tags:
+    - gateway_proxy
   roles:
     - gateway_proxy
 

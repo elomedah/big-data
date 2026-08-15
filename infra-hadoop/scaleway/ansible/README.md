@@ -185,7 +185,7 @@ Then rerun Ansible:
 
 ```bash
 cd infra-hadoop/scaleway/ansible
-ansible-playbook site.yml
+ansible-playbook site.yml --tags gateway_proxy
 ```
 
 Get the gateway public IP:

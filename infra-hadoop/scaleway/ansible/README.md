@@ -139,18 +139,43 @@ The YARN ResourceManager UI should show worker resources based on these
 variables from `group_vars/all.yml`:
 
 ```yaml
-yarn_nodemanager_resource_memory_mb: 2048
-yarn_nodemanager_resource_cpu_vcores: 2
+yarn_nodemanager_resource_memory_mb: -1
+yarn_nodemanager_resource_system_reserved_memory_mb: -1
+yarn_nodemanager_resource_system_reserved_memory_ratio: 0.2
+yarn_nodemanager_resource_cpu_vcores: -1
+yarn_nodemanager_resource_detect_hardware_capabilities: true
+yarn_nodemanager_resource_count_logical_processors_as_cores: true
+yarn_nodemanager_resource_pcores_vcores_multiplier: 0.8
+yarn_nodemanager_resource_percentage_physical_cpu_limit: 80
 yarn_maximum_allocation_mb: 2048
 yarn_maximum_allocation_vcores: 1
 ```
+
+With `yarn_nodemanager_resource_cpu_vcores: -1` and hardware detection enabled,
+each NodeManager detects the CPU visible on its worker VM. The `0.8` multiplier
+and the `80` percent CPU limit keep about 20% of CPU capacity outside YARN for
+the OS and Hadoop daemons. With `yarn_nodemanager_resource_memory_mb: -1`,
+memory is also detected automatically. With
+`yarn_nodemanager_resource_system_reserved_memory_mb: -1`, Ansible renders
+`yarn.nodemanager.resource.system-reserved-memory-mb` as 20% of the worker RAM
+using `yarn_nodemanager_resource_system_reserved_memory_ratio: 0.2`.
+
+The scheduler maximum allocation values limit a single YARN container request:
+
+```yaml
+yarn_maximum_allocation_mb: 2048
+yarn_maximum_allocation_vcores: 1
+```
+
+This means YARN can see most worker resources, but one Spark/MapReduce
+container cannot request more than 2 GB and 1 vcore.
 
 If the UI still shows auto-detected values, rerun the Hadoop role and restart
 YARN services:
 
 ```bash
-ansible-playbook site.yml --tags hadoop
 ansible-playbook stop-services.yml
+ansible-playbook site.yml --tags hadoop
 ansible-playbook start-services.yml
 ```
 

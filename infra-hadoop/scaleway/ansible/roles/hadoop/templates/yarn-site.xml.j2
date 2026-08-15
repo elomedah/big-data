@@ -37,8 +37,28 @@
     <value>{{ yarn_nodemanager_resource_memory_mb }}</value>
   </property>
   <property>
+    <name>yarn.nodemanager.resource.system-reserved-memory-mb</name>
+    <value>{% if (yarn_nodemanager_resource_system_reserved_memory_mb | int) >= 0 %}{{ yarn_nodemanager_resource_system_reserved_memory_mb }}{% else %}{{ ((ansible_memtotal_mb | int) * (yarn_nodemanager_resource_system_reserved_memory_ratio | float)) | round(0, 'ceil') | int }}{% endif %}</value>
+  </property>
+  <property>
     <name>yarn.nodemanager.resource.cpu-vcores</name>
     <value>{{ yarn_nodemanager_resource_cpu_vcores }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.detect-hardware-capabilities</name>
+    <value>{{ yarn_nodemanager_resource_detect_hardware_capabilities | lower }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.count-logical-processors-as-cores</name>
+    <value>{{ yarn_nodemanager_resource_count_logical_processors_as_cores | lower }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.pcores-vcores-multiplier</name>
+    <value>{{ yarn_nodemanager_resource_pcores_vcores_multiplier }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.percentage-physical-cpu-limit</name>
+    <value>{{ yarn_nodemanager_resource_percentage_physical_cpu_limit }}</value>
   </property>
   <property>
     <name>yarn.application.classpath</name>

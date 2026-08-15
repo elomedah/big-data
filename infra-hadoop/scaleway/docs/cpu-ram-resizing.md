@@ -3,6 +3,19 @@
 This document explains how to resize the Scaleway instances used by the Hadoop
 cluster.
 
+Before running `terraform plan` or `terraform apply` for a VM resize, stop the
+cluster services with Ansible:
+
+```bash
+cd infra-hadoop/scaleway/ansible
+ansible-playbook stop-services.yml
+```
+
+This is required because Terraform may stop, resize or replace worker VMs.
+Stopping services first avoids abrupt HDFS/YARN failures while NameNode,
+DataNodes, ResourceManager, NodeManagers, Hive, Spark or HBase are still
+running.
+
 In Terraform, CPU and RAM are not configured directly as numeric values. They
 are controlled by the Scaleway instance type, called `commercial_type`.
 
@@ -191,7 +204,7 @@ Tiny active test:
 terraform apply \
   -var='cluster_size=tiny' \
   -var='worker_mode=active' \
-  -var='worker_active_commercial_type=DEV1-S' \
+  -var='worker_active_commercial_type=DEV1-M' \
   -var='worker_reduced_commercial_type=DEV1-S'
 ```
 
@@ -201,7 +214,7 @@ Tiny reduced test:
 terraform apply \
   -var='cluster_size=tiny' \
   -var='worker_mode=reduced' \
-  -var='worker_active_commercial_type=DEV1-S' \
+  -var='worker_active_commercial_type=DEV1-M' \
   -var='worker_reduced_commercial_type=DEV1-S'
 ```
 
@@ -227,6 +240,9 @@ terraform apply \
 
 ### 3. Preview the Terraform change
 
+Run this only after `ansible-playbook stop-services.yml` has completed
+successfully.
+
 ```bash
 cd terraform
 terraform plan \
@@ -247,6 +263,8 @@ Be careful if Terraform shows data volume deletion. That is not expected for a
 simple CPU/RAM resize.
 
 ### 4. Apply the resize
+
+Run this only after the cluster services have been stopped.
 
 ```bash
 terraform apply \

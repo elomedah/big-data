@@ -1,5 +1,5 @@
 spark.master                       yarn
-spark.submit.deployMode            client
+spark.submit.deployMode            {{ spark_submit_deploy_mode }}
 spark.yarn.queue                   students
 spark.yarn.jars                    hdfs://{{ spark_jars_dir }}/*
 spark.eventLog.enabled             true
@@ -7,6 +7,8 @@ spark.eventLog.dir                 hdfs://{{ spark_event_log_dir }}
 spark.history.fs.logDirectory      hdfs://{{ spark_event_log_dir }}
 spark.ui.reverseProxy              true
 spark.driver.memory                {{ spark_driver_memory }}
+spark.driver.bindAddress           {{ spark_driver_bind_address }}
+spark.dynamicAllocation.enabled    {{ spark_dynamic_allocation_enabled | lower }}
 spark.executor.instances           {{ spark_executor_instances }}
 spark.executor.memory              {{ spark_executor_memory }}
 spark.executor.cores               {{ spark_executor_cores }}

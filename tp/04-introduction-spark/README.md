@@ -23,7 +23,9 @@ Ce TP s’appuie sur les notions présentées dans :
 - la documentation officielle `spark-submit` : `https://spark.apache.org/docs/3.5.7/submitting-applications.html` ;
 - la documentation officielle Spark SQL, DataFrames and Datasets : `https://spark.apache.org/docs/3.5.7/sql-programming-guide.html`.
 
-Les exemples du TP sont adaptés à l’environnement du cours et utilisent PySpark sur YARN.
+Les exemples interactifs du début de TP utilisent l'image Docker locale du TP
+01. Les traitements soumis ensuite au cluster utilisent Spark sur YARN en mode
+`cluster`.
 
 ## Contexte
 
@@ -39,68 +41,58 @@ Dans ce TP, vous allez manipuler Spark avec des logs applicatifs simplifiés, da
 
 ## Prérequis
 
-Vous devez être connecté au gateway Hadoop avec votre compte étudiant.
+Pour la première partie interactive, démarrez l'environnement Docker du TP 01
+sur votre machine.
 
 ```bash
-ssh -i ~/.ssh/m2-hadoop-student identifiant@<gateway_public_ip>
+cd tp/01-big-data-hadoop
+docker compose up -d
+docker exec -it tp-hadoop bash
 ```
 
-Chargez les environnements Hadoop et Spark.
+Dans le conteneur, vérifiez que les commandes répondent.
 
 ```bash
-source /etc/profile.d/hadoop.sh
-source /etc/profile.d/spark.sh
-```
-
-Vérifiez que les commandes répondent.
-
-```bash
+export USER=$(whoami)
 hdfs dfs -ls /
 yarn application -list
 spark-submit --version
 pyspark --version
 ```
 
-Interfaces utiles :
+Interfaces locales utiles pendant la première partie :
+
+```text
+YARN ResourceManager: http://localhost:8088
+Spark History Server: http://localhost:18080
+Spark Live UI:        http://localhost:4040
+```
+
+Pour la deuxième partie, vous devrez aussi être connecté au gateway Hadoop avec
+votre compte étudiant.
+
+```bash
+ssh -i ~/.ssh/m2-hadoop-student identifiant@<gateway_public_ip>
+source /etc/profile.d/hadoop.sh
+source /etc/profile.d/spark.sh
+```
+
+Interfaces cluster utiles :
 
 ```text
 YARN ResourceManager: http://<gateway_public_ip>:8088
 Spark History Server: http://<gateway_public_ip>:18080
-Spark Live UI:        http://<gateway_public_ip>:4040
-```
-
-La Spark Live UI est disponible uniquement pendant l’exécution d’une application
-Spark. Spark essaie d'utiliser le port `4040`, puis prend le port disponible
-suivant si celui-ci est déjà occupé, par exemple `4041`, `4042`, etc.
-
-Sur le cluster du TP, les ports Spark UI `4040` à `4500` sont exposés depuis la
-gateway pour permettre les lancements en parallèle. Ne forcez pas un port à la
-main : laissez Spark choisir le premier port disponible et récupérez l'URL dans
-les logs.
-
-Pendant le lancement, lisez les logs affichés dans le terminal et repérez la
-ligne qui indique l'adresse de la Spark UI, par exemple :
-
-```text
-Spark UI available at http://<gateway_public_ip>:4041
+YARN Tracking UI:     depuis la page de l'application YARN
 ```
 
 ### Modes de lancement Spark
 
-Dans ce TP, Spark est lancé sur YARN avec `--deploy-mode client`.
+Dans ce TP, la découverte interactive se fait dans Docker. Les traitements
+soumis au cluster du cours utilisent YARN avec `--deploy-mode cluster`.
 
 - `--master local` : Spark s'exécute localement sur une seule machine. C'est utile pour tester, mais ce n'est pas un vrai traitement distribué.
-- `--master yarn --deploy-mode client` : le driver Spark reste sur le gateway, tandis que les executors tournent dans YARN. C'est pratique en TP, car les logs du driver restent visibles dans le terminal.
-- `--master yarn --deploy-mode cluster` : le driver Spark est lui aussi lancé dans YARN. C'est plus proche d'un usage production, mais les logs doivent être consultés via YARN ou le Spark History Server.
-
-Dans un TP interactif, le mode `client` est plus simple à observer. En
-production, le mode `cluster` est souvent préférable pour des traitements
-automatisés.
-
-Une session PySpark sur YARN consomme au minimum deux rôles côté YARN :
-l'ApplicationMaster et au moins un executor. Dans l'interface YARN, il est donc
-normal qu'une session PySpark utilise plus d'un vcore au total, même si chaque
-container est limité à `1` vcore.
+- `--master yarn --deploy-mode client` : le driver Spark reste sur la machine de lancement, tandis que les executors tournent dans YARN. Si la commande est lancée depuis le gateway, elle consomme donc les ressources de la gateway.
+- `--master yarn --deploy-mode cluster` : le driver Spark est lui aussi lancé dans YARN. C'est le mode utilisé dans ce TP pour éviter de surcharger la gateway.
 
 ## Exercice 1 - Situer Spark dans l’écosystème Hadoop
 
@@ -115,9 +107,14 @@ Répondez aux questions suivantes.
 5. Quels types de traitements du projet DORA pourraient être écrits avec Spark ?
 6. Dans quels cas MapReduce peut-il rester pertinent malgré l’existence de Spark ?
 
-## Exercice 2 - Préparer des données dans HDFS
+## Exercice 2 - Préparer des données dans HDFS local
 
-Créez un dossier de travail.
+Dans le conteneur Docker `tp-hadoop`, créez un dossier de travail HDFS.
+
+Avant setter la variable $USER
+```bash
+export USER=$(whoami)
+```
 
 ```bash
 hdfs dfs -mkdir -p /user/$USER/tp04/input
@@ -162,14 +159,18 @@ Répondez aux questions suivantes.
 3. Quelles limites voyez-vous au CSV dans une plateforme de données professionnelle ?
 4. Quels formats seraient plus adaptés pour des traitements analytiques à grande échelle ?
 
-## Exercice 3 - Démarrer PySpark
+## Exercice 3 - Observer une session PySpark interactive locale
 
-Démarrez une session interactive PySpark sur YARN.
+Démarrez une session interactive PySpark dans le conteneur Docker pour observer
+les objets Spark principaux. Cette session reste locale à votre machine et ne
+consomme pas les ressources de la gateway du cluster.
 
 ```bash
 pyspark \
   --master yarn \
-  --deploy-mode client
+  --deploy-mode client \
+  --conf spark.driver.host=localhost \
+  --conf spark.driver.bindAddress=0.0.0.0
 ```
 
 Dans le shell PySpark, vérifiez la `SparkSession`.
@@ -187,30 +188,24 @@ spark.sparkContext.appName
 spark.sparkContext.master
 ```
 
-Ouvrez la Spark Live UI pendant que PySpark est lancé.
+Ouvrez la Spark Live UI locale pendant que PySpark est lancé.
 
 ```text
-http://<gateway_public_ip>:<spark_ui_port>
+http://localhost:4040
 ```
 
-Le port exact est affiché dans les logs de lancement de PySpark. Si `4040` est
-déjà utilisé par un autre étudiant, cherchez `4041`, `4042`, etc. Vous pouvez
-aussi l'afficher depuis PySpark :
+Si `4040` est déjà utilisé sur votre machine, Spark peut choisir `4041`,
+`4042`, etc. Vous pouvez afficher l'URL depuis PySpark :
 
 ```python
 sc.uiWebUrl
 ```
 
-Si l'URL affichée contient encore le nom interne `gateway`, remplacez
-simplement `gateway` par l'adresse IP publique du gateway dans votre navigateur.
-Après configuration complète du cluster, Spark doit afficher directement une
-URL de type `http://<gateway_public_ip>:4040`.
-
 Répondez aux questions suivantes.
 
 1. À quoi sert la `SparkSession` ?
 2. À quoi sert le `SparkContext` ?
-3. Pourquoi utilise-t-on le mode `client` depuis le gateway ?
+3. Pourquoi fait-on cette partie interactive dans Docker plutôt que sur la gateway ?
 4. Pourquoi la Spark Live UI n’existe-t-elle que pendant que l’application tourne ?
 5. Que voyez-vous dans YARN lorsqu’une session PySpark est ouverte ?
 
@@ -417,6 +412,37 @@ Répondez aux questions suivantes.
 
 ## Exercice 9 - Créer une application PySpark
 
+À partir de cet exercice, travaillez sur le gateway Hadoop du cluster.
+
+```bash
+ssh -i ~/.ssh/m2-hadoop-student identifiant@<gateway_public_ip>
+source /etc/profile.d/hadoop.sh
+source /etc/profile.d/spark.sh
+```
+
+Préparez les données d'entrée dans le HDFS du cluster.
+
+```bash
+hdfs dfs -mkdir -p /user/$USER/tp04/input
+hdfs dfs -mkdir -p /user/$USER/tp04/output
+
+cat > logs-spark.csv <<'EOF'
+timestamp,application,level,status_code,response_time_ms
+2026-01-10T10:00:00Z,payment-api,INFO,200,120
+2026-01-10T10:01:12Z,payment-api,WARN,200,850
+2026-01-10T10:02:18Z,auth-service,ERROR,401,95
+2026-01-10T10:03:44Z,core-banking,INFO,200,430
+2026-01-10T10:04:02Z,payment-api,ERROR,500,1320
+2026-01-10T10:05:19Z,auth-service,INFO,200,70
+2026-01-10T10:06:42Z,core-banking,WARN,200,990
+2026-01-10T10:07:05Z,payment-api,INFO,200,110
+2026-01-10T10:08:33Z,auth-service,ERROR,403,88
+2026-01-10T10:09:51Z,core-banking,ERROR,503,2100
+EOF
+
+hdfs dfs -put -f logs-spark.csv /user/$USER/tp04/input/
+```
+
 Créez un fichier Python.
 
 ```bash
@@ -458,7 +484,12 @@ Soumettez l’application sur YARN.
 ```bash
 spark-submit \
   --master yarn \
-  --deploy-mode client \
+  --deploy-mode cluster \
+  --queue students \
+  --conf spark.dynamicAllocation.enabled=false \
+  --conf spark.executor.instances=1 \
+  --conf spark.executor.cores=1 \
+  --conf spark.yarn.am.cores=1 \
   spark_log_analysis.py
 ```
 
@@ -542,7 +573,12 @@ Lancez le script.
 ```bash
 spark-submit \
   --master yarn \
-  --deploy-mode client \
+  --deploy-mode cluster \
+  --queue students \
+  --conf spark.dynamicAllocation.enabled=false \
+  --conf spark.executor.instances=1 \
+  --conf spark.executor.cores=1 \
+  --conf spark.yarn.am.cores=1 \
   spark_wordcount.py
 ```
 

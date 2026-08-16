@@ -117,7 +117,7 @@ Run a first YARN test:
 ```bash
 spark-submit \
   --master yarn \
-  --deploy-mode client \
+  --deploy-mode cluster \
   --class org.apache.spark.examples.SparkPi \
   $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.8.jar \
   10
@@ -170,15 +170,24 @@ yarn_maximum_allocation_vcores: 1
 This means YARN can see most worker resources, but one Spark/MapReduce
 container cannot request more than 2 GB and 1 vcore.
 
-Spark jobs are submitted to the student queue by default:
+Spark jobs are submitted to YARN cluster mode and to the student queue by
+default:
 
 ```properties
+spark.submit.deployMode cluster
 spark.yarn.queue students
 ```
+
+Cluster mode is required for a large class: the Spark driver runs inside YARN
+instead of consuming CPU/RAM on the gateway. Client mode should be limited to
+short demonstrations because each interactive PySpark shell keeps a driver
+process on the gateway.
 
 For TP concurrency, PySpark uses one executor by default:
 
 ```yaml
+spark_dynamic_allocation_enabled: false
+spark_driver_bind_address: 0.0.0.0
 spark_executor_instances: 1
 spark_executor_cores: 1
 spark_yarn_am_cores: 1
@@ -189,16 +198,42 @@ ApplicationMaster and one executor. With the defaults above, one active PySpark
 session therefore uses about 2 vcores in YARN, even though each individual
 container is limited to 1 vcore.
 
+When Spark runs in YARN cluster mode, the driver runs in a YARN container. Use
+the YARN Tracking UI while the application is running, then the Spark History
+Server after completion. `spark_driver_bind_address: 0.0.0.0` is kept for the
+rare client-mode demos where the driver still runs on the gateway.
+
+To debug a Spark UI that does not open, check the port from the PySpark shell:
+
+```python
+sc.uiWebUrl
+```
+
+Then check from the gateway:
+
+```bash
+ss -ltnp | grep 404
+curl -I http://127.0.0.1:<spark_ui_port>
+curl -I http://<gateway_public_ip>:<spark_ui_port>
+```
+
 The student queue has a guaranteed capacity and a maximum burst capacity:
 
 ```yaml
 yarn_students_capacity: 60
 yarn_students_max_capacity: 100
+yarn_students_maximum_am_resource_percent: 0.5
 ```
 
 The `100` maximum lets student jobs use idle cluster resources when the
 `default` queue is not active. This is useful for TP sessions where several
 students start PySpark at the same time.
+
+The `0.5` ApplicationMaster limit allows several interactive PySpark sessions
+to start concurrently. Each PySpark shell needs an ApplicationMaster before it
+can allocate its executor. If this value is too low, additional student
+applications stay in `ACCEPTED` with `0` containers even when some executor
+resources still appear available.
 
 If the UI still shows auto-detected values, rerun the Hadoop role and restart
 YARN services:

@@ -32,7 +32,6 @@ Dans les TP précédents, vous avez :
 - stocké des fichiers dans HDFS ;
 - observé la réplication ;
 - exploré YARN ;
-- lancé un premier traitement MapReduce.
 
 Spark est un moteur de traitement distribué plus moderne. Il permet de traiter des données stockées dans HDFS, mais il propose une API plus expressive que MapReduce et optimise les plans d’exécution.
 
@@ -70,7 +69,33 @@ Spark History Server: http://<gateway_public_ip>:18080
 Spark Live UI:        http://<gateway_public_ip>:4040
 ```
 
-La Spark Live UI est disponible uniquement pendant l’exécution d’une application Spark. Si plusieurs applications Spark tournent en même temps, Spark peut utiliser `4041`, `4042`, etc.
+La Spark Live UI est disponible uniquement pendant l’exécution d’une application
+Spark. Spark essaie d'utiliser le port `4040`, puis prend le port disponible
+suivant si celui-ci est déjà occupé, par exemple `4041`, `4042`, etc.
+
+Sur le cluster du TP, les ports Spark UI `4040` à `4500` sont exposés depuis la
+gateway pour permettre les lancements en parallèle. Ne forcez pas un port à la
+main : laissez Spark choisir le premier port disponible et récupérez l'URL dans
+les logs.
+
+Pendant le lancement, lisez les logs affichés dans le terminal et repérez la
+ligne qui indique l'adresse de la Spark UI, par exemple :
+
+```text
+Spark UI available at http://<gateway_public_ip>:4041
+```
+
+### Modes de lancement Spark
+
+Dans ce TP, Spark est lancé sur YARN avec `--deploy-mode client`.
+
+- `--master local` : Spark s'exécute localement sur une seule machine. C'est utile pour tester, mais ce n'est pas un vrai traitement distribué.
+- `--master yarn --deploy-mode client` : le driver Spark reste sur le gateway, tandis que les executors tournent dans YARN. C'est pratique en TP, car les logs du driver restent visibles dans le terminal.
+- `--master yarn --deploy-mode cluster` : le driver Spark est lui aussi lancé dans YARN. C'est plus proche d'un usage production, mais les logs doivent être consultés via YARN ou le Spark History Server.
+
+Dans un TP interactif, le mode `client` est plus simple à observer. En
+production, le mode `cluster` est souvent préférable pour des traitements
+automatisés.
 
 ## Exercice 1 - Situer Spark dans l’écosystème Hadoop
 
@@ -139,8 +164,7 @@ Démarrez une session interactive PySpark sur YARN.
 ```bash
 pyspark \
   --master yarn \
-  --deploy-mode client \
-  --conf spark.ui.port=4040
+  --deploy-mode client
 ```
 
 Dans le shell PySpark, vérifiez la `SparkSession`.
@@ -161,8 +185,21 @@ spark.sparkContext.master
 Ouvrez la Spark Live UI pendant que PySpark est lancé.
 
 ```text
-http://<gateway_public_ip>:4040
+http://<gateway_public_ip>:<spark_ui_port>
 ```
+
+Le port exact est affiché dans les logs de lancement de PySpark. Si `4040` est
+déjà utilisé par un autre étudiant, cherchez `4041`, `4042`, etc. Vous pouvez
+aussi l'afficher depuis PySpark :
+
+```python
+sc.uiWebUrl
+```
+
+Si l'URL affichée contient encore le nom interne `gateway`, remplacez
+simplement `gateway` par l'adresse IP publique du gateway dans votre navigateur.
+Après configuration complète du cluster, Spark doit afficher directement une
+URL de type `http://<gateway_public_ip>:4040`.
 
 Répondez aux questions suivantes.
 

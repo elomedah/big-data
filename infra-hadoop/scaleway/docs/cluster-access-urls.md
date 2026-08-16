@@ -40,7 +40,7 @@ Worker 3 HBase RegionServer: http://<gateway_public_ip>:16032
 ## Spark Live UI
 
 Spark live UI is available only while a Spark application is running. It is not
-exposed through the gateway reverse proxy because ports `4040-4050` are
+exposed through the gateway reverse proxy because ports `4040-4500` are
 temporary and may be owned directly by Spark drivers on the gateway.
 
 For finished Spark applications, use:

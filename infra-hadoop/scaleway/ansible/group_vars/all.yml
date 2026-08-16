@@ -55,7 +55,7 @@ student_password_lock: true
 teacher_user: teacher
 
 yarn_students_capacity: 60
-yarn_students_max_capacity: 70
+yarn_students_max_capacity: 100
 yarn_nodemanager_resource_memory_mb: -1
 yarn_nodemanager_resource_system_reserved_memory_mb: -1
 yarn_nodemanager_resource_system_reserved_memory_ratio: 0.2

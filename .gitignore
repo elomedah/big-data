@@ -10,6 +10,9 @@
 **/backend.hcl
 **/*.tfplan
 
+# Local teacher corrections
+tp/*/enseignants/
+
 # Local OS/editor files
 .DS_Store
 Thumbs.db

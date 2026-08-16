@@ -264,7 +264,159 @@ Répondez aux questions suivantes.
 3. Quelle différence faites-vous entre l’interface ResourceManager et le HistoryServer ?
 4. Pourquoi les logs sont-ils essentiels pour diagnostiquer un échec de traitement ?
 
-## Exercice 7 - Comprendre le déroulement MapReduce
+
+## Exercice 7 - Simuler une erreur et lire les logs
+
+### Erreur 1
+
+Lancez volontairement un job avec un dossier d’entrée inexistant.
+
+```bash
+hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
+  wordcount \
+  /user/$USER/tp03/input-does-not-exist \
+  /user/$USER/tp03/output-error
+```
+
+Répondez aux questions suivantes.
+
+1. Quel message d’erreur est affiché dans le terminal ?
+2. L’application apparaît-elle dans YARN ?
+3. Est-ce une erreur d’entrée, une erreur de ressources, une erreur de code ou une erreur système ?
+4. Pourquoi est-il important de distinguer ces catégories d’erreurs ?
+5. Quelle démarche suivriez-vous pour diagnostiquer un job MapReduce échoué en production ?
+
+
+### Erreur 2
+
+Lancez volontairement un job avec un dossier de sortie existant.
+
+```bash
+hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
+  wordcount \
+  /user/$USER/tp03/input \
+  /user/$USER/tp03/output-wordcount
+```
+
+### Erreur 3
+
+Simulez une erreur après le lancement du job : démarrez un traitement YARN en
+arrière-plan, attendez quelques secondes, puis supprimez son fichier d'entrée
+pendant l'exécution.
+
+```bash
+hdfs dfs -rm -r -f /user/$USER/tp03/output-input-deleted
+
+(
+  hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
+    wordcount \
+    /user/$USER/tp03/input \
+    /user/$USER/tp03/output-input-deleted &
+
+  job_pid=$!
+  sleep 5
+  hdfs dfs -rm -f /user/$USER/tp03/input/logs-mapreduce-large.txt
+  wait $job_pid
+)
+```
+
+Observez ensuite l'état de l'application dans YARN.
+
+```bash
+yarn application -list -appStates ALL
+yarn logs -applicationId <application_id>
+```
+
+Si le job se termine trop vite, recommencez l'expérience avec un fichier
+d'entrée plus volumineux ou diminuez le délai `sleep 5`. Selon le moment où les
+tâches MapReduce ont déjà ouvert leurs splits, le job peut échouer ou se
+terminer malgré la suppression.
+
+Restaurez le fichier d'entrée après l'expérience.
+
+```bash
+hdfs dfs -put -f logs-mapreduce-large.txt /user/$USER/tp03/input/
+```
+
+Répondez aux questions suivantes.
+
+1. Le job échoue-t-il toujours lorsque le fichier d'entrée est supprimé après le lancement ?
+2. À quel moment l'erreur apparaît-elle : soumission du job, exécution des mappers, reducers ou écriture de sortie ?
+3. Où trouvez-vous le message le plus utile : terminal, ResourceManager, HistoryServer ou logs YARN ?
+4. Pourquoi cette erreur est-elle plus intéressante qu'un dossier d'entrée inexistant avant le lancement ?
+5. Que faudrait-il éviter en production pour ne pas supprimer des données pendant qu'un traitement les lit ?
+
+
+### Erreur 4
+
+Lancez volontairement un job qui demande plus de CPU et de mémoire que ce qui
+est autorisé pour les étudiants.
+
+```bash
+hdfs dfs -rm -r -f /user/$USER/tp03/output-resource-error
+
+hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
+  wordcount \
+  -D mapreduce.map.memory.mb=4096 \
+  -D mapreduce.reduce.memory.mb=4096 \
+  -D mapreduce.map.cpu.vcores=2 \
+  -D mapreduce.reduce.cpu.vcores=2 \
+  /user/$USER/tp03/input \
+  /user/$USER/tp03/output-resource-error
+```
+
+Dans ce cluster, les conteneurs étudiants sont volontairement limités. Si la
+demande dépasse la mémoire maximale ou le nombre maximal de vcores autorisés
+par YARN, l'application doit être refusée ou rester impossible à planifier.
+
+Observez l'erreur dans le terminal, puis dans YARN.
+
+```bash
+yarn application -list -appStates ALL
+yarn logs -applicationId <application_id>
+```
+
+Répondez aux questions suivantes.
+
+1. Quel message indique que la demande de ressources est trop élevée ?
+2. Le job est-il refusé immédiatement ou reste-t-il en attente ?
+3. Quelle ressource pose problème : mémoire, CPU ou les deux ?
+4. Pourquoi YARN limite-t-il les ressources demandées par une seule application ?
+5. Quel réglage faudrait-il diminuer pour que ce job puisse être accepté ?
+
+
+## Exercice 8 - Lien avec le projet fil rouge
+
+Dans le projet DORA, les traitements distribués peuvent servir à :
+
+- compter des événements par application ;
+- détecter des erreurs fréquentes ;
+- produire des indicateurs quotidiens ;
+- préparer des données pour Hive ;
+- produire des preuves d’audit.
+
+Répondez aux questions suivantes.
+
+1. Quels traitements du projet devraient être lancés régulièrement sur YARN ?
+2. Quels traitements peuvent être exécutés en batch de nuit ?
+3. Quels traitements doivent être prioritaires en cas d’incident ?
+4. Quelles informations faut-il conserver pour prouver qu’un traitement a bien été exécuté ?
+5. Comment organiseriez-vous les sorties MapReduce dans les zones `processed` et `audit` du Data Lake ?
+6. Quels risques apparaissent si les étudiants ou les traitements automatiques écrivent tous dans les mêmes dossiers de sortie ?
+
+## Nettoyage
+
+Supprimez les fichiers locaux créés pendant le TP.
+
+```bash
+rm -f logs-mapreduce.txt logs-mapreduce-large.txt
+```
+
+```bash
+hdfs dfs -rm -r -f /user/$USER/tp03
+```
+
+## Exercice 9 - Comprendre le déroulement MapReduce (Optionnel)
 
 Un job MapReduce WordCount suit plusieurs étapes :
 
@@ -300,56 +452,6 @@ Répondez aux questions suivantes.
 4. Pourquoi MapReduce écrit-il le résultat final dans HDFS ?
 5. Quelles sont les limites de MapReduce pour des traitements interactifs ou itératifs ?
 6. Pourquoi MapReduce reste-t-il utile à étudier même si Spark est souvent utilisé en production ?
-
-## Exercice 8 - Simuler une erreur et lire les logs
-
-Lancez volontairement un job avec un dossier d’entrée inexistant.
-
-```bash
-hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
-  wordcount \
-  /user/$USER/tp03/input-does-not-exist \
-  /user/$USER/tp03/output-error
-```
-
-Répondez aux questions suivantes.
-
-1. Quel message d’erreur est affiché dans le terminal ?
-2. L’application apparaît-elle dans YARN ?
-3. Est-ce une erreur d’entrée, une erreur de ressources, une erreur de code ou une erreur système ?
-4. Pourquoi est-il important de distinguer ces catégories d’erreurs ?
-5. Quelle démarche suivriez-vous pour diagnostiquer un job MapReduce échoué en production ?
-
-## Exercice 9 - Lien avec le projet fil rouge
-
-Dans le projet DORA, les traitements distribués peuvent servir à :
-
-- compter des événements par application ;
-- détecter des erreurs fréquentes ;
-- produire des indicateurs quotidiens ;
-- préparer des données pour Hive ;
-- produire des preuves d’audit.
-
-Répondez aux questions suivantes.
-
-1. Quels traitements du projet devraient être lancés régulièrement sur YARN ?
-2. Quels traitements peuvent être exécutés en batch de nuit ?
-3. Quels traitements doivent être prioritaires en cas d’incident ?
-4. Quelles informations faut-il conserver pour prouver qu’un traitement a bien été exécuté ?
-5. Comment organiseriez-vous les sorties MapReduce dans les zones `processed` et `audit` du Data Lake ?
-6. Quels risques apparaissent si les étudiants ou les traitements automatiques écrivent tous dans les mêmes dossiers de sortie ?
-
-## Nettoyage
-
-Supprimez les fichiers locaux créés pendant le TP.
-
-```bash
-rm -f logs-mapreduce.txt logs-mapreduce-large.txt
-```
-
-```bash
-hdfs dfs -rm -r -f /user/$USER/tp03
-```
 
 ## À retenir
 

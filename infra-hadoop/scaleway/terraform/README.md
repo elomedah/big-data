@@ -575,7 +575,7 @@ instances, Block Storage volumes, snapshots or public IPs remain.
   configured worker count. It also opens Spark History Server `18080` and
   HiveServer2 Web UI `10002`, which are served directly by services running on
   the gateway and are not handled by Nginx. Spark application UIs on
-  `4040-4050` are not proxied because those ports are ephemeral and may be
+  `4040-4500` are not proxied because those ports are ephemeral and may be
   owned directly by Spark drivers on the gateway.
 - Data disks are attached to the master and workers as separate Block Storage
   volumes. They survive worker compute resizing and are protected by default

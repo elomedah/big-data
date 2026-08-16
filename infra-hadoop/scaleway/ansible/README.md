@@ -170,6 +170,17 @@ yarn_maximum_allocation_vcores: 1
 This means YARN can see most worker resources, but one Spark/MapReduce
 container cannot request more than 2 GB and 1 vcore.
 
+The student queue has a guaranteed capacity and a maximum burst capacity:
+
+```yaml
+yarn_students_capacity: 60
+yarn_students_max_capacity: 100
+```
+
+The `100` maximum lets student jobs use idle cluster resources when the
+`default` queue is not active. This is useful for TP sessions where several
+students start PySpark at the same time.
+
 If the UI still shows auto-detected values, rerun the Hadoop role and restart
 YARN services:
 

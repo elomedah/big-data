@@ -6,3 +6,6 @@ export SPARK_HOME={{ spark_home }}
 export PYSPARK_PYTHON=python3
 export SPARK_LOG_DIR=/var/log/spark
 export SPARK_PID_DIR=/run/spark
+{% if inventory_hostname in groups['gateway'] %}
+export SPARK_PUBLIC_DNS={{ hostvars[groups['gateway'][0]].public_ip }}
+{% endif %}

@@ -170,6 +170,25 @@ yarn_maximum_allocation_vcores: 1
 This means YARN can see most worker resources, but one Spark/MapReduce
 container cannot request more than 2 GB and 1 vcore.
 
+Spark jobs are submitted to the student queue by default:
+
+```properties
+spark.yarn.queue students
+```
+
+For TP concurrency, PySpark uses one executor by default:
+
+```yaml
+spark_executor_instances: 1
+spark_executor_cores: 1
+spark_yarn_am_cores: 1
+```
+
+A PySpark session on YARN still consumes at least two YARN containers: one
+ApplicationMaster and one executor. With the defaults above, one active PySpark
+session therefore uses about 2 vcores in YARN, even though each individual
+container is limited to 1 vcore.
+
 The student queue has a guaranteed capacity and a maximum burst capacity:
 
 ```yaml

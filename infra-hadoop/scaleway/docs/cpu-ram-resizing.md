@@ -308,22 +308,23 @@ again.
 
 ### 5. Start services again
 
-If the machines were only resized and the OS configuration is still present:
-
-```bash
-cd ../ansible
-ansible-playbook start-services.yml
-```
-
 If Terraform recreated VMs or if you are unsure:
 
 ```bash
-cd ../ansible
+cd infra-hadoop/scaleway/ansible
 ansible-playbook site.yml
 ```
 
 `site.yml` is longer, but it reinstalls/reconfigures the nodes and is safer
 after instance replacement.
+
+If the machines were only resized and the OS configuration is still present:
+
+```bash
+cd infra-hadoop/scaleway/ansible
+ansible-playbook start-services.yml
+```
+
 
 ### 6. Verify the cluster
 

@@ -97,6 +97,11 @@ Dans un TP interactif, le mode `client` est plus simple à observer. En
 production, le mode `cluster` est souvent préférable pour des traitements
 automatisés.
 
+Une session PySpark sur YARN consomme au minimum deux rôles côté YARN :
+l'ApplicationMaster et au moins un executor. Dans l'interface YARN, il est donc
+normal qu'une session PySpark utilise plus d'un vcore au total, même si chaque
+container est limité à `1` vcore.
+
 ## Exercice 1 - Situer Spark dans l’écosystème Hadoop
 
 Spark n’est pas un système de stockage. Il lit des données depuis HDFS ou d’autres systèmes de stockage, puis exécute des traitements distribués.

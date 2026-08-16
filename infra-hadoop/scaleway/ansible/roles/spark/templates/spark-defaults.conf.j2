@@ -1,13 +1,17 @@
 spark.master                       yarn
 spark.submit.deployMode            client
+spark.yarn.queue                   students
 spark.yarn.jars                    hdfs://{{ spark_jars_dir }}/*
 spark.eventLog.enabled             true
 spark.eventLog.dir                 hdfs://{{ spark_event_log_dir }}
 spark.history.fs.logDirectory      hdfs://{{ spark_event_log_dir }}
 spark.ui.reverseProxy              true
 spark.driver.memory                {{ spark_driver_memory }}
+spark.executor.instances           {{ spark_executor_instances }}
 spark.executor.memory              {{ spark_executor_memory }}
 spark.executor.cores               {{ spark_executor_cores }}
+spark.yarn.am.memory               {{ spark_yarn_am_memory }}
+spark.yarn.am.cores                {{ spark_yarn_am_cores }}
 spark.yarn.appMasterEnv.JAVA_HOME  /usr/lib/jvm/java-11-openjdk-amd64
 spark.executorEnv.JAVA_HOME        /usr/lib/jvm/java-11-openjdk-amd64
 spark.yarn.appMasterEnv.HADOOP_CONF_DIR {{ hadoop_home }}/etc/hadoop

@@ -18,8 +18,11 @@ spark_home: /opt/spark
 spark_event_log_dir: /spark-logs
 spark_jars_dir: /spark-jars
 spark_driver_memory: 512m
+spark_executor_instances: 1
 spark_executor_memory: 768m
 spark_executor_cores: 1
+spark_yarn_am_memory: 512m
+spark_yarn_am_cores: 1
 
 hive_version: "4.0.1"
 hive_package: "apache-hive-{{ hive_version }}-bin"

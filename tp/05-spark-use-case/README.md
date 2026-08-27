@@ -41,10 +41,12 @@ votre machine.
 ```bash
 cd tp/01-big-data-hadoop
 docker compose up -d
-docker exec -it tp-hadoop bash
+docker exec -it --user hadoop tp-hadoop bash
 ```
 
-Dans le conteneur, vérifiez que les commandes répondent.
+Utilisez l'utilisateur `hadoop` dans le conteneur afin que les fichiers HDFS et
+les jobs YARN soient créés avec les bons droits. Dans le conteneur, vérifiez que
+les commandes répondent.
 
 ```bash
 export USER=$(whoami)
@@ -94,11 +96,7 @@ Interfaces cluster utiles :
 YARN ResourceManager: http://<gateway_public_ip>:8088
 Spark History Server: http://<gateway_public_ip>:18080
 Spark Live UI:        http://<gateway_public_ip>:4040
-```
 
-## Exercice 1 - Préparer les zones du Data Lake
-
-Créez une arborescence de travail dans votre espace HDFS.
 
 ```bash
 hdfs dfs -mkdir -p /user/$USER/datalake/raw/team_payments/application_logs/year=2026/month=01/day=15
@@ -837,7 +835,7 @@ Répondez aux questions suivantes.
 2. À quoi sert l’option `--py-files` de `spark-submit` ?
 3. Que faudrait-il ajouter pour transformer cet exemple en projet industrialisable ?
 
-## Nettoyage
+## Nettoyage (Optionnel : le TP-06 aura besoin des données)
 
 Supprimez les fichiers locaux créés pendant le TP.
 

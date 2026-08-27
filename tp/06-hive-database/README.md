@@ -51,13 +51,15 @@ docker ps
 Connectez-vous à Hive avec `beeline`.
 
 ```bash
-beeline -u jdbc:hive2://localhost:10000
+export HIVE_USER=$(whoami)
+beeline -u 'jdbc:hive2://localhost:10000/default;auth=noSasl' -n "$HIVE_USER"
 ```
 
-Si `beeline` est exécuté depuis un conteneur, adaptez la commande au nom du service Hive utilisé dans votre installation.
+Si `beeline` est exécuté depuis la machine hôte, lancez-le dans le conteneur
+`tp-hadoop`.
 
 ```bash
-docker exec -it hive-server beeline -u jdbc:hive2://localhost:10000
+docker exec -it tp-hadoop bash -lc 'export HIVE_USER=$(whoami) && beeline -u "jdbc:hive2://localhost:10000/default;auth=noSasl" -n "$HIVE_USER"'
 ```
 
 ### Option B - Gateway Hadoop du cours
@@ -79,7 +81,8 @@ Vérifiez que HDFS et Hive répondent.
 
 ```bash
 hdfs dfs -ls /
-beeline -u jdbc:hive2://localhost:10000
+export HIVE_USER=$(whoami)
+beeline -u 'jdbc:hive2://localhost:10000/default;auth=noSasl' -n "$HIVE_USER"
 ```
 
 Interfaces utiles :
@@ -112,49 +115,36 @@ Répondez aux questions suivantes.
 
 ## Exercice 2 - Préparer les données du projet fil rouge
 
-Si vous avez terminé le TP 05, vous pouvez réutiliser les données déjà créées dans `/user/$USER/datalake`.
+Ce TP part du principe que les données du TP 05 sont déjà présentes dans
+`/user/$USER/datalake`. Ne créez pas de nouveau jeu de données : réutilisez les
+logs bruts, les référentiels et les sorties Parquet ou ORC produits par Spark.
 
-Sinon, créez un jeu minimal de logs bruts.
+Vérifiez que l'arborescence attendue existe.
 
 ```bash
-hdfs dfs -mkdir -p /user/$USER/datalake/raw/team_payments/application_logs/year=2026/month=01/day=15
-hdfs dfs -mkdir -p /user/$USER/datalake/raw/team_security/application_logs/year=2026/month=01/day=15
-hdfs dfs -mkdir -p /user/$USER/datalake/processed/logs/daily_app_metrics_orc/event_date=2026-01-15/app_id=payment-api
+hdfs dfs -ls -R /user/$USER/datalake/raw
+hdfs dfs -ls -R /user/$USER/datalake/processed/logs
+hdfs dfs -ls -R /user/$USER/datalake/audit/spark
+```
+
+Créez uniquement le dossier d'audit Hive s'il n'existe pas encore.
+
+```bash
 hdfs dfs -mkdir -p /user/$USER/datalake/audit/hive
 ```
 
-Créez un fichier local de logs bruts.
-
-```bash
-cat > hive_raw_logs.csv <<'EOF'
-event_ts,app_id,env,level,status_code,response_time_ms,request_id,message
-2026-01-15T08:00:00Z,payment-api,prod,INFO,200,120,req-001,payment accepted
-2026-01-15T08:01:10Z,payment-api,prod,WARN,200,920,req-002,slow acquirer response
-2026-01-15T08:02:15Z,payment-api,prod,ERROR,504,2100,req-003,acquirer timeout
-2026-01-15T08:00:11Z,auth-service,prod,INFO,200,80,req-101,token issued
-2026-01-15T08:01:28Z,auth-service,prod,ERROR,401,95,req-102,invalid credentials
-EOF
-```
-
-Déposez le fichier dans la zone `raw`.
-
-```bash
-hdfs dfs -put -f hive_raw_logs.csv /user/$USER/datalake/raw/team_payments/application_logs/year=2026/month=01/day=15/
-```
-
-Vérifiez l'arborescence.
-
-```bash
-hdfs dfs -ls -R /user/$USER/datalake
-```
+Si une des commandes de vérification échoue, revenez au TP 05 et relancez le
+traitement Spark avant de continuer ce TP.
 
 
 ## Exercice 3 - Se connecter à Hive et inspecter l'environnement
 
-Connectez-vous avec `beeline`.
+Récupérez d'abord le nom de l'utilisateur courant, puis connectez-vous avec
+`beeline` en transmettant ce nom à HiveServer2.
 
 ```bash
-beeline -u jdbc:hive2://localhost:10000
+export HIVE_USER=$(whoami)
+beeline -u 'jdbc:hive2://localhost:10000/default;auth=noSasl' -n "$HIVE_USER"
 ```
 
 Dans Hive, affichez les bases existantes.
@@ -177,25 +167,29 @@ SELECT current_user();
 
 ## Exercice 4 - Créer une base Hive pour le projet
 
-Créez une base dédiée. Remplacez `identifiant` par votre identifiant si la variable n'est pas disponible dans votre environnement Hive.
+Créez une base dédiée. Remplacez `<identifiant>` par votre identifiant si la
+variable n'est pas disponible dans votre environnement Hive.
+
+**Les caractères `<` et `>` sont volontaires : la requête échouera si vous ne
+remplacez pas `<identifiant>` par votre vrai nom d'utilisateur.**
 
 ```sql
-CREATE DATABASE IF NOT EXISTS dora_fil_rouge_identifiant
+CREATE DATABASE IF NOT EXISTS dora_fil_rouge_<identifiant>
 COMMENT 'Base Hive du projet fil rouge DORA'
-LOCATION '/user/identifiant/hive/dora_fil_rouge.db';
+LOCATION '/user/<identifiant>/hive/dora_fil_rouge.db';
 ```
 
 Utilisez la base.
 
 ```sql
-USE dora_fil_rouge_identifiant;
+USE dora_fil_rouge_<identifiant>;
 ```
 
 Vérifiez.
 
 ```sql
 SHOW DATABASES LIKE 'dora*';
-DESCRIBE DATABASE EXTENDED dora_fil_rouge_identifiant;
+DESCRIBE DATABASE EXTENDED dora_fil_rouge_<identifiant>;
 ```
 
 Répondez aux questions suivantes.
@@ -208,6 +202,12 @@ Répondez aux questions suivantes.
 ## Exercice 5 - Créer une table externe sur les logs bruts
 
 Créez une table externe partitionnée sur les logs bruts.
+
+**Remplacez `<identifiant>` par votre nom d'utilisateur HDFS. Pour le connaître,
+exécutez `whoami` dans le terminal avant d'ouvrir Hive. Dans le conteneur Docker
+du TP, ce nom peut être `root` ou `hadoop` selon l'utilisateur utilisé. Sur la
+gateway du cluster, utilisez votre identifiant étudiant affiché par `whoami`.
+Supprimez aussi les caractères `<` et `>` lors du remplacement.**
 
 ```sql
 CREATE EXTERNAL TABLE IF NOT EXISTS raw_application_logs (
@@ -229,7 +229,7 @@ PARTITIONED BY (
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
-LOCATION '/user/identifiant/datalake/raw';
+LOCATION '/user/<identifiant>/datalake/raw';
 ```
 
 Ajoutez explicitement une partition.
@@ -242,7 +242,7 @@ PARTITION (
   month='01',
   day='15'
 )
-LOCATION '/user/identifiant/datalake/raw/team_payments/application_logs/year=2026/month=01/day=15';
+LOCATION '/user/<identifiant>/datalake/raw/team_payments/application_logs/year=2026/month=01/day=15';
 ```
 
 Listez les partitions.
@@ -300,7 +300,11 @@ Répondez aux questions suivantes.
 
 ## Exercice 7 - Créer une table externe sur les indicateurs traités
 
-Si vous avez produit la sortie ORC du TP 05, créez une table externe dessus.
+Créez une table externe sur la sortie Parquet produite dans le TP 05.
+
+Dans l'image Docker du cours, utilisez Parquet pour cette table. Certaines
+combinaisons Hive/ORC peuvent échouer à la lecture de fichiers ORC écrits par
+Spark avec une erreur de compatibilité ORC/protobuf.
 
 ```sql
 CREATE EXTERNAL TABLE IF NOT EXISTS processed_daily_app_metrics (
@@ -320,8 +324,8 @@ PARTITIONED BY (
   event_date STRING,
   app_id STRING
 )
-STORED AS ORC
-LOCATION '/user/identifiant/datalake/processed/logs/daily_app_metrics_orc';
+STORED AS PARQUET
+LOCATION '/user/<identifiant>/datalake/processed/logs/daily_app_metrics_parquet';
 ```
 
 Demandez à Hive de découvrir les partitions existantes.
@@ -340,7 +344,9 @@ WHERE event_date = '2026-01-15'
 ORDER BY error_rate DESC;
 ```
 
-Si vos sorties sont en Parquet au lieu d'ORC, utilisez `STORED AS PARQUET` et pointez vers le dossier Parquet produit dans le TP 05.
+Si votre environnement Hive lit correctement les fichiers ORC produits par
+Spark, vous pouvez utiliser `STORED AS ORC` et pointer vers
+`/user/<identifiant>/datalake/processed/logs/daily_app_metrics_orc`.
 
 Répondez aux questions suivantes.
 
@@ -369,7 +375,7 @@ PARTITIONED BY (
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
-LOCATION '/user/identifiant/datalake/audit/hive/checks';
+LOCATION '/user/<identifiant>/datalake/audit/hive/checks';
 ```
 
 Créez un fichier local de contrôle.
@@ -396,13 +402,6 @@ SELECT *
 FROM audit_hive_checks
 WHERE check_date = '2026-01-15';
 ```
-
-Répondez aux questions suivantes.
-
-1. Pourquoi conserver des résultats de contrôle dans `audit` ?
-2. Quelles informations manquent pour rendre le contrôle totalement reproductible ?
-3. Pourquoi faut-il historiser les contrôles plutôt que conserver seulement le dernier résultat ?
-4. Comment utiliseriez-vous cette table lors d'un audit DORA ?
 
 ## Exercice 9 - Requêtes analytiques sur le projet fil rouge
 
@@ -449,11 +448,8 @@ ORDER BY error_rate DESC, sla_breach_count DESC;
 
 Répondez aux questions suivantes.
 
-1. Quelle requête est la plus proche d'un besoin d'exploitation ?
-2. Quelle requête est la plus proche d'un besoin d'audit ?
-3. Pourquoi filtrer sur les colonnes de partition ?
-4. Que se passerait-il sur plusieurs années de logs sans filtre de partition ?
-5. Quels indicateurs ajouteriez-vous pour suivre la résilience opérationnelle ?
+1. Pourquoi filtrer sur les colonnes de partition ?
+2. Que se passerait-il sur plusieurs années de logs sans filtre de partition ?
 
 ## Exercice 10 - Observer le plan d'exécution
 
@@ -509,7 +505,29 @@ DESCRIBE FORMATTED demo_internal_table;
 DESCRIBE FORMATTED raw_application_logs;
 ```
 
-Ne supprimez pas encore les tables.
+Dans un terminal, observez les fichiers HDFS créés pour la table interne.
+
+```bash
+hdfs dfs -ls -R /user/$USER/hive/dora_fil_rouge.db/demo_internal_table
+```
+```bash
+hdfs dfs -cat /user/$USER/hive/dora_fil_rouge.db/demo_internal_table/*
+```
+
+Dans Hive, supprimez la table interne.
+
+```sql
+DROP TABLE demo_internal_table;
+```
+
+Dans le terminal, relancez la vérification HDFS.
+
+```bash
+hdfs dfs -ls -R /user/$USER/hive/dora_fil_rouge.db/demo_internal_table
+```
+
+La commande doit indiquer que le chemin n'existe plus : Hive a supprimé les
+fichiers car `demo_internal_table` est une table interne.
 
 Répondez aux questions suivantes.
 
@@ -517,28 +535,6 @@ Répondez aux questions suivantes.
 2. Où sont stockées les données de la table interne ?
 3. Pourquoi une suppression de table interne peut-elle être plus dangereuse ?
 4. Pourquoi les tables externes sont-elles préférées pour exposer les zones du Data Lake ?
-
-## Exercice 12 - Livrable projet
-
-Préparez un court livrable avec :
-
-- le nom de votre base Hive ;
-- la liste des tables créées ;
-- le schéma de `raw_application_logs` ;
-- le schéma de `processed_daily_app_metrics` si disponible ;
-- la liste des partitions ;
-- trois requêtes HiveQL utiles pour le projet DORA ;
-- une justification du choix des partitions ;
-- une explication de la différence entre `raw`, `processed` et `audit`.
-
-Commandes utiles :
-
-```sql
-SHOW TABLES;
-DESCRIBE raw_application_logs;
-SHOW PARTITIONS raw_application_logs;
-DESCRIBE FORMATTED raw_application_logs;
-```
 
 
 ## À retenir

@@ -194,7 +194,7 @@ Web UIs:
   HBase RegionServer:     http://localhost:16030
 
 Shell:
-  docker exec -it tp-hadoop bash
+  docker exec -it --user hadoop tp-hadoop bash
 
 EOF
 }

@@ -7,6 +7,7 @@
 - situer Hadoop dans une architecture Big Data moderne ;
 - expliquer pourquoi une architecture distribuée est nécessaire pour certains cas d’usage ;
 - identifier les premiers enjeux d’accès, de sécurité et de gouvernance ;
+- démarrer l'image Docker locale utilisée dans les TP ;
 - générer une clé SSH personnelle ;
 - transmettre uniquement votre clé publique à l’enseignant ;
 - vous connecter au gateway Hadoop ;
@@ -109,8 +110,11 @@ docker compose up -d
 Entrez dans le conteneur `tp-hadoop`.
 
 ```bash
-docker exec -it tp-hadoop bash
+docker exec -it --user hadoop tp-hadoop bash
 ```
+
+Utilisez l'utilisateur `hadoop` dans le conteneur afin que les fichiers HDFS et
+les jobs YARN soient créés avec les bons droits.
 
 Vérifiez que les commandes principales répondent.
 
@@ -143,7 +147,7 @@ spark-submit \
 Vérifiez Hive.
 
 ```bash
-beeline -u 'jdbc:hive2://localhost:10000/default;auth=noSasl' -e 'SHOW DATABASES;'
+beeline -u 'jdbc:hive2://localhost:10000/default;auth=noSasl' -n hadoop -e 'SHOW DATABASES;'
 ```
 
 Vérifiez HBase.

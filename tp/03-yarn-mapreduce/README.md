@@ -28,7 +28,46 @@ L’objectif n’est pas seulement de lancer une commande, mais de comprendre ce
 
 ## Prérequis
 
-Vous devez être connecté au gateway Hadoop avec votre compte étudiant.
+Vous pouvez réaliser ce TP dans l'environnement Docker local du TP 01 ou sur le
+gateway Hadoop du cours.
+
+### Option A - Docker local
+
+Démarrez l'environnement Docker du TP 01, puis entrez dans le conteneur avec
+l'utilisateur `hadoop`.
+
+```bash
+cd tp/01-big-data-hadoop
+docker compose up -d
+docker exec -it --user hadoop tp-hadoop bash
+```
+
+Dans le conteneur, initialisez la variable `USER` et vérifiez que HDFS et YARN
+répondent.
+
+```bash
+export USER=$(whoami)
+hdfs dfs -ls /
+yarn node -list
+yarn application -list
+```
+
+Interfaces locales utiles :
+
+```text
+YARN ResourceManager:    http://localhost:8088
+MapReduce HistoryServer: http://localhost:19888
+NameNode UI:             http://localhost:9870
+```
+
+L'environnement Docker contient un seul NodeManager. Il permet d'observer le
+fonctionnement de YARN et de lancer des jobs MapReduce, mais les exercices sur
+la capacité du cluster ou les files d'attente doivent être interprétés comme une
+version locale simplifiée.
+
+### Option B - Gateway Hadoop du cours
+
+Connectez-vous au gateway Hadoop avec votre compte étudiant.
 
 ```bash
 ssh -i ~/.ssh/m2-hadoop-student identifiant@<gateway_public_ip>
@@ -100,7 +139,8 @@ yarn application -list -appStates ALL
 Ouvrez l’interface ResourceManager.
 
 ```text
-http://<gateway_public_ip>:8088
+Docker:  http://localhost:8088
+Cluster: http://<gateway_public_ip>:8088
 ```
 
 Répondez aux questions suivantes.
@@ -109,7 +149,7 @@ Répondez aux questions suivantes.
 2. Quelle est la mémoire totale disponible pour YARN ?
 3. Combien de vCPU sont visibles ?
 4. Y a-t-il des applications en cours d’exécution ?
-6. Pourquoi l’état des NodeManagers est-il important avant de lancer un traitement distribué ?
+5. Pourquoi l’état des NodeManagers est-il important avant de lancer un traitement distribué ?
 
 ## Exercice 3 - Explorer les files d’attente YARN
 
@@ -117,6 +157,14 @@ Affichez les informations de la file `default`.
 
 ```bash
 yarn queue -status default
+```
+
+Sur le cluster du cours, si une file dédiée vous est indiquée, vérifiez-la aussi.
+L'exemple suivant n'est à lancer que si la file `students` existe dans votre
+environnement.
+
+```bash
+yarn queue -status students
 ```
 
 Affichez les applications présentes dans toutes les files.
@@ -128,7 +176,8 @@ yarn application -list -appStates ALL
 Dans l’interface ResourceManager, ouvrez la partie liée au scheduler.
 
 ```text
-http://<gateway_public_ip>:8088/cluster/scheduler
+Docker:  http://localhost:8088/cluster/scheduler
+Cluster: http://<gateway_public_ip>:8088/cluster/scheduler
 ```
 
 Répondez aux questions suivantes.
@@ -207,7 +256,8 @@ hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
 Pendant l’exécution, ouvrez l’interface YARN.
 
 ```text
-http://<gateway_public_ip>:8088
+Docker:  http://localhost:8088
+Cluster: http://<gateway_public_ip>:8088
 ```
 
 Vérifiez le résultat.
@@ -223,7 +273,7 @@ Répondez aux questions suivantes.
 2. Quel est le nom de l’application affiché dans YARN ?
 3. Combien de temps le job a-t-il duré ?
 4. Quel fichier contient le résultat final ?
-6. Quels mots apparaissent le plus souvent dans le résultat ?
+5. Quels mots apparaissent le plus souvent dans le résultat ?
 
 ## Exercice 6 - Suivre une application YARN
 
@@ -254,7 +304,8 @@ yarn logs -applicationId <application_id>
 Ouvrez aussi le MapReduce HistoryServer.
 
 ```text
-http://<gateway_public_ip>:19888
+Docker:  http://localhost:19888
+Cluster: http://<gateway_public_ip>:19888
 ```
 
 Répondez aux questions suivantes.
@@ -350,7 +401,10 @@ Répondez aux questions suivantes.
 ### Erreur 4
 
 Lancez volontairement un job qui demande plus de CPU et de mémoire que ce qui
-est autorisé pour les étudiants.
+est autorisé dans votre environnement.
+
+Dans Docker, l'image locale limite YARN à une petite capacité. Utilisez cette
+variante.
 
 ```bash
 hdfs dfs -rm -r -f /user/$USER/tp03/output-resource-error
@@ -365,9 +419,16 @@ hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
   /user/$USER/tp03/output-resource-error
 ```
 
-Dans ce cluster, les conteneurs étudiants sont volontairement limités. Si la
-demande dépasse la mémoire maximale ou le nombre maximal de vcores autorisés
-par YARN, l'application doit être refusée ou rester impossible à planifier.
+Sur le cluster du cours, les conteneurs étudiants peuvent avoir d'autres limites.
+Si la commande précédente ne provoque pas d'erreur, augmentez les valeurs pour
+dépasser les limites indiquées par YARN.
+
+Consultez l'interface du scheduler dans le ResourceManager pour repérer les
+limites de mémoire et de vCPU applicables à votre file.
+
+Dans les deux cas, si la demande dépasse la mémoire maximale ou le nombre
+maximal de vcores autorisés par YARN, l'application doit être refusée ou rester
+impossible à planifier.
 
 Observez l'erreur dans le terminal, puis dans YARN.
 

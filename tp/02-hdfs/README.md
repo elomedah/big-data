@@ -26,7 +26,43 @@ Dans ce TP, vous allez utiliser HDFS pour simuler les premières étapes d’un 
 
 ## Prérequis
 
-Vous devez être connecté au gateway Hadoop avec votre compte étudiant.
+Vous pouvez réaliser ce TP dans l'environnement Docker local du TP 01 ou sur le
+gateway Hadoop du cours.
+
+### Option A - Docker local
+
+Démarrez l'environnement Docker du TP 01, puis entrez dans le conteneur avec
+l'utilisateur `hadoop`.
+
+```bash
+cd tp/01-big-data-hadoop
+docker compose up -d
+docker exec -it --user hadoop tp-hadoop bash
+```
+
+Dans le conteneur, initialisez la variable `USER` et vérifiez que HDFS répond.
+
+```bash
+export USER=$(whoami)
+hdfs dfs -ls /
+hdfs dfsadmin -report
+```
+
+Interfaces locales utiles :
+
+```text
+HDFS NameNode:        http://localhost:9870
+YARN ResourceManager: http://localhost:8088
+```
+
+L'environnement Docker contient un seul DataNode. Les exercices de réplication
+permettent donc d'observer les commandes et l'état `under replicated`, mais un
+facteur de réplication supérieur à `1` ne peut pas être réellement satisfait en
+local.
+
+### Option B - Gateway Hadoop du cours
+
+Connectez-vous au gateway Hadoop avec votre compte étudiant.
 
 ```bash
 ssh -i ~/.ssh/m2-hadoop-student identifiant@<gateway_public_ip>
@@ -43,6 +79,13 @@ Vérifiez que HDFS répond.
 ```bash
 hdfs dfs -ls /
 hdfs dfsadmin -report
+```
+
+Interfaces cluster utiles :
+
+```text
+HDFS NameNode:        http://<gateway_public_ip>:9870
+YARN ResourceManager: http://<gateway_public_ip>:8088
 ```
 
 ## Session d’onboarding HDFS - Commandes usuelles
@@ -322,11 +365,23 @@ Affichez le facteur de réplication actuel.
 hdfs dfs -stat %r /user/$USER/tp02/input/logs-applications.csv
 ```
 
-Modifiez le facteur de réplication à `2`.
+Modifiez le facteur de réplication demandé à `2`.
+
+Avec Docker local :
+
+```bash
+hdfs dfs -setrep 2 /user/$USER/tp02/input/logs-applications.csv
+```
+
+Sur le cluster du cours :
 
 ```bash
 hdfs dfs -setrep -w 2 /user/$USER/tp02/input/logs-applications.csv
 ```
+
+Dans Docker, HDFS ne possède qu'un seul DataNode : le facteur demandé est
+enregistré, mais les blocs restent sous-répliqués. Sur le cluster du cours, `-w`
+attend que HDFS crée les réplicas si suffisamment de DataNodes sont disponibles.
 
 Vérifiez le résultat.
 
@@ -335,11 +390,22 @@ hdfs dfs -stat %r /user/$USER/tp02/input/logs-applications.csv
 hdfs fsck /user/$USER/tp02/input/logs-applications.csv -files -blocks -locations
 ```
 
-Remettez le facteur de réplication à `3`.
+Remettez le facteur de réplication demandé à `3`.
+
+Avec Docker local :
+
+```bash
+hdfs dfs -setrep 3 /user/$USER/tp02/input/logs-applications.csv
+```
+
+Sur le cluster du cours :
 
 ```bash
 hdfs dfs -setrep -w 3 /user/$USER/tp02/input/logs-applications.csv
 ```
+
+Dans Docker, évitez `-w` avec un facteur supérieur à `1`, car le conteneur ne
+dispose pas d'assez de DataNodes pour satisfaire la demande.
 
 Répondez aux questions suivantes.
 
@@ -359,7 +425,8 @@ hdfs dfsadmin -report
 Ouvrez aussi l’interface NameNode.
 
 ```text
-http://<gateway_public_ip>:9870
+Docker:  http://localhost:9870
+Cluster: http://<gateway_public_ip>:9870
 ```
 
 Répondez aux questions suivantes.

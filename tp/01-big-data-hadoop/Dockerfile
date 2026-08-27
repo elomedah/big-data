@@ -34,6 +34,7 @@ RUN apt-get update \
         ca-certificates \
         curl \
         libpostgresql-jdbc-java \
+        nano \
         netcat-openbsd \
         openjdk-11-jdk \
         postgresql \
@@ -42,6 +43,7 @@ RUN apt-get update \
         python3 \
         rsync \
         tini \
+        vim-tiny \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --system hadoop \

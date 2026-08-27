@@ -35,20 +35,52 @@ Les logs doivent être :
 
 ## Prérequis
 
-Vous devez être connecté au gateway Hadoop avec votre compte étudiant.
+Pour la première partie du TP, démarrez l'environnement Docker du TP 01 sur
+votre machine.
+
+```bash
+cd tp/01-big-data-hadoop
+docker compose up -d
+docker exec -it tp-hadoop bash
+```
+
+Dans le conteneur, vérifiez que les commandes répondent.
+
+```bash
+export USER=$(whoami)
+hdfs dfs -ls /
+spark-submit --version
+yarn application -list
+```
+
+Si HDFS refuse une écriture avec un message indiquant que le NameNode est en
+`safe mode`, quittez le safe mode avant de relancer la commande.
+
+```bash
+hdfs dfsadmin -safemode leave
+```
+
+Interfaces locales utiles pendant cette première partie :
+
+```text
+YARN ResourceManager: http://localhost:8088
+Spark History Server: http://localhost:18080
+Spark Live UI:        http://localhost:4040
+```
+
+Si `4040` est déjà utilisé sur votre machine, Spark peut choisir `4041`,
+`4042`, etc.
+
+Pour une exécution sur le cluster du cours, connectez-vous au gateway Hadoop
+avec votre compte étudiant.
 
 ```bash
 ssh -i ~/.ssh/m2-hadoop-student identifiant@<gateway_public_ip>
-```
-
-Chargez les environnements Hadoop et Spark.
-
-```bash
 source /etc/profile.d/hadoop.sh
 source /etc/profile.d/spark.sh
 ```
 
-Vérifiez que Spark et HDFS répondent.
+Vérifiez alors que Spark et HDFS répondent.
 
 ```bash
 hdfs dfs -ls /
@@ -56,7 +88,7 @@ spark-submit --version
 yarn application -list
 ```
 
-Interfaces utiles :
+Interfaces cluster utiles :
 
 ```text
 YARN ResourceManager: http://<gateway_public_ip>:8088
@@ -87,8 +119,6 @@ Répondez aux questions suivantes.
 
 1. Pourquoi les équipes déposent-elles leurs fichiers dans des sous-dossiers distincts de `raw` ?
 2. Pourquoi conserve-t-on une organisation par année, mois et jour dès la zone brute ?
-3. Pourquoi ne faut-il pas écraser les fichiers bruts après transformation ?
-4. Quelles règles de nommage imposeriez-vous aux équipes qui déposent des fichiers dans `raw` ?
 
 ## Exercice 2 - Créer des logs applicatifs multi-équipes
 
@@ -147,10 +177,8 @@ hdfs dfs -ls -R /user/$USER/datalake/raw
 
 Répondez aux questions suivantes.
 
-1. Quels risques apparaissent si toutes les équipes déposent leurs logs dans le même dossier ?
-2. Comment identifieriez-vous l’équipe source d’un fichier sans ajouter une colonne dans le CSV ?
-3. Quels contrôles devriez-vous effectuer au moment du dépôt dans `raw` ?
-4. Pourquoi la zone `raw` doit-elle accepter plusieurs formats ou plusieurs producteurs ?
+1. Comment identifieriez-vous l’équipe source d’un fichier sans ajouter une colonne dans le CSV ?
+2. Quels contrôles devriez-vous effectuer au moment du dépôt dans `raw` ?
 
 ## Exercice 3 - Créer des référentiels pour les jointures
 
@@ -192,9 +220,7 @@ hdfs dfs -put -f app_sla.csv /user/$USER/datalake/raw/referentials/
 Répondez aux questions suivantes.
 
 1. Pourquoi séparer les logs et les référentiels ?
-2. Pourquoi les référentiels sont-ils nécessaires pour produire des indicateurs métier ?
-3. Que se passe-t-il si un `app_id` existe dans les logs mais pas dans le référentiel ?
-4. Qui devrait être responsable de la qualité des référentiels ?
+2. Que se passe-t-il si un `app_id` existe dans les logs mais pas dans le référentiel ?
 
 ## Exercice 4 - Lire les données avec un schéma explicite
 
@@ -285,9 +311,7 @@ spark-submit \
 Répondez aux questions suivantes.
 
 1. Pourquoi définit-on un schéma explicite au lieu d’utiliser `inferSchema` ?
-2. À quoi sert `input_file_name()` ?
-3. Comment la colonne `source_team` est-elle déduite ?
-4. Pourquoi est-il important de conserver le chemin du fichier source ?
+2. Comment la colonne `source_team` est-elle déduite ?
 
 ## Exercice 5 - Ajouter des colonnes métiers
 
@@ -327,9 +351,7 @@ Répondez aux questions suivantes.
 
 1. Pourquoi convertir `event_ts` en timestamp ?
 2. Pourquoi créer une colonne `event_date` ?
-3. Pourquoi créer une colonne `event_hour` ?
-4. Quel est l’intérêt des colonnes booléennes `is_error` et `is_warning` ?
-5. Comment pourriez-vous améliorer la colonne `latency_bucket` ?
+3. Quel est l’intérêt des colonnes booléennes `is_error` et `is_warning` ?
 
 ## Exercice 6 - Réaliser des jointures avec les référentiels
 
@@ -367,12 +389,10 @@ spark-submit \
 
 Répondez aux questions suivantes.
 
-1. Quel est le rôle d’une jointure dans ce pipeline ?
-2. Pourquoi utilise-t-on ici une jointure `left` ?
-3. Que signifie une ligne avec `app_name` à `null` ?
-4. Pourquoi peut-on utiliser `broadcast` sur les référentiels ?
-5. Dans quel cas le `broadcast` deviendrait-il dangereux ?
-6. Quel indicateur métier permet de produire la colonne `sla_breached` ?
+1. Pourquoi utilise-t-on ici une jointure `left` ?
+2. Que signifie une ligne avec `app_name` à `null` ?
+3. Pourquoi peut-on utiliser `broadcast` sur les référentiels ?
+4. Dans quel cas le `broadcast` deviendrait-il dangereux ?
 
 ## Exercice 7 - Agréger les indicateurs par application et par date
 
@@ -420,8 +440,6 @@ Répondez aux questions suivantes.
 1. Pourquoi agréger par `event_date` et `app_id` ?
 2. Quelle différence faites-vous entre `owner_team` et `source_team` ?
 3. Pourquoi le taux d’erreur est-il souvent plus utile que le nombre brut d’erreurs ?
-4. Quels indicateurs placeriez-vous dans un tableau de bord d’exploitation ?
-5. Quels indicateurs seraient utiles pour un audit DORA ?
 
 ## Exercice 8 - Sauvegarder en Parquet avec partitionnement
 
@@ -495,10 +513,7 @@ Répondez aux questions suivantes.
 
 1. Pourquoi partitionner les logs enrichis par `event_date` ?
 2. Pourquoi ajouter `app_id` dans le partitionnement ?
-3. Quels types de requêtes seront accélérés par ce partitionnement ?
-4. Quels risques apparaissent si une colonne de partitionnement possède trop de valeurs distinctes ?
-5. Pourquoi Spark écrit-il plusieurs fichiers `part-*` ?
-6. Pourquoi Parquet est-il plus adapté que CSV pour la zone `processed` ?
+3. Pourquoi Parquet est-il plus adapté que CSV pour la zone `processed` ?
 
 ## Exercice 9 - Lire des données partitionnées
 
@@ -547,8 +562,6 @@ Répondez aux questions suivantes.
 
 1. Où voyez-vous les colonnes de partition dans le schéma ?
 2. Pourquoi Spark peut-il éviter de lire certaines partitions ?
-3. Comment le partitionnement influence-t-il les performances de lecture ?
-4. Pourquoi le partitionnement ne remplace-t-il pas une bonne modélisation des données ?
 
 ## Exercice 10 - Sauvegarder en ORC
 
@@ -587,8 +600,6 @@ Répondez aux questions suivantes.
 
 1. Quelle différence faites-vous entre un format ligne et un format colonne ?
 2. Pourquoi Parquet et ORC sont-ils adaptés aux traitements analytiques ?
-3. Dans quels cas choisiriez-vous ORC plutôt que Parquet ?
-4. Pourquoi le choix du format doit-il être cohérent avec les outils de lecture futurs ?
 
 ## Exercice 11 - Gérer les lignes rejetées
 
@@ -627,19 +638,29 @@ rejected_logs_path = f"{base_path}/audit/spark/rejected_logs"
 Répondez aux questions suivantes.
 
 1. Pourquoi ne faut-il pas simplement supprimer les lignes invalides ?
-2. Pourquoi les lignes rejetées appartiennent-elles plutôt à la zone `audit` ?
-3. Quelles colonnes ajouteriez-vous pour expliquer la raison du rejet ?
-4. Comment alerteriez-vous une équipe qui dépose trop de lignes invalides ?
-5. Quel lien faites-vous entre qualité des données et conformité ?
+2. Quelles colonnes ajouteriez-vous pour expliquer la raison du rejet ?
 
 ## Exercice 12 - Repartition, coalesce et nombre de fichiers
 
 Avant l’écriture, testez différentes stratégies.
 
 ```python
-daily_app_metrics.repartition("event_date", "app_id").write.mode("overwrite").partitionBy("event_date", "app_id").parquet(f"{base_path}/processed/logs/repartitioned_metrics")
+(
+    daily_app_metrics
+    .repartition("event_date", "app_id")
+    .write
+    .mode("overwrite")
+    .partitionBy("event_date", "app_id")
+    .parquet(f"{base_path}/processed/logs/repartitioned_metrics")
+)
 
-daily_app_metrics.coalesce(1).write.mode("overwrite").parquet(f"{base_path}/processed/logs/coalesced_metrics")
+(
+    daily_app_metrics
+    .coalesce(1)
+    .write
+    .mode("overwrite")
+    .parquet(f"{base_path}/processed/logs/coalesced_metrics")
+)
 ```
 
 Répondez aux questions suivantes.
@@ -647,17 +668,18 @@ Répondez aux questions suivantes.
 1. Quelle différence faites-vous entre `repartition` et `coalesce` ?
 2. Pourquoi `coalesce(1)` peut-il être dangereux sur de gros volumes ?
 3. Pourquoi un trop grand nombre de petits fichiers pose-t-il problème dans HDFS ?
-4. Pourquoi un très petit nombre de gros fichiers peut-il aussi poser problème ?
-5. Comment choisiriez-vous le nombre de partitions de sortie dans un pipeline de production ?
 
 ## Exercice 13 - Suivre et analyser le traitement
 
 Après chaque exécution, ouvrez :
 
 ```text
-YARN ResourceManager: http://<gateway_public_ip>:8088
-Spark History Server: http://<gateway_public_ip>:18080
+YARN ResourceManager: http://localhost:8088
+Spark History Server: http://localhost:18080
 ```
+
+Sur le cluster du cours, remplacez `localhost` par l'adresse publique du
+gateway.
 
 Listez les applications.
 
@@ -676,9 +698,7 @@ Répondez aux questions suivantes.
 1. Combien de jobs Spark votre application exécute-t-elle ?
 2. Quelles actions déclenchent ces jobs ?
 3. Où voyez-vous les stages ?
-4. Où voyez-vous les lectures et écritures HDFS ?
-5. Quels indices indiquent qu’une jointure ou une agrégation provoque un shuffle ?
-6. Quels éléments utiliseriez-vous pour diagnostiquer une application lente ?
+4. Quels indices indiquent qu’une jointure ou une agrégation provoque un shuffle ?
 
 ## Exercice 14 - Réflexion d’architecture
 
@@ -690,12 +710,14 @@ Répondez aux questions suivantes.
 4. Comment distingueriez-vous la date d’événement et la date de traitement ?
 5. Quelles métadonnées écririez-vous pour chaque exécution Spark ?
 6. Comment garantiriez-vous qu’un indicateur produit est reproductible ?
-7. Comment adapteriez-vous le partitionnement si certaines applications génèrent beaucoup plus de logs que les autres ?
-8. Quels contrôles automatiseriez-vous avant d’écrire dans `processed` ?
-9. Quels résultats doivent être conservés dans `audit` pour répondre à un contrôle ?
-10. Quels compromis voyez-vous entre performance, coût de stockage, lisibilité et auditabilité ?
+7. Quels compromis voyez-vous entre performance, coût de stockage, lisibilité et auditabilité ?
 
 ## Exercice 15 - Structurer un projet Spark avec plusieurs fichiers Python
+
+Les exercices 1 à 14 peuvent être réalisés dans le conteneur Docker
+`tp-hadoop`. Cet exercice utilise le projet exemple fourni dans le dépôt ; vous
+pouvez le lancer depuis le dépôt local si celui-ci est accessible dans votre
+environnement, ou depuis le gateway du cluster si le dossier y a été copié.
 
 Jusqu’ici, les exemples Spark ont été écrits dans un seul fichier. Cette approche est pratique pour apprendre, mais elle devient difficile à maintenir dès que le traitement grandit.
 
@@ -713,6 +735,27 @@ Un exemple de projet est fourni dans ce dossier :
 
 ```text
 tp/05-spark-use-case/example-spark-project
+```
+
+Si vous travaillez avec Docker et que le dépôt est sur votre machine hôte,
+copiez le projet dans le conteneur.
+
+```bash
+docker cp tp/05-spark-use-case/example-spark-project tp-hadoop:/home/hadoop/example-spark-project
+docker exec tp-hadoop chown -R hadoop:hadoop /home/hadoop/example-spark-project
+docker exec -it --user hadoop tp-hadoop bash
+cd /home/hadoop/example-spark-project
+```
+
+Si vous travaillez sur le cluster du cours, copiez le projet vers le gateway.
+
+```bash
+scp -r -i ~/.ssh/m2-hadoop-student \
+  tp/05-spark-use-case/example-spark-project \
+  identifiant@<gateway_public_ip>:~/
+
+ssh -i ~/.ssh/m2-hadoop-student identifiant@<gateway_public_ip>
+cd ~/example-spark-project
 ```
 
 Structure proposée :
@@ -740,7 +783,8 @@ Rôle des fichiers :
 - `quality.py` : séparation des lignes valides et rejetées ;
 - `metrics.py` : calcul des indicateurs.
 
-Pour lancer ce projet, placez-vous dans le dossier de l’exemple.
+Si le dépôt est directement accessible depuis l’environnement d’exécution,
+placez-vous dans le dossier de l’exemple.
 
 ```bash
 cd tp/05-spark-use-case/example-spark-project
@@ -790,15 +834,8 @@ hdfs dfs -ls -R /user/$USER/datalake/audit/spark
 Répondez aux questions suivantes.
 
 1. Pourquoi est-il préférable de ne pas mettre tout le code Spark dans un seul fichier ?
-2. Quel est le rôle du dossier `jobs` ?
-3. Quel est le rôle du dossier `src/log_pipeline` ?
-4. Pourquoi placer les schémas dans un fichier séparé ?
-5. Pourquoi isoler les règles de qualité dans un module dédié ?
-6. À quoi sert l’option `--py-files` de `spark-submit` ?
-7. Que faudrait-il ajouter pour transformer cet exemple en projet industrialisable ?
-8. Où placeriez-vous des tests unitaires pour les fonctions de transformation ?
-9. Comment géreriez-vous les paramètres d’environnement entre développement, test et production ?
-10. Quels avantages cette structure apporte-t-elle pour le travail en équipe ?
+2. À quoi sert l’option `--py-files` de `spark-submit` ?
+3. Que faudrait-il ajouter pour transformer cet exemple en projet industrialisable ?
 
 ## Nettoyage
 

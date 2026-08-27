@@ -10,7 +10,7 @@
   </property>
   <property>
     <name>yarn.resourcemanager.webapp.address</name>
-    <value>0.0.0.0:8088</value>
+    <value>localhost:8088</value>
   </property>
   <property>
     <name>yarn.nodemanager.hostname</name>
@@ -22,7 +22,7 @@
   </property>
   <property>
     <name>yarn.nodemanager.webapp.address</name>
-    <value>0.0.0.0:8042</value>
+    <value>localhost:8042</value>
   </property>
   <property>
     <name>yarn.nodemanager.aux-services</name>

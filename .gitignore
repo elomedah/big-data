@@ -11,7 +11,7 @@
 **/*.tfplan
 
 # Local teacher corrections
-tp/*/enseignants/
+enseignants/
 
 # Local OS/editor files
 .DS_Store

@@ -562,7 +562,142 @@ Répondez aux questions suivantes.
 5. Quelle RowKey proposeriez-vous pour le projet DORA et pourquoi ?
    Réponse indicative : Une réponse acceptable dépend de l'accès visé. Pour consulter par application et date : `app_id#event_date#reverse_ts#request_id`. Pour consulter par requête : une table secondaire indexée par `request_id` peut être préférable.
 
-## Exercice 12 - Comparer HBase, Hive et HDFS
+## Exercice 12 - Charger un gros volume et observer les régions
+
+HBase découpe les tables en régions. Une région contient une plage de RowKey.
+Quand le volume augmente, HBase peut découper une région en plusieurs régions.
+Il est aussi possible de créer une table avec des points de découpage dès le
+départ.
+
+Créez une table dédiée au chargement volumineux avec des régions pré-découpées.
+
+```ruby
+create 'dora_identifiant:bulk_application_events',
+  { NAME => 'event', VERSIONS => 1 },
+  { NAME => 'tech', VERSIONS => 1 },
+  SPLITS => ['app03#', 'app06#', 'app09#']
+```
+
+Observez la structure de la table.
+
+```ruby
+describe 'dora_identifiant:bulk_application_events'
+```
+
+Préparez un fichier CSV à importer. Cette commande est à exécuter dans le shell
+Linux, pas dans `hbase shell`.
+
+La génération peut prendre un peu de temps selon les ressources disponibles dans
+le conteneur ou sur le cluster.
+
+```bash
+mkdir -p /tmp/tp07-hbase
+CSV_FILE=/tmp/tp07-hbase/bulk_application_events.csv
+: > "$CSV_FILE"
+
+for i in $(seq 1 5000); do
+  app=$(printf "app%02d" $(( (i % 12) + 1 )))
+  day=$(printf "%02d" $(( (i % 28) + 1 )))
+  rowkey="${app}#202602${day}#$(printf "%08d" "$i")"
+  status="OK"
+
+  if [ $(( i % 10 )) -eq 0 ]; then
+    status="ERROR"
+  fi
+
+  echo "${rowkey},${status},$((100 + (i % 900))),host-$((i % 20))" >> "$CSV_FILE"
+done
+
+head "$CSV_FILE"
+wc -l "$CSV_FILE"
+```
+
+Déposez le fichier CSV dans HDFS.
+
+```bash
+hdfs dfs -mkdir -p /user/$USER/tp07/hbase-import
+hdfs dfs -put -f "$CSV_FILE" /user/$USER/tp07/hbase-import/
+hdfs dfs -ls /user/$USER/tp07/hbase-import/
+```
+
+Importez le CSV dans HBase avec `ImportTsv`.
+
+Option Docker : utilisez le moteur MapReduce en mode local. Cela garde un import
+CSV reproductible tout en évitant le lancement d'un conteneur YARN dans Docker.
+
+```bash
+hbase org.apache.hadoop.hbase.mapreduce.ImportTsv \
+  -Dmapreduce.framework.name=local \
+  -Dmapreduce.map.java.opts=-Xmx384m \
+  -Dimporttsv.separator=, \
+  -Dimporttsv.columns=HBASE_ROW_KEY,event:status,event:response_time_ms,tech:host \
+  dora_identifiant:bulk_application_events \
+  /user/$USER/tp07/hbase-import/bulk_application_events.csv
+```
+
+Option gateway ou cluster : exécutez la commande depuis le gateway pour lancer
+un job MapReduce sur YARN.
+
+```bash
+hbase org.apache.hadoop.hbase.mapreduce.ImportTsv \
+  -Dimporttsv.separator=, \
+  -Dimporttsv.columns=HBASE_ROW_KEY,event:status,event:response_time_ms,tech:host \
+  dora_identifiant:bulk_application_events \
+  /user/$USER/tp07/hbase-import/bulk_application_events.csv
+```
+
+Vérifiez le nombre de lignes chargées.
+
+```ruby
+count 'dora_identifiant:bulk_application_events', INTERVAL => 1000
+```
+
+Observez les régions de la table.
+
+```ruby
+list_regions 'dora_identifiant:bulk_application_events'
+```
+
+Si la commande `list_regions` n'est pas disponible dans votre version de HBase,
+utilisez l'interface HBase Master ou interrogez la table système `hbase:meta`.
+
+```ruby
+scan 'hbase:meta',
+  {
+    FILTER => "PrefixFilter('dora_identifiant:bulk_application_events')",
+    COLUMNS => ['info:regioninfo']
+  }
+```
+
+Depuis l'interface HBase Master, ouvrez la table
+`dora_identifiant:bulk_application_events` et observez :
+
+- le nombre de régions ;
+- les clés de début et de fin de chaque région ;
+- le RegionServer qui héberge chaque région.
+
+Après l'import, actualisez la page de la table dans HBase Master pour observer
+l'augmentation du nombre de lignes stockées dans les régions. Avec l'option
+Docker, l'import n'apparaît pas comme application YARN. Depuis le gateway, le
+job apparaît dans le ResourceManager.
+
+Dans Docker, un seul RegionServer est généralement disponible. Plusieurs régions
+peuvent donc exister, même si elles sont hébergées par le même RegionServer.
+
+Répondez aux questions suivantes.
+
+1. Pourquoi la table contient-elle plusieurs régions dès sa création ?
+   Réponse indicative : Les points de découpage `SPLITS` créent plusieurs plages de RowKey dès la création de la table. Avec trois splits, HBase crée quatre régions initiales.
+2. Quel lien existe-t-il entre les points de découpage `SPLITS` et les plages de RowKey ?
+   Réponse indicative : Chaque split marque une frontière triée entre deux plages. Les lignes dont la RowKey est inférieure au premier split vont dans la première région, puis chaque intervalle va dans une région différente.
+3. Pourquoi un chargement massif avec des RowKey mal réparties peut-il créer un point chaud ?
+   Réponse indicative : Si les RowKey commencent toutes par la même valeur, les écritures arrivent dans la même plage de clés et donc dans la même région. Le RegionServer qui porte cette région concentre la charge.
+4. Pourquoi plusieurs régions ne signifient-elles pas forcément plusieurs machines dans Docker ?
+   Réponse indicative : Docker utilise généralement un seul RegionServer dans cette installation. HBase peut créer plusieurs régions logiques, mais elles restent toutes hébergées par ce même RegionServer.
+5. Pourquoi un import CSV est-il plus adapté qu'une suite de commandes `put` pour un gros volume ?
+   Réponse indicative : Un import CSV permet de charger un fichier déjà présent dans HDFS avec un traitement MapReduce. Des milliers de commandes `put` dans `hbase shell` sont plus lentes, moins reproductibles et moins représentatives d'un chargement industriel. En Docker, le mode local évite les problèmes de lancement YARN tout en conservant la logique d'import.
+
+## Exercice 13 - Comparer HBase, Hive et HDFS
 
 Complétez le tableau suivant dans votre compte rendu.
 
@@ -577,7 +712,7 @@ Complétez le tableau suivant dans votre compte rendu.
 | Consulter le dernier statut d'un incident |  |  |
 | Conserver les fichiers originaux immuables |  |  |
 
-## Exercice 13 - Livrable projet HBase
+## Exercice 14 - Livrable projet HBase
 
 Préparez un court livrable avec :
 
@@ -598,6 +733,7 @@ Commandes utiles :
 list
 describe 'dora_identifiant:application_events'
 describe 'dora_identifiant:incidents'
+describe 'dora_identifiant:bulk_application_events'
 ```
 
 Table complétée indicative :
@@ -630,6 +766,9 @@ drop 'dora_identifiant:application_events'
 
 disable 'dora_identifiant:incidents'
 drop 'dora_identifiant:incidents'
+
+disable 'dora_identifiant:bulk_application_events'
+drop 'dora_identifiant:bulk_application_events'
 ```
 
 Si vous voulez supprimer le namespace, il doit être vide.

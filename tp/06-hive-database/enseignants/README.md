@@ -1,7 +1,7 @@
-# TP 06 - Hive : bases, tables externes et partitionnement - Corrigé enseignants
+﻿# TP 06 - Hive : bases, tables externes et partitionnement - Corrigé enseignants
 
-Ce document reprend le TP étudiant et ajoute des réponses indicatives après
-chaque série de questions. Les réponses servent de guide de correction et
+Ce document reprend le TP étudiant et place les réponses indicatives directement
+sous les questions concernées. Les réponses servent de guide de correction et
 peuvent être adaptées selon l'environnement Docker ou cluster utilisé.
 
 ## Objectifs
@@ -112,23 +112,15 @@ Hive est une couche SQL au-dessus d'un stockage distribué. Les données peuvent
 Répondez aux questions suivantes.
 
 1. Pourquoi Hive est-il utile au-dessus de HDFS ?
+   Réponse indicative : Hive ajoute une couche SQL et un catalogue de métadonnées au-dessus des fichiers HDFS. Il permet d'interroger des fichiers sans écrire directement du code MapReduce ou Spark.
 2. Quelle différence faites-vous entre HDFS et Hive ?
+   Réponse indicative : HDFS stocke les fichiers. Hive décrit ces fichiers sous forme de bases, tables, colonnes, formats et partitions.
 3. Quel est le rôle du metastore ?
+   Réponse indicative : Le metastore conserve les métadonnées Hive : noms des tables, schémas, emplacements HDFS, formats, partitions et propriétés.
 4. Pourquoi Hive est-il adapté à des analyses batch plutôt qu'à des requêtes transactionnelles très fréquentes ?
+   Réponse indicative : Hive est conçu pour scanner de gros volumes et lancer des traitements distribués. Il n'est pas optimisé pour des accès ligne à ligne, des mises à jour fréquentes ou une faible latence transactionnelle.
 5. Dans le projet DORA, quels utilisateurs pourraient interroger les données avec Hive ?
-
-Correction indicative :
-
-1. Pourquoi Hive est-il utile au-dessus de HDFS ?
-   Hive ajoute une couche SQL et un catalogue de métadonnées au-dessus des fichiers HDFS. Il permet d'interroger des fichiers sans écrire directement du code MapReduce ou Spark.
-2. Quelle différence faites-vous entre HDFS et Hive ?
-   HDFS stocke les fichiers. Hive décrit ces fichiers sous forme de bases, tables, colonnes, formats et partitions.
-3. Quel est le rôle du metastore ?
-   Le metastore conserve les métadonnées Hive : noms des tables, schémas, emplacements HDFS, formats, partitions et propriétés.
-4. Pourquoi Hive est-il adapté à des analyses batch plutôt qu'à des requêtes transactionnelles très fréquentes ?
-   Hive est conçu pour scanner de gros volumes et lancer des traitements distribués. Il n'est pas optimisé pour des accès ligne à ligne, des mises à jour fréquentes ou une faible latence transactionnelle.
-5. Dans le projet DORA, quels utilisateurs pourraient interroger les données avec Hive ?
-   Des data analysts, data engineers, équipes d'exploitation, contrôleurs internes ou équipes conformité peuvent utiliser Hive pour analyser les logs et les indicateurs produits.
+   Réponse indicative : Des data analysts, data engineers, équipes d'exploitation, contrôleurs internes ou équipes conformité peuvent utiliser Hive pour analyser les logs et les indicateurs produits.
 
 ## Exercice 2 - Préparer les données du projet fil rouge
 
@@ -212,20 +204,13 @@ DESCRIBE DATABASE EXTENDED dora_fil_rouge_<identifiant>;
 Répondez aux questions suivantes.
 
 1. Pourquoi créer une base par étudiant ou par équipe ?
+   Réponse indicative : Cela isole les tables, évite les collisions de noms et facilite les droits, le nettoyage et la correction.
 2. À quoi sert la clause `LOCATION` dans `CREATE DATABASE` ?
+   Réponse indicative : Elle indique le dossier HDFS où Hive stockera par défaut les données des tables internes créées dans cette base.
 3. Que se passerait-il si toutes les équipes utilisaient la même base ?
+   Réponse indicative : Les tables risqueraient d'être écrasées ou confondues, et les droits seraient plus difficiles à gérer.
 4. Quelles conventions de nommage appliqueriez-vous pour les bases Hive d'un projet réel ?
-
-Correction indicative :
-
-1. Pourquoi créer une base par étudiant ou par équipe ?
-   Cela isole les tables, évite les collisions de noms et facilite les droits, le nettoyage et la correction.
-2. À quoi sert la clause `LOCATION` dans `CREATE DATABASE` ?
-   Elle indique le dossier HDFS où Hive stockera par défaut les données des tables internes créées dans cette base.
-3. Que se passerait-il si toutes les équipes utilisaient la même base ?
-   Les tables risqueraient d'être écrasées ou confondues, et les droits seraient plus difficiles à gérer.
-4. Quelles conventions de nommage appliqueriez-vous pour les bases Hive d'un projet réel ?
-   Des noms explicites, stables, en minuscules, sans caractères spéciaux, incluant éventuellement le projet, l'environnement et l'équipe.
+   Réponse indicative : Des noms explicites, stables, en minuscules, sans caractères spéciaux, incluant éventuellement le projet, l'environnement et l'équipe.
 
 ## Exercice 5 - Créer une table externe sur les logs bruts
 
@@ -293,23 +278,15 @@ LIMIT 20;
 Répondez aux questions suivantes.
 
 1. Pourquoi la table est-elle externe ?
+   Réponse indicative : Les fichiers existent déjà dans le Data Lake. Hive ne doit pas les posséder ni les supprimer si la table est supprimée.
 2. Que signifie la clause `LOCATION` au niveau de la table ?
+   Réponse indicative : Elle définit le dossier racine dans HDFS où Hive cherche les fichiers ou les partitions de la table.
 3. Que signifie la clause `LOCATION` au niveau de la partition ?
+   Réponse indicative : Elle associe une partition Hive précise à un dossier HDFS précis.
 4. Pourquoi `source_team`, `year`, `month` et `day` ne sont-ils pas dans les colonnes du CSV ?
+   Réponse indicative : Ces valeurs sont portées par l'arborescence HDFS et déclarées comme colonnes de partition.
 5. Quel problème voyez-vous avec l'en-tête CSV dans une table Hive simple ?
-
-Correction indicative :
-
-1. Pourquoi la table est-elle externe ?
-   Les fichiers existent déjà dans le Data Lake. Hive ne doit pas les posséder ni les supprimer si la table est supprimée.
-2. Que signifie la clause `LOCATION` au niveau de la table ?
-   Elle définit le dossier racine dans HDFS où Hive cherche les fichiers ou les partitions de la table.
-3. Que signifie la clause `LOCATION` au niveau de la partition ?
-   Elle associe une partition Hive précise à un dossier HDFS précis.
-4. Pourquoi `source_team`, `year`, `month` et `day` ne sont-ils pas dans les colonnes du CSV ?
-   Ces valeurs sont portées par l'arborescence HDFS et déclarées comme colonnes de partition.
-5. Quel problème voyez-vous avec l'en-tête CSV dans une table Hive simple ?
-   Sans configuration particulière, Hive peut lire la ligne d'en-tête comme une ligne de données.
+   Réponse indicative : Sans configuration particulière, Hive peut lire la ligne d'en-tête comme une ligne de données.
 
 ## Exercice 6 - Corriger la lecture de l'en-tête CSV
 
@@ -335,20 +312,13 @@ ORDER BY event_count DESC;
 Répondez aux questions suivantes.
 
 1. Pourquoi l'en-tête CSV peut-il poser problème ?
+   Réponse indicative : Il contient les noms de colonnes, pas des données. Si Hive le lit comme une ligne normale, les agrégations et conversions de type peuvent être faussées.
 2. Pourquoi cette solution reste-t-elle fragile sur des fichiers CSV complexes ?
+   Réponse indicative : CSV gère mal les séparateurs dans les champs, les guillemets, les retours ligne intégrés et les évolutions de schéma.
 3. Quels formats sont plus adaptés pour la zone `processed` ?
+   Réponse indicative : Parquet et ORC sont plus adaptés car ils sont typés, compressés, colonnes et efficaces pour les lectures analytiques.
 4. Pourquoi Spark a-t-il écrit en Parquet ou ORC dans le TP 05 ?
-
-Correction indicative :
-
-1. Pourquoi l'en-tête CSV peut-il poser problème ?
-   Il contient les noms de colonnes, pas des données. Si Hive le lit comme une ligne normale, les agrégations et conversions de type peuvent être faussées.
-2. Pourquoi cette solution reste-t-elle fragile sur des fichiers CSV complexes ?
-   CSV gère mal les séparateurs dans les champs, les guillemets, les retours ligne intégrés et les évolutions de schéma.
-3. Quels formats sont plus adaptés pour la zone `processed` ?
-   Parquet et ORC sont plus adaptés car ils sont typés, compressés, colonnes et efficaces pour les lectures analytiques.
-4. Pourquoi Spark a-t-il écrit en Parquet ou ORC dans le TP 05 ?
-   Spark produit des données nettoyées et structurées. Un format colonne rend ces sorties plus rapides et plus fiables à relire par Hive ou Spark.
+   Réponse indicative : Spark produit des données nettoyées et structurées. Un format colonne rend ces sorties plus rapides et plus fiables à relire par Hive ou Spark.
 
 ## Exercice 7 - Créer une table externe sur les indicateurs traités
 
@@ -403,20 +373,13 @@ Spark, vous pouvez utiliser `STORED AS ORC` et pointer vers
 Répondez aux questions suivantes.
 
 1. Pourquoi la zone `processed` est-elle plus adaptée à Hive que la zone `raw` ?
+   Réponse indicative : Elle contient des données déjà structurées, typées, enrichies et souvent écrites dans un format optimisé.
 2. Pourquoi les formats colonnes accélèrent-ils certaines requêtes analytiques ?
+   Réponse indicative : Hive peut lire seulement les colonnes nécessaires et bénéficier de la compression et des métadonnées du format.
 3. À quoi sert `MSCK REPAIR TABLE` ?
+   Réponse indicative : Cette commande parcourt l'arborescence HDFS de la table et ajoute au metastore les partitions déjà présentes sur disque.
 4. Dans quel cas préféreriez-vous `ALTER TABLE ADD PARTITION` à `MSCK REPAIR TABLE` ?
-
-Correction indicative :
-
-1. Pourquoi la zone `processed` est-elle plus adaptée à Hive que la zone `raw` ?
-   Elle contient des données déjà structurées, typées, enrichies et souvent écrites dans un format optimisé.
-2. Pourquoi les formats colonnes accélèrent-ils certaines requêtes analytiques ?
-   Hive peut lire seulement les colonnes nécessaires et bénéficier de la compression et des métadonnées du format.
-3. À quoi sert `MSCK REPAIR TABLE` ?
-   Cette commande parcourt l'arborescence HDFS de la table et ajoute au metastore les partitions déjà présentes sur disque.
-4. Dans quel cas préféreriez-vous `ALTER TABLE ADD PARTITION` à `MSCK REPAIR TABLE` ?
-   Quand on connaît exactement les partitions à ajouter, ou quand on veut éviter un scan coûteux de toute l'arborescence.
+   Réponse indicative : Quand on connaît exactement les partitions à ajouter, ou quand on veut éviter un scan coûteux de toute l'arborescence.
 
 ## Exercice 8 - Créer une table d'audit Hive
 
@@ -512,14 +475,9 @@ ORDER BY error_rate DESC, sla_breach_count DESC;
 Répondez aux questions suivantes.
 
 1. Pourquoi filtrer sur les colonnes de partition ?
+   Réponse indicative : Le filtre permet à Hive d'éliminer des dossiers entiers avant la lecture. C'est le partition pruning.
 2. Que se passerait-il sur plusieurs années de logs sans filtre de partition ?
-
-Correction indicative :
-
-1. Pourquoi filtrer sur les colonnes de partition ?
-   Le filtre permet à Hive d'éliminer des dossiers entiers avant la lecture. C'est le partition pruning.
-2. Que se passerait-il sur plusieurs années de logs sans filtre de partition ?
-   Hive pourrait scanner un très grand nombre de dossiers et de fichiers, ce qui augmenterait fortement le temps de traitement et la charge du cluster.
+   Réponse indicative : Hive pourrait scanner un très grand nombre de dossiers et de fichiers, ce qui augmenterait fortement le temps de traitement et la charge du cluster.
 
 ## Exercice 10 - Observer le plan d'exécution
 
@@ -549,20 +507,13 @@ GROUP BY app_id;
 Répondez aux questions suivantes.
 
 1. Où voyez-vous l'effet du filtre de partition ?
+   Réponse indicative : Dans le plan `EXPLAIN`, Hive indique les partitions ou chemins retenus. Avec un filtre sur `year`, `month` et `day`, moins de partitions sont lues.
 2. Pourquoi le partition pruning est-il important ?
+   Réponse indicative : Il réduit le volume de données lues, le nombre de fichiers ouverts et le nombre de tâches nécessaires.
 3. Pourquoi une table très partitionnée peut-elle aussi devenir difficile à gérer ?
+   Réponse indicative : Trop de partitions augmente la taille du metastore, ralentit les réparations et peut produire beaucoup de petits dossiers ou petits fichiers.
 4. Comment choisiriez-vous les colonnes de partition dans un Data Warehouse Hive ?
-
-Correction indicative :
-
-1. Où voyez-vous l'effet du filtre de partition ?
-   Dans le plan `EXPLAIN`, Hive indique les partitions ou chemins retenus. Avec un filtre sur `year`, `month` et `day`, moins de partitions sont lues.
-2. Pourquoi le partition pruning est-il important ?
-   Il réduit le volume de données lues, le nombre de fichiers ouverts et le nombre de tâches nécessaires.
-3. Pourquoi une table très partitionnée peut-elle aussi devenir difficile à gérer ?
-   Trop de partitions augmente la taille du metastore, ralentit les réparations et peut produire beaucoup de petits dossiers ou petits fichiers.
-4. Comment choisiriez-vous les colonnes de partition dans un Data Warehouse Hive ?
-   Il faut choisir des colonnes très utilisées dans les filtres, de cardinalité raisonnable, stables et cohérentes avec les usages de lecture.
+   Réponse indicative : Il faut choisir des colonnes très utilisées dans les filtres, de cardinalité raisonnable, stables et cohérentes avec les usages de lecture.
 
 ## Exercice 11 - Tables internes et externes
 
@@ -613,21 +564,13 @@ fichiers car `demo_internal_table` est une table interne.
 Répondez aux questions suivantes.
 
 1. Quelle différence voyez-vous dans le type de table ?
+   Réponse indicative : `demo_internal_table` est une table interne ou managed table. `raw_application_logs` est une table externe.
 2. Où sont stockées les données de la table interne ?
+   Réponse indicative : Elles sont stockées dans le warehouse Hive de la base, ici sous le dossier de la base `dora_fil_rouge.db`.
 3. Pourquoi une suppression de table interne peut-elle être plus dangereuse ?
+   Réponse indicative : Supprimer une table interne supprime aussi ses fichiers HDFS. On peut donc perdre les données, pas seulement les métadonnées.
 4. Pourquoi les tables externes sont-elles préférées pour exposer les zones du Data Lake ?
-
-Correction indicative :
-
-1. Quelle différence voyez-vous dans le type de table ?
-   `demo_internal_table` est une table interne ou managed table. `raw_application_logs` est une table externe.
-2. Où sont stockées les données de la table interne ?
-   Elles sont stockées dans le warehouse Hive de la base, ici sous le dossier de la base `dora_fil_rouge.db`.
-3. Pourquoi une suppression de table interne peut-elle être plus dangereuse ?
-   Supprimer une table interne supprime aussi ses fichiers HDFS. On peut donc perdre les données, pas seulement les métadonnées.
-4. Pourquoi les tables externes sont-elles préférées pour exposer les zones du Data Lake ?
-   Elles permettent à Hive de référencer des données gérées par le Data Lake sans en devenir propriétaire.
-
+   Réponse indicative : Elles permettent à Hive de référencer des données gérées par le Data Lake sans en devenir propriétaire.
 
 ## À retenir
 

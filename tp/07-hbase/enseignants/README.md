@@ -1,4 +1,8 @@
-# TP 07 - HBase : accès par clé, versionnement et intégration DORA
+﻿# TP 07 - HBase : accès par clé, versionnement et intégration DORA - Corrigé enseignants
+
+Ce document reprend le TP étudiant et place les réponses indicatives directement
+sous les questions concernées. Les réponses servent de guide de correction et
+peuvent être adaptées selon l'environnement Docker ou cluster utilisé.
 
 ## Objectifs
 
@@ -144,8 +148,11 @@ Interfaces utiles :
 Répondez aux questions suivantes.
 
 1. Quel besoin HBase couvre-t-il dans une plateforme Big Data ?
+   Réponse indicative : HBase couvre le besoin d'accès rapide par clé ou par plage de clés sur de très grands volumes. Il complète HDFS, Hive et Spark quand on veut retrouver quelques lignes sans scanner de gros fichiers.
 2. Dans le projet DORA, quels accès rapides pourraient justifier HBase ?
+   Réponse indicative : La consultation d'un incident par identifiant, le dernier statut d'une application, une recherche par `request_id` ou un accès rapide aux dépassements SLA récents peuvent justifier HBase.
 3. Quelles données doivent rester dans HDFS même si un index HBase existe ?
+   Réponse indicative : Les logs bruts, les fichiers archivés, les preuves complètes et les sorties analytiques volumineuses doivent rester dans HDFS. HBase peut stocker des index, des métadonnées ou des liens vers ces fichiers.
 
 ## Exercice 2 - Comprendre le modèle de données HBase
 
@@ -199,7 +206,7 @@ Dans une base relationnelle, les colonnes sont définies dans le schéma de la
 table. Dans HBase, seules les familles de colonnes sont définies à l'avance :
 les qualifiers peuvent varier d'une ligne à l'autre.
 
-![Schéma logique et stockage HBase](image.png)
+![Schéma logique et stockage HBase](../image.png)
 
 Vue simplifiée du stockage :
 
@@ -220,9 +227,13 @@ RowKey + famille de colonnes + qualifier + timestamp -> valeur
 Répondez aux questions suivantes.
 
 1. Quelle différence faites-vous entre une famille de colonnes et un qualifier ?
+   Réponse indicative : Une famille de colonnes est définie lors de la création de la table et structure le stockage. Un qualifier est une colonne à l'intérieur d'une famille, ajoutable plus librement.
 2. Pourquoi faut-il choisir les familles de colonnes avec soin ?
+   Réponse indicative : Les familles influencent le stockage physique, la lecture et la maintenance. Les multiplier augmente la complexité et peut dégrader les performances.
 3. Pourquoi la RowKey est-elle centrale dans HBase ?
+   Réponse indicative : Elle identifie la ligne, détermine l'ordre de stockage et conditionne l'efficacité des `get` et des `scan`.
 4. Pourquoi une mauvaise RowKey peut-elle créer un point chaud (trop de lectures
+   Réponse indicative : Si beaucoup d'écritures arrivent sur des clés proches, elles ciblent la même région et le même RegionServer. La charge n'est alors plus bien répartie.
    ou d'écritures concentrées sur la même région HBase) ?
 
 ## Exercice 3 - Démarrer `hbase shell`
@@ -261,7 +272,9 @@ Comparaison avec une base relationnelle :
 Répondez aux questions suivantes.
 
 1. Pourquoi chaque étudiant doit-il utiliser son propre namespace ?
+   Réponse indicative : Pour isoler les tables, éviter les collisions de noms et faciliter le nettoyage ou l'évaluation d'un travail.
 2. Quel problème apparaîtrait si tout le monde créait les mêmes tables dans le namespace `default` ?
+   Réponse indicative : Les tables auraient les mêmes noms, ce qui provoquerait des erreurs de création, des écrasements logiques ou des lectures sur les données d'un autre groupe.
 
 ## Exercice 4 - Créer une table d'événements applicatifs
 
@@ -290,8 +303,11 @@ Familles proposées :
 Répondez aux questions suivantes.
 
 1. Pourquoi séparer les colonnes en familles ?
+   Réponse indicative : Pour regrouper les colonnes lues ensemble et distinguer des usages différents : événement, technique, audit.
 2. Pourquoi la famille `audit` garde-t-elle plusieurs versions ?
+   Réponse indicative : Les informations d'audit peuvent évoluer : statut d'ingestion, raison de contrôle, mise à jour. Les versions permettent de conserver une trace courte de ces évolutions.
 3. Pourquoi ne pas créer une famille de colonnes pour chaque champ ?
+   Réponse indicative : Une famille est une unité importante de stockage. En créer une par champ rend le modèle coûteux et difficile à maintenir.
 
 ## Exercice 5 - Insérer des événements
 
@@ -337,8 +353,11 @@ put 'dora_identifiant:application_events', 'auth-service#20260115#9999999982#req
 Répondez aux questions suivantes.
 
 1. Quelles informations sont encodées dans la RowKey ?
+   Réponse indicative : Elle encode l'application, la date, un timestamp inversé et l'identifiant de requête.
 2. Quels avantages et limites voyez-vous dans cette RowKey ?
+   Réponse indicative : Elle facilite les scans par application et par date, et peut favoriser la lecture des événements récents. En revanche, elle n'est pas optimale pour chercher directement par `request_id` si on ne connaît pas l'application et la date.
 3. Pourquoi stocker le chemin HDFS du fichier source dans HBase ?
+   Réponse indicative : Pour retrouver rapidement la preuve complète ou le fichier d'origine sans stocker tout le contenu dans HBase.
 
 ## Exercice 6 - Lire par clé
 
@@ -367,8 +386,11 @@ get 'dora_identifiant:application_events',
 Répondez aux questions suivantes.
 
 1. Pourquoi `get` est-il efficace dans HBase ?
+   Réponse indicative : HBase utilise la RowKey pour localiser directement la région et la ligne, sans scanner toute la table.
 2. Quelle information faut-il connaître pour utiliser `get` ?
+   Réponse indicative : Il faut connaître la RowKey complète. On peut ensuite limiter la lecture à une famille ou à une cellule.
 3. Pourquoi ce mode d'accès est-il différent d'une requête Hive ?
+   Réponse indicative : Hive interroge des fichiers et lance souvent un traitement distribué. HBase sert à lire rapidement quelques lignes par clé.
 
 ## Exercice 7 - Scanner une plage de lignes
 
@@ -396,9 +418,13 @@ scan 'dora_identifiant:application_events',
 Répondez aux questions suivantes.
 
 1. Pourquoi le scan utilise-t-il `STARTROW` et `STOPROW` ?
+   Réponse indicative : Pour borner la plage de RowKey à lire et éviter un scan complet.
 2. Pourquoi cette requête fonctionne-t-elle bien avec la RowKey choisie ?
+   Réponse indicative : Les événements de `payment-api` pour `20260115` sont contigus ou proches dans l'ordre lexicographique des RowKey.
 3. Que se passerait-il si la RowKey commençait par `request_id` ?
+   Réponse indicative : Les événements d'une même application et d'une même date seraient dispersés, rendant ce scan beaucoup moins efficace.
 4. Pourquoi faut-il éviter les scans complets sur de très grandes tables HBase ?
+   Réponse indicative : Un scan complet parcourt toutes les régions, consomme beaucoup de ressources et peut pénaliser les autres usages du cluster.
 
 ## Exercice 8 - Filtrer les événements
 
@@ -424,8 +450,11 @@ scan 'dora_identifiant:application_events',
 Répondez aux questions suivantes.
 
 1. Quelle différence faites-vous entre filtrer par RowKey et filtrer par valeur ?
+   Réponse indicative : Filtrer par RowKey permet de cibler une plage de stockage. Filtrer par valeur oblige souvent HBase à lire plus de lignes puis à éliminer celles qui ne correspondent pas.
 2. Pourquoi un filtre par valeur peut-il rester coûteux ?
+   Réponse indicative : Parce que la valeur filtrée n'est pas forcément utilisée pour localiser les régions. HBase doit parcourir les lignes candidates.
 3. Dans quel cas créeriez-vous une deuxième table HBase servant d'index ?
+   Réponse indicative : Si un accès fréquent utilise une autre clé principale, par exemple `request_id` ou `incident_id`, une table dédiée peut éviter des scans coûteux.
 
 ## Exercice 9 - Créer une table d'incidents
 
@@ -465,8 +494,11 @@ get 'dora_identifiant:incidents', 'incident#20260115#INC-0001'
 Répondez aux questions suivantes.
 
 1. Pourquoi stocker des liens vers HDFS plutôt que toutes les preuves dans HBase ?
+   Réponse indicative : HBase est fait pour des accès rapides à des petites valeurs. Les preuves complètes peuvent être volumineuses et doivent rester dans HDFS.
 2. Quelle différence faites-vous entre `identity`, `state`, `links` et `audit` ?
+   Réponse indicative : `identity` décrit l'incident, `state` contient son état courant ou récent, `links` pointe vers les données HDFS, et `audit` garde les informations de suivi.
 3. Quels autres champs ajouteriez-vous pour suivre un incident réglementaire ?
+   Réponse indicative : On peut ajouter la criticité réglementaire, l'heure de détection, l'heure de résolution, le propriétaire, le statut de notification, l'impact estimé et la référence du run Spark.
 
 ## Exercice 10 - Utiliser le versionnement
 
@@ -499,8 +531,11 @@ get 'dora_identifiant:incidents',
 Répondez aux questions suivantes.
 
 1. Pourquoi le versionnement est-il utile pour suivre le cycle de vie d'un incident ?
+   Réponse indicative : Il permet de conserver plusieurs états successifs d'une même cellule, par exemple `OPEN`, `INVESTIGATING`, puis `RESOLVED`.
 2. Quelle différence faites-vous entre une version HBase et une ligne d'historique métier explicite ?
+   Réponse indicative : Une version HBase est portée par le timestamp d'une cellule. Une ligne d'historique métier est un événement explicite, souvent plus lisible pour des audits complexes.
 3. Pourquoi faut-il limiter le nombre de versions conservées ?
+   Réponse indicative : Les versions consomment du stockage et peuvent ralentir certaines lectures. Il faut conserver seulement ce qui est utile.
 
 ## Exercice 11 - Éviter les mauvaises RowKey
 
@@ -517,10 +552,15 @@ salt03#payment-api#20260115#req-001
 Répondez aux questions suivantes.
 
 1. Quelle RowKey est adaptée pour lire les événements d'une application sur une date ?
+   Réponse indicative : `payment-api#20260115#req-001` est adaptée, car l'application et la date sont au début de la clé.
 2. Quelle RowKey est adaptée pour retrouver un événement par `request_id` ?
+   Réponse indicative : `req-001` est adaptée si l'accès principal est la recherche directe par `request_id`.
 3. Quelle RowKey risque de créer un point chaud si toutes les écritures arrivent sur la même date ?
+   Réponse indicative : `20260115#payment-api#req-001` peut concentrer beaucoup d'écritures sur la même plage de clés pour une journée active.
 4. Quel compromis un préfixe de salage comme `salt03` introduit-il pour les scans ?
+   Réponse indicative : Le salage répartit mieux les écritures, mais oblige à scanner plusieurs préfixes pour reconstituer une plage logique.
 5. Quelle RowKey proposeriez-vous pour le projet DORA et pourquoi ?
+   Réponse indicative : Une réponse acceptable dépend de l'accès visé. Pour consulter par application et date : `app_id#event_date#reverse_ts#request_id`. Pour consulter par requête : une table secondaire indexée par `request_id` peut être préférable.
 
 ## Exercice 12 - Comparer HBase, Hive et HDFS
 
@@ -536,12 +576,6 @@ Complétez le tableau suivant dans votre compte rendu.
 | Scanner tous les logs d'une année |  |  |
 | Consulter le dernier statut d'un incident |  |  |
 | Conserver les fichiers originaux immuables |  |  |
-
-Répondez aux questions suivantes.
-
-1. Pourquoi HBase n'est-il pas l'outil principal pour scanner tous les logs d'une année ?
-2. Pourquoi Hive est plus naturel pour les agrégations SQL ?
-3. Pourquoi HDFS reste la source de vérité pour les fichiers archivés ?
 
 ## Exercice 13 - Livrable projet HBase
 
@@ -565,6 +599,26 @@ list
 describe 'dora_identifiant:application_events'
 describe 'dora_identifiant:incidents'
 ```
+
+Table complétée indicative :
+
+Le livrable attendu doit montrer que le modèle HBase part des accès. Un bon rendu distingue clairement :
+
+- les données conservées dans HDFS : logs bruts, fichiers archivés, résultats complets ;
+- les données exposées dans Hive : indicateurs et tables analytiques ;
+- les données placées dans HBase : statuts, index, identifiants, liens HDFS et petits ensembles consultables rapidement.
+
+Une proposition acceptable peut contenir :
+
+| Table | RowKey | Usage |
+|---|---|---|
+| `application_events` | `app_id#date#reverse_ts#request_id` | événements récents par application et date |
+| `incidents` | `incident#date#incident_id` | consultation et suivi d'un incident |
+| `request_lookup` | `request_id` | recherche directe d'une requête si ce besoin est fréquent |
+
+Les familles doivent rester peu nombreuses. Par exemple `identity`, `state`,
+`links`, `audit` pour les incidents, et `event`, `tech`, `audit` pour les
+événements applicatifs.
 
 ## Nettoyage
 

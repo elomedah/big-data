@@ -244,6 +244,18 @@ ansible-playbook site.yml --tags hadoop
 ansible-playbook start-services.yml
 ```
 
+If an HBase MapReduce import fails before starting with
+`ADD_OPENS: No such file or directory`, HBase is launching the job with Hadoop
+jars that are not aligned with the running YARN services. Redeploy the Hadoop and
+HBase configuration so that HBase uses the cluster Hadoop classpath first, then
+restart the services:
+
+```bash
+ansible-playbook stop-services.yml
+ansible-playbook site.yml --tags hadoop,hbase
+ansible-playbook start-services.yml
+```
+
 Spark event logs are stored in HDFS:
 
 ```text

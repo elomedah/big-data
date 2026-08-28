@@ -36,6 +36,8 @@
 - name: Install and configure HBase
   hosts: hadoop
   become: true
+  tags:
+    - hbase
   roles:
     - hbase
 

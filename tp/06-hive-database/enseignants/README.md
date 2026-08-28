@@ -197,9 +197,11 @@ USE dora_fil_rouge_<identifiant>;
 Vérifiez.
 
 ```sql
-SHOW DATABASES LIKE 'dora*';
+SHOW DATABASES LIKE 'dora%';
 DESCRIBE DATABASE EXTENDED dora_fil_rouge_<identifiant>;
 ```
+
+Dans Hive, utilisez `%` comme joker dans ce type de filtre `LIKE`.
 
 Répondez aux questions suivantes.
 

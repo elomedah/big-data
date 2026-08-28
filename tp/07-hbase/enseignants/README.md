@@ -595,7 +595,7 @@ mkdir -p /tmp/tp07-hbase
 CSV_FILE=/tmp/tp07-hbase/bulk_application_events.csv
 : > "$CSV_FILE"
 
-for i in $(seq 1 5000); do
+for i in $(seq 1 50000); do
   app=$(printf "app%02d" $(( (i % 12) + 1 )))
   day=$(printf "%02d" $(( (i % 28) + 1 )))
   rowkey="${app}#202602${day}#$(printf "%08d" "$i")"
@@ -622,21 +622,8 @@ hdfs dfs -ls /user/$USER/tp07/hbase-import/
 
 Importez le CSV dans HBase avec `ImportTsv`.
 
-Option Docker : utilisez le moteur MapReduce en mode local. Cela garde un import
-CSV reproductible tout en évitant le lancement d'un conteneur YARN dans Docker.
-
-```bash
-hbase org.apache.hadoop.hbase.mapreduce.ImportTsv \
-  -Dmapreduce.framework.name=local \
-  -Dmapreduce.map.java.opts=-Xmx384m \
-  -Dimporttsv.separator=, \
-  -Dimporttsv.columns=HBASE_ROW_KEY,event:status,event:response_time_ms,tech:host \
-  dora_identifiant:bulk_application_events \
-  /user/$USER/tp07/hbase-import/bulk_application_events.csv
-```
-
-Option gateway ou cluster : exécutez la commande depuis le gateway pour lancer
-un job MapReduce sur YARN.
+La commande est la même dans Docker et depuis la gateway. Elle lance un job
+MapReduce sur YARN : le chargement est donc visible dans le ResourceManager.
 
 ```bash
 hbase org.apache.hadoop.hbase.mapreduce.ImportTsv \
@@ -645,6 +632,10 @@ hbase org.apache.hadoop.hbase.mapreduce.ImportTsv \
   dora_identifiant:bulk_application_events \
   /user/$USER/tp07/hbase-import/bulk_application_events.csv
 ```
+
+Si l'erreur `ADD_OPENS: No such file or directory` apparaît, HBase ne charge pas
+le classpath Hadoop du cluster dans le bon ordre. Il faut corriger la
+configuration de l'infrastructure avant de relancer l'import.
 
 Vérifiez le nombre de lignes chargées.
 
@@ -677,9 +668,8 @@ Depuis l'interface HBase Master, ouvrez la table
 - le RegionServer qui héberge chaque région.
 
 Après l'import, actualisez la page de la table dans HBase Master pour observer
-l'augmentation du nombre de lignes stockées dans les régions. Avec l'option
-Docker, l'import n'apparaît pas comme application YARN. Depuis le gateway, le
-job apparaît dans le ResourceManager.
+l'augmentation du nombre de lignes stockées dans les régions. Le job d'import
+apparaît aussi dans le ResourceManager.
 
 Dans Docker, un seul RegionServer est généralement disponible. Plusieurs régions
 peuvent donc exister, même si elles sont hébergées par le même RegionServer.
@@ -694,8 +684,8 @@ Répondez aux questions suivantes.
    Réponse indicative : Si les RowKey commencent toutes par la même valeur, les écritures arrivent dans la même plage de clés et donc dans la même région. Le RegionServer qui porte cette région concentre la charge.
 4. Pourquoi plusieurs régions ne signifient-elles pas forcément plusieurs machines dans Docker ?
    Réponse indicative : Docker utilise généralement un seul RegionServer dans cette installation. HBase peut créer plusieurs régions logiques, mais elles restent toutes hébergées par ce même RegionServer.
-5. Pourquoi un import CSV est-il plus adapté qu'une suite de commandes `put` pour un gros volume ?
-   Réponse indicative : Un import CSV permet de charger un fichier déjà présent dans HDFS avec un traitement MapReduce. Des milliers de commandes `put` dans `hbase shell` sont plus lentes, moins reproductibles et moins représentatives d'un chargement industriel. En Docker, le mode local évite les problèmes de lancement YARN tout en conservant la logique d'import.
+5. Pourquoi `ImportTsv` est-il plus adapté qu'une suite de commandes `put` pour un gros volume ?
+   Réponse indicative : `ImportTsv` lit un fichier CSV depuis HDFS et exécute un job MapReduce. C'est plus reproductible, plus observable dans YARN et plus représentatif d'un chargement industriel que des milliers de commandes `put` saisies dans `hbase shell`.
 
 ## Exercice 13 - Comparer HBase, Hive et HDFS
 

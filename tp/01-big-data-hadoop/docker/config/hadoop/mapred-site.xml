@@ -33,6 +33,14 @@
     <value>-Xmx384m</value>
   </property>
   <property>
+    <name>yarn.app.mapreduce.am.resource.mb</name>
+    <value>1024</value>
+  </property>
+  <property>
+    <name>yarn.app.mapreduce.am.command-opts</name>
+    <value>-Xmx512m</value>
+  </property>
+  <property>
     <name>yarn.app.mapreduce.am.env</name>
     <value>HADOOP_MAPRED_HOME=/opt/hadoop</value>
   </property>

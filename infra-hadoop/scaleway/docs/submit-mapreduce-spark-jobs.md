@@ -85,7 +85,7 @@ hdfs dfs -rm -r -f /user/$USER/output-mapreduce
 Submit the job:
 
 ```bash
-hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-3.3.6.jar \
+hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-*.jar \
   -files mapper.py,reducer.py \
   -mapper mapper.py \
   -reducer reducer.py \

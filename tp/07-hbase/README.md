@@ -582,21 +582,8 @@ hdfs dfs -ls /user/$USER/tp07/hbase-import/
 
 Importez le CSV dans HBase avec `ImportTsv`.
 
-Option Docker : utilisez le moteur MapReduce en mode local. Cela garde un import
-CSV reproductible tout en évitant le lancement d'un conteneur YARN dans Docker.
-
-```bash
-hbase org.apache.hadoop.hbase.mapreduce.ImportTsv \
-  -Dmapreduce.framework.name=local \
-  -Dmapreduce.map.java.opts=-Xmx384m \
-  -Dimporttsv.separator=, \
-  -Dimporttsv.columns=HBASE_ROW_KEY,event:status,event:response_time_ms,tech:host \
-  dora_identifiant:bulk_application_events \
-  /user/$USER/tp07/hbase-import/bulk_application_events.csv
-```
-
-Option gateway ou cluster : exécutez la commande depuis le gateway pour lancer
-un job MapReduce sur YARN.
+La commande est la même dans Docker et depuis la gateway. Elle lance un job
+MapReduce sur YARN : le chargement est donc visible dans le ResourceManager.
 
 ```bash
 hbase org.apache.hadoop.hbase.mapreduce.ImportTsv \
@@ -605,6 +592,10 @@ hbase org.apache.hadoop.hbase.mapreduce.ImportTsv \
   dora_identifiant:bulk_application_events \
   /user/$USER/tp07/hbase-import/bulk_application_events.csv
 ```
+
+Si l'erreur `ADD_OPENS: No such file or directory` apparaît, HBase ne charge pas
+le classpath Hadoop du cluster dans le bon ordre. Il faut corriger la
+configuration de l'infrastructure avant de relancer l'import.
 
 Vérifiez le nombre de lignes chargées.
 
@@ -636,9 +627,8 @@ Depuis l'interface HBase Master, ouvrez la table
 - le RegionServer qui héberge chaque région.
 
 Après l'import, actualisez la page de la table dans HBase Master pour observer
-l'augmentation du nombre de lignes stockées dans les régions. Avec l'option
-Docker, l'import n'apparaît pas comme application YARN. Depuis le gateway, le
-job apparaît dans le ResourceManager.
+l'augmentation du nombre de lignes stockées dans les régions. Le job d'import
+apparaît aussi dans le ResourceManager.
 
 Dans Docker, un seul RegionServer est généralement disponible. Plusieurs régions
 peuvent donc exister, même si elles sont hébergées par le même RegionServer.
@@ -649,7 +639,7 @@ Répondez aux questions suivantes.
 2. Quel lien existe-t-il entre les points de découpage `SPLITS` et les plages de RowKey ?
 3. Pourquoi un chargement massif avec des RowKey mal réparties peut-il créer un point chaud ?
 4. Pourquoi plusieurs régions ne signifient-elles pas forcément plusieurs machines dans Docker ?
-5. Pourquoi un import CSV est-il plus adapté qu'une suite de commandes `put` pour un gros volume ?
+5. Pourquoi `ImportTsv` est-il plus adapté qu'une suite de commandes `put` pour un gros volume ?
 
 ## Exercice 13 - Comparer HBase, Hive et HDFS
 

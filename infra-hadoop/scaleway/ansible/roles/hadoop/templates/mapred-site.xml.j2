@@ -21,6 +21,26 @@
     <value>{{ hadoop_home }}/share/hadoop/mapreduce/*,{{ hadoop_home }}/share/hadoop/mapreduce/lib/*,{{ hadoop_home }}/share/hadoop/common/*,{{ hadoop_home }}/share/hadoop/common/lib/*,{{ hadoop_home }}/share/hadoop/hdfs/*,{{ hadoop_home }}/share/hadoop/hdfs/lib/*,{{ hadoop_home }}/share/hadoop/yarn/*,{{ hadoop_home }}/share/hadoop/yarn/lib/*</value>
   </property>
   <property>
+    <name>mapreduce.map.memory.mb</name>
+    <value>512</value>
+  </property>
+  <property>
+    <name>mapreduce.reduce.memory.mb</name>
+    <value>512</value>
+  </property>
+  <property>
+    <name>mapreduce.map.java.opts</name>
+    <value>-Xmx384m</value>
+  </property>
+  <property>
+    <name>mapreduce.reduce.java.opts</name>
+    <value>-Xmx384m</value>
+  </property>
+  <property>
+    <name>yarn.app.mapreduce.am.resource.mb</name>
+    <value>1024</value>
+  </property>
+  <property>
     <name>yarn.app.mapreduce.am.command-opts</name>
     <value>-Xmx512m</value>
   </property>

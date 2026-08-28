@@ -173,11 +173,20 @@ Répondez aux questions suivantes.
 4. Quels formats seraient plus adaptés pour des traitements analytiques à grande échelle ?
    Réponse indicative : Parquet et ORC sont plus adaptés, car ils sont typés, compressés et orientés colonnes.
 
-## Exercice 3 - Observer une session PySpark interactive locale
+## Exercice 3 - Observer une session Spark selon l'environnement
 
-Démarrez une session interactive PySpark dans le conteneur Docker pour observer
-les objets Spark principaux. Cette session reste locale à votre machine et ne
-consomme pas les ressources de la gateway du cluster.
+Dans cet exercice, deux options sont possibles selon votre environnement.
+
+| Environnement | Option à utiliser | Objectif |
+|---|---|---|
+| Docker | Session PySpark interactive | Observer directement les objets Spark principaux. |
+| Gateway ou cluster | Script soumis avec `spark-submit --deploy-mode cluster` | Observer Spark sans exécuter le driver sur la gateway. |
+
+### Option Docker - Session PySpark interactive
+
+Démarrez une session interactive PySpark dans le conteneur Docker. Cette session
+reste locale à votre machine et ne consomme pas les ressources de la gateway du
+cluster.
 
 ```bash
 pyspark \
@@ -215,6 +224,56 @@ Si `4040` est déjà utilisé sur votre machine, Spark peut choisir `4041`,
 sc.uiWebUrl
 ```
 
+### Option gateway ou cluster - Script en mode cluster
+
+Ne lancez pas une session `pyspark` interactive longue depuis la gateway. En
+mode interactif, le driver reste sur la machine de lancement et peut consommer
+les ressources de la gateway.
+
+Pour observer Spark sans saturer la gateway, créez un petit script et
+soumettez-le avec `spark-submit --deploy-mode cluster`.
+
+```bash
+cat > observe_spark_session.py <<'EOF'
+from pyspark.sql import SparkSession
+
+spark = (
+    SparkSession.builder
+    .appName("tp04-observe-spark-session")
+    .getOrCreate()
+)
+
+sc = spark.sparkContext
+
+print("Spark version:", spark.version)
+print("Application name:", sc.appName)
+print("Master:", sc.master)
+print("Deploy mode:", sc.getConf().get("spark.submit.deployMode", "unknown"))
+print("Spark user:", sc.sparkUser())
+
+spark.stop()
+EOF
+```
+
+Soumettez le script depuis la gateway en mode cluster.
+
+```bash
+spark-submit \
+  --master yarn \
+  --deploy-mode cluster \
+  --queue students \
+  --conf spark.dynamicAllocation.enabled=false \
+  --conf spark.executor.instances=1 \
+  --conf spark.executor.cores=1 \
+  --conf spark.executor.memory=512m \
+  --conf spark.yarn.am.cores=1 \
+  --conf spark.yarn.am.memory=512m \
+  observe_spark_session.py
+```
+
+Dans ce mode, le driver est lancé dans YARN. La gateway sert seulement à
+soumettre l'application.
+
 Répondez aux questions suivantes.
 
 1. À quoi sert la `SparkSession` ?
@@ -227,10 +286,57 @@ Répondez aux questions suivantes.
    Réponse indicative : Elle est servie par l'application Spark active. Une fois l'application arrêtée, il faut consulter l'historique via le History Server.
 5. Que voyez-vous dans YARN lorsqu’une session PySpark est ouverte ?
    Réponse indicative : Une application Spark avec son driver, ses containers et son état d'exécution.
+6. Pourquoi utilise-t-on `spark-submit --deploy-mode cluster` depuis la gateway ?
+   Réponse indicative : En mode cluster, le driver est lancé dans YARN au lieu de rester sur la gateway. Cela évite de consommer durablement CPU et mémoire sur la machine d'accès.
+
+Pour la suite du TP, choisissez le mode adapté à votre environnement.
+
+| Environnement | Manière de travailler |
+|---|---|
+| Docker | Vous pouvez saisir les blocs des exercices 4 à 8 directement dans la session PySpark interactive. |
+| Gateway ou cluster | Ajoutez les blocs des exercices 4 à 8 progressivement dans un fichier Python, puis relancez ce fichier avec `spark-submit --deploy-mode cluster`. |
+
+Sur gateway, ne recopiez pas les blocs dans une session PySpark interactive. Le
+code doit être ajouté pas à pas dans le même fichier, avant `spark.stop()`.
+
+Créez le fichier de travail.
+
+```bash
+cat > tp04_step_by_step.py <<'EOF'
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+spark = (
+    SparkSession.builder
+    .appName("tp04-step-by-step")
+    .getOrCreate()
+)
+
+# Ajoutez ici les blocs des exercices 4 à 8.
+
+spark.stop()
+EOF
+```
+
+À chaque étape, complétez le fichier puis relancez-le.
+
+```bash
+spark-submit \
+  --master yarn \
+  --deploy-mode cluster \
+  --queue students \
+  --conf spark.dynamicAllocation.enabled=false \
+  --conf spark.executor.instances=1 \
+  --conf spark.executor.cores=1 \
+  --conf spark.executor.memory=512m \
+  --conf spark.yarn.am.cores=1 \
+  --conf spark.yarn.am.memory=512m \
+  tp04_step_by_step.py
+```
 
 ## Exercice 4 - Lire un fichier HDFS avec Spark
 
-Dans PySpark, lisez le fichier CSV depuis HDFS.
+Dans PySpark ou dans `tp04_step_by_step.py`, lisez le fichier CSV depuis HDFS.
 
 ```python
 path = f"/user/{spark.sparkContext.sparkUser()}/tp04/input/logs-spark.csv"
@@ -326,7 +432,8 @@ Répondez aux questions suivantes.
 
 ## Exercice 6 - Agréger les logs avec l’API DataFrame
 
-Importez les fonctions Spark SQL.
+Importez les fonctions Spark SQL si elles ne sont pas déjà présentes dans votre
+fichier.
 
 ```python
 from pyspark.sql import functions as F
@@ -428,7 +535,7 @@ Vérifiez depuis PySpark.
 spark.read.parquet(output_path).show()
 ```
 
-Quittez PySpark.
+Quittez PySpark si vous travaillez en mode interactif Docker.
 
 ```python
 exit()

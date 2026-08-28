@@ -271,7 +271,7 @@ Comparaison avec une base relationnelle :
 
 Répondez aux questions suivantes.
 
-1. Pourquoi chaque étudiant doit-il utiliser son propre namespace ?
+1. Pourquoi devez-vous utiliser votre propre namespace ?
    Réponse indicative : Pour isoler les tables, éviter les collisions de noms et faciliter le nettoyage ou l'évaluation d'un travail.
 2. Quel problème apparaîtrait si tout le monde créait les mêmes tables dans le namespace `default` ?
    Réponse indicative : Les tables auraient les mêmes noms, ce qui provoquerait des erreurs de création, des écrasements logiques ou des lectures sur les données d'un autre groupe.

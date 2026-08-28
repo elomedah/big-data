@@ -2,7 +2,7 @@
 
 Ce projet clôture la séquence Hadoop, Spark, Hive et HBase. Il ne s'agit plus
 d'un TP guidé : les choix de conception, de traitement, de stockage et de
-validation sont à produire par les étudiants.
+validation sont à produire dans le dossier projet.
 
 Le projet reprend le contexte DORA des TP précédents, mais avec un volume de
 données plus important, plus de référentiels, plus d'applications, plus de dates
@@ -79,8 +79,8 @@ Le jeu Docker fourni dans ce dépôt couvre actuellement :
 
 ## Chargement initial attendu
 
-Les étudiants doivent déposer le répertoire `datalake/` dans leur espace HDFS
-utilisateur, en conservant l'organisation fournie.
+Déposer le répertoire `datalake/` dans l'espace HDFS utilisateur, en conservant
+l'organisation fournie.
 
 Chemin cible attendu :
 
@@ -116,8 +116,7 @@ doivent pas écraser la zone `raw`.
 
 ## Attendus Spark
 
-Les étudiants doivent concevoir une application Spark structurée. Elle doit au
-minimum couvrir :
+Concevoir une application Spark structurée couvrant au minimum :
 
 - lecture des logs partitionnés et des référentiels ;
 - typage explicite des colonnes ;
@@ -141,8 +140,8 @@ Les choix suivants doivent être justifiés :
 
 ## Attendus Hive
 
-Les étudiants doivent exposer les données utiles dans Hive avec des tables
-externes. Le modèle Hive doit permettre :
+Exposer les données utiles dans Hive avec des tables externes. Le modèle Hive
+doit permettre :
 
 - d'interroger les logs bruts ;
 - d'interroger les référentiels ;
@@ -162,8 +161,8 @@ Les requêtes Hive livrées doivent montrer au minimum :
 
 ## Attendus HBase
 
-Les étudiants doivent proposer un modèle HBase adapté à des consultations
-rapides. HBase ne doit pas contenir une copie complète de toutes les données.
+Proposer un modèle HBase adapté à des consultations rapides. HBase ne doit pas
+contenir une copie complète de toutes les données.
 
 Le dossier doit expliquer :
 
@@ -184,7 +183,7 @@ Les accès rapides peuvent concerner par exemple :
 
 ## Livrables
 
-Chaque groupe doit rendre :
+Rendre les éléments suivants :
 
 | Livrable | Contenu |
 |---|---|
@@ -213,6 +212,6 @@ le cluster à partir du répertoire `datalake/` fourni.
 
 ## Point de départ
 
-Le seul élément fourni aux étudiants est le jeu de données `datalake/`. Le reste
-du projet est à concevoir et à implémenter dans la structure de leur choix, à
+Le seul élément fourni au départ est le jeu de données `datalake/`. Le reste
+du projet est à concevoir et à implémenter dans la structure de votre choix, à
 condition qu'elle soit cohérente et documentée.

@@ -260,7 +260,7 @@ Comparaison avec une base relationnelle :
 
 Répondez aux questions suivantes.
 
-1. Pourquoi chaque étudiant doit-il utiliser son propre namespace ?
+1. Pourquoi devez-vous utiliser votre propre namespace ?
 2. Quel problème apparaîtrait si tout le monde créait les mêmes tables dans le namespace `default` ?
 
 ## Exercice 4 - Créer une table d'événements applicatifs

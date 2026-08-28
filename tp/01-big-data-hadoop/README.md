@@ -221,7 +221,7 @@ par l’adresse IP publique du gateway.
 
 ## Exercice 1 - Générer votre clé SSH
 
-Chaque étudiant doit générer sa propre clé SSH sur son ordinateur.
+Générez votre propre clé SSH sur votre ordinateur.
 
 Exécutez la commande suivante :
 
@@ -248,7 +248,7 @@ Le fichier avec l’extension `.pub` est votre clé publique. C’est ce fichier
 
 Questions de réflexion :
 
-1. Pourquoi une clé SSH personnelle est-elle préférable à un mot de passe commun pour tous les étudiants ?
+1. Pourquoi une clé SSH personnelle est-elle préférable à un mot de passe commun partagé ?
 2. Quels risques apparaissent si plusieurs utilisateurs partagent la même identité technique sur un cluster ?
 3. Pourquoi le commentaire placé à la fin de la clé, par exemple `jean.dupont`, est-il utile pour l’administration ?
 4. Que faudrait-il prévoir dans une organisation réelle lorsqu’un collaborateur quitte un projet ou perd sa clé privée ?
@@ -322,7 +322,7 @@ hbase version
 Questions de réflexion :
 
 1. À quoi servent les variables d’environnement comme `HADOOP_HOME`, `SPARK_HOME` ou `HBASE_HOME` ?
-2. Pourquoi est-il important que tous les étudiants utilisent le même environnement logiciel pendant un TP ?
+2. Pourquoi est-il important d'utiliser le même environnement logiciel pendant un TP ?
 3. Quels problèmes peuvent apparaître si deux versions différentes de Spark, Hive ou Hadoop sont présentes sur la même machine ?
 4. Pourquoi la reproductibilité de l’environnement est-elle importante dans un contexte data engineering ?
 

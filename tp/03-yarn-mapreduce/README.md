@@ -183,7 +183,7 @@ Cluster: http://<gateway_public_ip>:8088/cluster/scheduler
 Répondez aux questions suivantes.
 
 1. À quoi sert une file d’attente YARN ?
-2. Pourquoi peut-on vouloir séparer les ressources entre étudiants, enseignants et traitements automatiques ?
+2. Pourquoi peut-on vouloir séparer les ressources entre utilisateurs, enseignants et traitements automatiques ?
 3. Quelle différence faites-vous entre capacité minimale, capacité maximale et ressources réellement utilisées ?
 4. Dans un cluster partagé, pourquoi le scheduling est-il un sujet de gouvernance autant qu’un sujet technique ?
 5. Pour le projet DORA, quels traitements devraient être prioritaires : ingestion, archivage, audit, traitements analytiques ? Justifiez.
@@ -419,7 +419,7 @@ hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
   /user/$USER/tp03/output-resource-error
 ```
 
-Sur le cluster du cours, les conteneurs étudiants peuvent avoir d'autres limites.
+Sur le cluster du cours, les conteneurs d'exécution peuvent avoir d'autres limites.
 Si la commande précédente ne provoque pas d'erreur, augmentez les valeurs pour
 dépasser les limites indiquées par YARN.
 
@@ -463,7 +463,7 @@ Répondez aux questions suivantes.
 3. Quels traitements doivent être prioritaires en cas d’incident ?
 4. Quelles informations faut-il conserver pour prouver qu’un traitement a bien été exécuté ?
 5. Comment organiseriez-vous les sorties MapReduce dans les zones `processed` et `audit` du Data Lake ?
-6. Quels risques apparaissent si les étudiants ou les traitements automatiques écrivent tous dans les mêmes dossiers de sortie ?
+6. Quels risques apparaissent si plusieurs utilisateurs ou traitements automatiques écrivent dans les mêmes dossiers de sortie ?
 
 ## Nettoyage
 

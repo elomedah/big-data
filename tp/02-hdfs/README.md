@@ -262,7 +262,7 @@ hdfs dfs -ls -R /user/$USER/tp02
 Répondez aux questions suivantes.
 
 1. À quoi sert le dossier `/user/$USER` ?
-2. Pourquoi est-il important que chaque étudiant travaille dans son propre espace ?
+2. Pourquoi est-il important de travailler dans votre propre espace ?
 3. Quels problèmes peuvent apparaître si tous les utilisateurs écrivent dans le même dossier ?
 
 ## Exercice 3 - Créer et charger des données
@@ -496,7 +496,7 @@ Répondez aux questions suivantes.
 6. Pourquoi organiser les données par source et par date ?
 7. Quels noms de répertoires éviteriez-vous dans un Data Lake professionnel ?
 8. Comment garantir que les données `raw` restent immuables ?
-9. Quels droits d’accès donneriez-vous aux étudiants, aux administrateurs, aux traitements automatiques et aux auditeurs ?
+9. Quels droits d’accès donneriez-vous aux utilisateurs du TP, aux administrateurs, aux traitements automatiques et aux auditeurs ?
 10. Quelles métadonnées doivent accompagner chaque fichier chargé dans le Data Lake ?
 11. Comment géreriez-vous la rétention des données sur plusieurs années ?
 12. Comment prouver qu’un fichier n’a pas été modifié depuis son ingestion ?

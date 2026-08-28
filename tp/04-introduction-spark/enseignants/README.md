@@ -268,7 +268,7 @@ Répondez aux questions suivantes.
 2. Quel est le rôle de l’option `inferSchema` ?
    Réponse indicative : Elle demande à Spark de déduire les types à partir des données.
 3. Quels types Spark a-t-il détectés ?
-   Réponse indicative : Selon les données, Spark détecte généralement des chaînes, entiers, doubles ou timestamps. Les étudiants doivent vérifier avec `printSchema()`.
+   Réponse indicative : Selon les données, Spark détecte généralement des chaînes, entiers, doubles ou timestamps. Vérifier avec `printSchema()`.
 4. Pourquoi l’inférence de schéma peut-elle être dangereuse sur des fichiers très volumineux ou hétérogènes ?
    Réponse indicative : Elle peut coûter cher, varier selon l'échantillon lu et produire des types incohérents entre fichiers.
 5. Quelle commande déclenche réellement un calcul distribué ?

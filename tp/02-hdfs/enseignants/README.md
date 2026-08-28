@@ -233,7 +233,7 @@ Répondez aux questions suivantes.
 
 1. À quoi sert le dossier `/user/$USER` ?
    Réponse indicative : C'est l'espace personnel HDFS de l'utilisateur, utilisé par défaut par Hadoop, YARN, MapReduce ou Spark.
-2. Pourquoi est-il important que chaque étudiant travaille dans son propre espace ?
+2. Pourquoi est-il important de travailler dans votre propre espace ?
    Réponse indicative : Cela évite les collisions de fichiers et permet d'appliquer des droits ou quotas par étudiant.
 3. Quels problèmes peuvent apparaître si tous les utilisateurs écrivent dans le même dossier ?
    Réponse indicative : Écrasements, erreurs de droits, mélange de résultats, nettoyage dangereux et difficulté à attribuer les actions.
@@ -510,8 +510,8 @@ Répondez aux questions suivantes.
    Réponse indicative : Éviter les noms vagues ou temporaires comme `test`, `new`, `old`, `final`, `final2`, `misc`, `data`, `backup`, ou des noms dépendant d'une personne.
 8. Comment garantir que les données `raw` restent immuables ?
    Réponse indicative : Droits en lecture seule après ingestion, convention d'écriture atomique, snapshots, checksums, séparation des comptes d'écriture et de lecture.
-9. Quels droits d’accès donneriez-vous aux étudiants, aux administrateurs, aux traitements automatiques et aux auditeurs ?
-   Réponse indicative : Étudiants : droits limités dans leur espace. Administrateurs : contrôle complet. Traitements automatiques : écriture ciblée. Auditeurs : lecture sur `audit` et éventuellement `archive`.
+9. Quels droits d’accès donneriez-vous aux utilisateurs du TP, aux administrateurs, aux traitements automatiques et aux auditeurs ?
+   Réponse indicative : Utilisateurs du TP : droits limités dans leur espace. Administrateurs : contrôle complet. Traitements automatiques : écriture ciblée. Auditeurs : lecture sur `audit` et éventuellement `archive`.
 10. Quelles métadonnées doivent accompagner chaque fichier chargé dans le Data Lake ?
    Réponse indicative : Source, date d'ingestion, producteur, schéma, format, taille, checksum, version, niveau de sensibilité, rétention et propriétaire.
 11. Comment géreriez-vous la rétention des données sur plusieurs années ?

@@ -123,7 +123,7 @@ Répondez aux questions suivantes.
 3. Combien de vCPU sont visibles ?
    Réponse indicative : Le nombre de vCPU correspond à la somme des vcores exposés par les workers. Il peut être inférieur aux CPU physiques si YARN garde une réserve.
 4. Y a-t-il des applications en cours d’exécution ?
-   Réponse indicative : Cela dépend du moment. Avant le TP, il ne devrait pas y avoir d'application `RUNNING`, sauf si d'autres étudiants utilisent le cluster.
+   Réponse indicative : Cela dépend du moment. Avant le TP, il ne devrait pas y avoir d'application `RUNNING`, sauf si d'autres utilisateurs utilisent le cluster.
 6. Pourquoi l’état des NodeManagers est-il important avant de lancer un traitement distribué ?
    Réponse indicative : Si des NodeManagers sont absents, perdus ou unhealthy, le parallélisme est réduit et certains jobs peuvent rester bloqués ou échouer.
 
@@ -151,8 +151,8 @@ Répondez aux questions suivantes.
 
 1. À quoi sert une file d’attente YARN ?
    Réponse indicative : Une file d'attente organise le partage des ressources entre groupes d'utilisateurs ou types de traitements.
-2. Pourquoi peut-on vouloir séparer les ressources entre étudiants, enseignants et traitements automatiques ?
-   Réponse indicative : Les étudiants, enseignants et traitements automatiques n'ont pas les mêmes priorités ni les mêmes garanties de service.
+2. Pourquoi peut-on vouloir séparer les ressources entre utilisateurs, enseignants et traitements automatiques ?
+   Réponse indicative : Les utilisateurs, enseignants et traitements automatiques n'ont pas les mêmes priorités ni les mêmes garanties de service.
 3. Quelle différence faites-vous entre capacité minimale, capacité maximale et ressources réellement utilisées ?
    Réponse indicative : La capacité minimale est une part garantie, la capacité maximale est une limite haute, les ressources utilisées sont la consommation réelle à un instant donné.
 4. Dans un cluster partagé, pourquoi le scheduling est-il un sujet de gouvernance autant qu’un sujet technique ?
@@ -345,7 +345,7 @@ Répondez aux questions suivantes.
    Réponse indicative : Conserver l'identifiant YARN, l'heure de début et de fin, l'utilisateur, les paramètres, les chemins d'entrée et de sortie, le statut final, le nombre de lignes traitées, les compteurs MapReduce et les logs.
 5. Comment organiseriez-vous les sorties MapReduce dans les zones `processed` et `audit` du Data Lake ?
    Réponse indicative : Les résultats métiers vont dans `processed`, par exemple `/user/$USER/datalake/processed/application_logs/year=2026/month=01/day=10/`. Les preuves d'exécution, logs de traitement, compteurs, statuts et contrôles vont dans `audit`, par exemple `/user/$USER/datalake/audit/mapreduce/wordcount/year=2026/month=01/day=10/`.
-6. Quels risques apparaissent si les étudiants ou les traitements automatiques écrivent tous dans les mêmes dossiers de sortie ?
+6. Quels risques apparaissent si plusieurs utilisateurs ou traitements automatiques écrivent dans les mêmes dossiers de sortie ?
    Réponse indicative : Il y a des risques d'écrasement, de mélange de données, de droits mal maîtrisés, de résultats non reproductibles et de difficulté à attribuer les erreurs. En production, il faut isoler les sorties par utilisateur, application, date d'exécution et identifiant de job.
 
 ## Nettoyage

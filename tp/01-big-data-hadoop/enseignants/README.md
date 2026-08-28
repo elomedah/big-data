@@ -221,7 +221,7 @@ par l’adresse IP publique du gateway.
 
 ## Exercice 1 - Générer votre clé SSH
 
-Chaque étudiant doit générer sa propre clé SSH sur son ordinateur.
+Générez votre propre clé SSH sur votre ordinateur.
 
 Exécutez la commande suivante :
 
@@ -248,7 +248,7 @@ Le fichier avec l’extension `.pub` est votre clé publique. C’est ce fichier
 
 Questions de réflexion :
 
-1. Pourquoi une clé SSH personnelle est-elle préférable à un mot de passe commun pour tous les étudiants ?
+1. Pourquoi une clé SSH personnelle est-elle préférable à un mot de passe commun partagé ?
    Réponse indicative : Une clé personnelle identifie clairement l'utilisateur, évite le partage d'un secret commun et permet de révoquer un accès sans impacter toute la classe.
 2. Quels risques apparaissent si plusieurs utilisateurs partagent la même identité technique sur un cluster ?
    Réponse indicative : On perd la traçabilité, il devient difficile d'attribuer une action, et un incident de sécurité peut concerner tous les utilisateurs.
@@ -298,7 +298,7 @@ pwd
 Questions de réflexion :
 
 1. Pourquoi l’accès étudiant se fait-il par un gateway plutôt que directement vers les machines internes du cluster ?
-   Réponse indicative : Le gateway limite l'exposition du cluster : les étudiants passent par un point d'entrée contrôlé au lieu d'accéder directement aux nœuds internes.
+   Réponse indicative : Le gateway limite l'exposition du cluster : les utilisateurs passent par un point d'entrée contrôlé au lieu d'accéder directement aux nœuds internes.
 2. Quels avantages apporte un gateway pour la sécurité, l’administration et la traçabilité ?
    Réponse indicative : Il centralise les accès SSH, les journaux, les règles réseau et l'administration des comptes.
 3. Quels risques apparaissent si le gateway est mal configuré ou trop exposé sur Internet ?
@@ -332,7 +332,7 @@ Questions de réflexion :
 
 1. À quoi servent les variables d’environnement comme `HADOOP_HOME`, `SPARK_HOME` ou `HBASE_HOME` ?
    Réponse indicative : Elles indiquent où les logiciels sont installés et permettent aux commandes de trouver les binaires, bibliothèques et fichiers de configuration.
-2. Pourquoi est-il important que tous les étudiants utilisent le même environnement logiciel pendant un TP ?
+2. Pourquoi est-il important d'utiliser le même environnement logiciel pendant un TP ?
    Réponse indicative : Cela évite les écarts de comportement et simplifie l'aide pendant le TP.
 3. Quels problèmes peuvent apparaître si deux versions différentes de Spark, Hive ou Hadoop sont présentes sur la même machine ?
    Réponse indicative : Incompatibilités de protocole, erreurs de classes Java, mauvais fichiers de configuration, différences de syntaxe ou résultats difficiles à reproduire.

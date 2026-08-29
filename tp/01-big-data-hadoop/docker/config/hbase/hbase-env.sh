@@ -6,5 +6,4 @@ export HBASE_PID_DIR=/data/hbase/pids
 export HBASE_MANAGES_ZK=false
 export HADOOP_HOME=${HADOOP_HOME:-/opt/hadoop}
 export HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-/opt/hadoop/etc/hadoop}
-export HBASE_CLASSPATH_PREFIX=$("$HADOOP_HOME"/bin/hadoop classpath)
-export HBASE_CLASSPATH="$HADOOP_CONF_DIR"
+export HBASE_CLASSPATH="$HADOOP_CONF_DIR:$("$HADOOP_HOME"/bin/hadoop classpath --glob)"

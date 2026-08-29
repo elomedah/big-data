@@ -82,6 +82,7 @@ RUN mkdir -p "${HIVE_HOME}" \
 RUN mkdir -p "${HBASE_HOME}" \
     && curl -fsSL "https://archive.apache.org/dist/hbase/${HBASE_VERSION}/hbase-${HBASE_VERSION}-hadoop3-bin.tar.gz" -o /tmp/hbase.tar.gz \
     && tar -xzf /tmp/hbase.tar.gz -C "${HBASE_HOME}" --strip-components=1 \
+    && find "${HBASE_HOME}/lib" -maxdepth 1 -type f -name 'hadoop-*.jar' -delete \
     && rm /tmp/hbase.tar.gz
 
 COPY docker/config/hadoop/ ${HADOOP_CONF_DIR}/

@@ -77,6 +77,21 @@
       - --strip-components=1
     creates: /opt/{{ hbase_package }}/bin/hbase
 
+- name: Find HBase-bundled Hadoop jars
+  ansible.builtin.find:
+    paths: /opt/{{ hbase_package }}/lib
+    patterns: "hadoop-*.jar"
+    file_type: file
+  register: hbase_bundled_hadoop_jars
+
+- name: Remove HBase-bundled Hadoop jars
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ hbase_bundled_hadoop_jars.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+
 - name: Link HBase installation
   ansible.builtin.file:
     src: /opt/{{ hbase_package }}

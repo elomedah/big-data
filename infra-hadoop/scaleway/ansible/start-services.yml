@@ -1,0 +1,24 @@
+---
+- name: Start master services
+  hosts: masters
+  become: true
+  vars:
+    cluster_services_state: started
+  roles:
+    - cluster_services
+
+- name: Start worker services
+  hosts: workers
+  become: true
+  vars:
+    cluster_services_state: started
+  roles:
+    - cluster_services
+
+- name: Start gateway services
+  hosts: gateway
+  become: true
+  vars:
+    cluster_services_state: started
+  roles:
+    - cluster_services

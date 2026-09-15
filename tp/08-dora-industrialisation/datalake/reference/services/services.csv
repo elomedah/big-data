@@ -1,0 +1,13 @@
+service_name,app_id,endpoint,audience,criticality
+checkout,payment-api,/checkout,customer,critical
+refund,billing-worker,/refund,backoffice,high
+login,auth-service,/login,customer,critical
+token,identity-portal,/token,system,medium
+score,risk-engine,/risk/score,system,critical
+fraud-check,fraud-detector,/fraud/check,system,high
+push,mobile-backend,/notifications/push,customer,high
+email,notification-api,/notifications/email,system,medium
+ticket,ticketing-api,/tickets,backoffice,medium
+sync,crm-sync,/sync,system,low
+ingest,datalake-ingest,/ingest,system,high
+metrics,metrics-api,/metrics,backoffice,medium

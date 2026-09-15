@@ -1,0 +1,7 @@
+team_id,team_name,domain,location
+team_payments,Payments,finance,Paris
+team_identity,Identity,security,Lyon
+team_risk,Risk,risk,London
+team_mobile,Mobile,digital,Madrid
+team_support,Support,operations,Warsaw
+team_data,Data Platform,platform,Paris

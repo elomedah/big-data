@@ -1,0 +1,13 @@
+app_id,sla_ms,availability_target,rto_minutes,rpo_minutes
+payment-api,250,99.5,60,15
+billing-worker,500,99.0,60,15
+auth-service,250,99.5,60,15
+identity-portal,900,99.0,60,15
+risk-engine,250,99.5,60,15
+fraud-detector,500,99.0,60,15
+mobile-backend,500,99.0,60,15
+notification-api,900,99.0,60,15
+ticketing-api,900,99.0,60,15
+crm-sync,1500,99.0,60,15
+datalake-ingest,500,99.0,60,15
+metrics-api,900,99.0,60,15

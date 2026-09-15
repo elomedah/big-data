@@ -1,0 +1,39 @@
+services:
+  tp-hadoop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tp01-bigdata-hadoop:latest
+    container_name: tp-hadoop
+    hostname: tp-hadoop
+    restart: unless-stopped
+    shm_size: "1g"
+    ports:
+      - "9000:9000"     # HDFS RPC
+      - "9870:9870"     # NameNode UI
+      - "9864:9864"     # DataNode UI
+      - "9866:9866"     # DataNode transfer
+      - "8088:8088"     # YARN ResourceManager UI
+      - "8042:8042"     # YARN NodeManager UI
+      - "19888:19888"   # MapReduce HistoryServer UI
+      - "18080:18080"   # Spark History Server UI
+      - "10000:10000"   # HiveServer2 JDBC
+      - "10002:10002"   # HiveServer2 Web UI
+      - "9083:9083"     # Hive Metastore Thrift
+      - "16010:16010"   # HBase Master UI
+      - "16030:16030"   # HBase RegionServer UI
+      - "2181:2181"     # HBase ZooKeeper
+      - "4040-4050:4040-4050" # Spark live UIs
+    volumes:
+      - tp_hadoop_data:/data
+      - tp_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/tp-hadoop/bin/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+
+volumes:
+  tp_hadoop_data:
+  tp_postgres_data:

@@ -1,0 +1,249 @@
+locals {
+  worker_commercial_type = var.worker_mode == "active" ? var.worker_active_commercial_type : var.worker_reduced_commercial_type
+  default_gateway_active_commercial_type  = var.cluster_size == "large" ? "DEV1-L" : "DEV1-S"
+  default_gateway_reduced_commercial_type = "DEV1-S"
+  gateway_active_commercial_type          = coalesce(var.gateway_active_commercial_type, local.default_gateway_active_commercial_type)
+  gateway_reduced_commercial_type         = coalesce(var.gateway_reduced_commercial_type, local.default_gateway_reduced_commercial_type)
+  gateway_commercial_type                 = var.gateway_mode == "active" ? local.gateway_active_commercial_type : local.gateway_reduced_commercial_type
+  default_master_active_commercial_type   = var.cluster_size == "large" ? "BASIC3-X8C-32G" : "DEV1-S"
+  default_master_reduced_commercial_type  = var.cluster_size == "large" ? "DEV1-L" : "DEV1-S"
+  master_active_commercial_type           = coalesce(var.master_active_commercial_type, local.default_master_active_commercial_type)
+  master_reduced_commercial_type          = coalesce(var.master_reduced_commercial_type, local.default_master_reduced_commercial_type)
+  master_commercial_type                  = var.master_mode == "active" ? local.master_active_commercial_type : local.master_reduced_commercial_type
+
+  server_profiles = {
+    tiny = merge({
+      bastion = {
+        commercial_type = "DEV1-S"
+        root_size_gb    = 20
+        data_size_gb    = 0
+        public          = true
+        role            = "bastion"
+      }
+      gateway = {
+        commercial_type = local.gateway_commercial_type
+        root_size_gb    = 20
+        data_size_gb    = 0
+        public          = true
+        role            = "gateway"
+      }
+      master = {
+        commercial_type = local.master_commercial_type
+        root_size_gb    = 20
+        data_size_gb    = 20
+        public          = false
+        role            = "master"
+      }
+    }, {
+      for i in range(1, var.tiny_worker_count + 1) : "worker-${i}" => {
+        commercial_type = local.worker_commercial_type
+        root_size_gb    = 20
+        data_size_gb    = 20
+        public          = false
+        role            = "worker"
+      }
+    })
+
+    large = merge({
+      bastion = {
+        commercial_type = "DEV1-M"
+        root_size_gb    = 40
+        data_size_gb    = 0
+        public          = true
+        role            = "bastion"
+      }
+      gateway = {
+        commercial_type = local.gateway_commercial_type
+        root_size_gb    = 80
+        data_size_gb    = 0
+        public          = true
+        role            = "gateway"
+      }
+      master = {
+        commercial_type = local.master_commercial_type
+        root_size_gb    = 100
+        data_size_gb    = 100
+        public          = false
+        role            = "master"
+      }
+    }, {
+      for i in range(1, var.large_worker_count + 1) : "worker-${i}" => {
+        commercial_type = local.worker_commercial_type
+        root_size_gb    = 100
+        data_size_gb    = var.large_worker_data_size_gb
+        public          = false
+        role            = "worker"
+      }
+    })
+  }
+
+  servers = local.server_profiles[var.cluster_size]
+  admin_ssh_public_key = trimspace(file(pathexpand(var.admin_ssh_public_key_path)))
+
+  tags = [
+    var.project_name,
+    "hadoop",
+    "teaching",
+  ]
+
+  public_servers = {
+    for name, server in local.servers : name => server
+    if server.public || var.allocate_public_ip_to_private_nodes
+  }
+
+  data_volumes = {
+    for name, server in local.servers : name => server
+    if server.data_size_gb > 0
+  }
+
+  gateway_cidrs = length(var.student_ssh_cidrs) > 0 ? var.student_ssh_cidrs : [var.teacher_ssh_cidr]
+  max_worker_count = max(var.tiny_worker_count, var.large_worker_count)
+  gateway_web_ports = concat(
+    [9870, 8088, 19888, 18080, 10002, 16010],
+    [for port in range(4040, 4501) : port],
+    [for i in range(local.max_worker_count) : 9864 + i],
+    [for i in range(local.max_worker_count) : 8042 + i],
+    [for i in range(local.max_worker_count) : 16030 + i],
+  )
+
+  private_ip_offsets = merge({
+    bastion  = 10
+    gateway  = 11
+    master   = 12
+  }, {
+    for i in range(1, local.max_worker_count + 1) : "worker-${i}" => 20 + i
+  })
+}
+
+resource "scaleway_vpc_private_network" "hadoop" {
+  name   = "${var.project_name}-private"
+  region = var.region
+  tags   = local.tags
+
+  ipv4_subnet {
+    subnet = var.private_subnet
+  }
+}
+
+resource "scaleway_instance_security_group" "bastion" {
+  name                    = "${var.project_name}-bastion-sg"
+  inbound_default_policy  = "drop"
+  outbound_default_policy = "accept"
+  zone                    = var.zone
+
+  inbound_rule {
+    action   = "accept"
+    port     = 22
+    ip_range = var.teacher_ssh_cidr
+  }
+}
+
+resource "scaleway_instance_security_group" "gateway" {
+  name                    = "${var.project_name}-gateway-sg"
+  inbound_default_policy  = "drop"
+  outbound_default_policy = "accept"
+  zone                    = var.zone
+
+  dynamic "inbound_rule" {
+    for_each = local.gateway_cidrs
+    content {
+      action   = "accept"
+      port     = 22
+      ip_range = inbound_rule.value
+    }
+  }
+
+  inbound_rule {
+    action   = "accept"
+    ip_range = var.private_cidr
+  }
+
+  dynamic "inbound_rule" {
+    for_each = {
+      for pair in setproduct(var.student_web_cidrs, local.gateway_web_ports) : "${pair[0]}-${pair[1]}" => {
+        cidr = pair[0]
+        port = pair[1]
+      }
+    }
+    content {
+      action   = "accept"
+      port     = inbound_rule.value.port
+      ip_range = inbound_rule.value.cidr
+    }
+  }
+}
+
+resource "scaleway_instance_security_group" "internal" {
+  name                    = "${var.project_name}-internal-sg"
+  inbound_default_policy  = "drop"
+  outbound_default_policy = "accept"
+  zone                    = var.zone
+
+  inbound_rule {
+    action   = "accept"
+    ip_range = var.private_cidr
+  }
+}
+
+resource "scaleway_instance_ip" "public" {
+  for_each = local.public_servers
+  zone     = var.zone
+}
+
+resource "scaleway_block_volume" "data" {
+  for_each = local.data_volumes
+
+  name       = "${var.project_name}-${each.key}-data"
+  zone       = var.zone
+  iops       = 5000
+  size_in_gb = each.value.data_size_gb
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "scaleway_ipam_ip" "private" {
+  for_each = local.servers
+
+  address = cidrhost(var.private_subnet, local.private_ip_offsets[each.key])
+  tags    = concat(local.tags, [each.value.role])
+
+  source {
+    private_network_id = scaleway_vpc_private_network.hadoop.id
+  }
+}
+
+resource "scaleway_instance_server" "node" {
+  for_each = local.servers
+
+  name              = "${var.project_name}-${each.key}"
+  type              = each.value.commercial_type
+  image             = var.image
+  zone              = var.zone
+  tags              = concat(local.tags, [each.value.role])
+  enable_dynamic_ip = false
+  ip_id             = try(scaleway_instance_ip.public[each.key].id, null)
+  security_group_id = each.value.role == "bastion" ? scaleway_instance_security_group.bastion.id : each.value.role == "gateway" ? scaleway_instance_security_group.gateway.id : scaleway_instance_security_group.internal.id
+  additional_volume_ids = try([scaleway_block_volume.data[each.key].id], [])
+
+  root_volume {
+    size_in_gb  = each.value.root_size_gb
+    volume_type = "sbs_volume"
+  }
+
+  user_data = {
+    cloud-init = templatefile("${path.module}/cloud-init.yaml.tftpl", {
+      ssh_public_key = local.admin_ssh_public_key
+    })
+  }
+}
+
+resource "scaleway_instance_private_nic" "node" {
+  for_each = local.servers
+
+  server_id          = scaleway_instance_server.node[each.key].id
+  private_network_id = scaleway_vpc_private_network.hadoop.id
+  ipam_ip_ids        = [scaleway_ipam_ip.private[each.key].id]
+  zone               = var.zone
+}

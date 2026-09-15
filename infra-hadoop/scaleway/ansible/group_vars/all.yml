@@ -1,0 +1,75 @@
+---
+hadoop_version: "3.3.6"
+hadoop_download_url: "https://dlcdn.apache.org/hadoop/common/hadoop-{{ hadoop_version }}/hadoop-{{ hadoop_version }}.tar.gz"
+hadoop_download_fallback_url: "https://archive.apache.org/dist/hadoop/common/hadoop-{{ hadoop_version }}/hadoop-{{ hadoop_version }}.tar.gz"
+hadoop_home: /opt/hadoop
+hadoop_user: hadoop
+hadoop_group: hadoop
+hadoop_data_dir: /data/hadoop
+hadoop_data_device: auto
+hadoop_replication: 3
+hadoop_block_size: 134217728
+
+spark_version: "3.5.8"
+spark_package: "spark-{{ spark_version }}-bin-hadoop3"
+spark_download_url: "https://dlcdn.apache.org/spark/spark-{{ spark_version }}/{{ spark_package }}.tgz"
+spark_download_fallback_url: "https://archive.apache.org/dist/spark/spark-{{ spark_version }}/{{ spark_package }}.tgz"
+spark_home: /opt/spark
+spark_event_log_dir: /spark-logs
+spark_jars_dir: /spark-jars
+spark_submit_deploy_mode: cluster
+spark_driver_memory: 512m
+spark_driver_bind_address: 0.0.0.0
+spark_dynamic_allocation_enabled: false
+spark_executor_instances: 1
+spark_executor_memory: 768m
+spark_executor_cores: 1
+spark_yarn_am_memory: 512m
+spark_yarn_am_cores: 1
+
+hive_version: "4.0.1"
+hive_package: "apache-hive-{{ hive_version }}-bin"
+hive_download_url: "https://archive.apache.org/dist/hive/hive-{{ hive_version }}/{{ hive_package }}.tar.gz"
+hive_download_fallback_url: "https://archive.apache.org/dist/hive/hive-{{ hive_version }}/{{ hive_package }}.tar.gz"
+hive_home: /opt/hive
+hive_warehouse_dir: /user/hive/warehouse
+hive_metastore_db: hive_metastore
+hive_metastore_user: hive
+hive_metastore_password: hive
+hive_metastore_port: 9083
+hive_server2_port: 10000
+hive_server2_webui_port: 10002
+
+hbase_version: "2.5.15"
+hbase_archive: "hbase-{{ hbase_version }}-hadoop3-bin"
+hbase_package: "hbase-{{ hbase_version }}-hadoop3"
+hbase_download_url: "https://downloads.apache.org/hbase/{{ hbase_version }}/{{ hbase_archive }}.tar.gz"
+hbase_download_fallback_url: "https://archive.apache.org/dist/hbase/{{ hbase_version }}/{{ hbase_archive }}.tar.gz"
+hbase_home: /opt/hbase
+hbase_root_dir: /hbase
+hbase_zookeeper_data_dir: "{{ hadoop_data_dir }}/zookeeper"
+hbase_master_web_port: 16010
+hbase_regionserver_web_port: 16030
+
+java_package: openjdk-11-jdk
+
+student_group: student
+student_count: 3
+student_space_quota: 5g
+student_file_quota: 50000
+student_password_lock: true
+teacher_user: teacher
+
+yarn_students_capacity: 60
+yarn_students_max_capacity: 100
+yarn_students_maximum_am_resource_percent: 0.5
+yarn_nodemanager_resource_memory_mb: -1
+yarn_nodemanager_resource_system_reserved_memory_mb: -1
+yarn_nodemanager_resource_system_reserved_memory_ratio: 0.2
+yarn_nodemanager_resource_cpu_vcores: -1
+yarn_nodemanager_resource_detect_hardware_capabilities: true
+yarn_nodemanager_resource_count_logical_processors_as_cores: true
+yarn_nodemanager_resource_pcores_vcores_multiplier: 0.8
+yarn_nodemanager_resource_percentage_physical_cpu_limit: 80
+yarn_maximum_allocation_mb: 2048
+yarn_maximum_allocation_vcores: 1

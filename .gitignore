@@ -1,0 +1,18 @@
+# Terraform local state and secrets
+**/.terraform/
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/terraform.tfstate.d/
+**/*.tfstate
+**/*.tfstate.*
+**/terraform.tfvars
+**/terraform.tfvars.json
+**/backend.hcl
+**/*.tfplan
+
+# Local teacher corrections
+enseignants/
+
+# Local OS/editor files
+.DS_Store
+Thumbs.db

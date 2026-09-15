@@ -1,0 +1,7 @@
+---
+namenode_host: "{{ groups['masters'][0] }}"
+resourcemanager_host: "{{ groups['masters'][0] }}"
+hdfs_name_dir: "{{ hadoop_data_dir }}/namenode"
+hdfs_data_dir: "{{ hadoop_data_dir }}/datanode"
+yarn_local_dir: "{{ hadoop_data_dir }}/yarn/local"
+yarn_log_dir: "{{ hadoop_data_dir }}/yarn/logs"

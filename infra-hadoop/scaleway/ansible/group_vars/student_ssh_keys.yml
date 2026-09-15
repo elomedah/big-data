@@ -1,0 +1,13 @@
+---
+# Copy this file to group_vars/student_ssh_keys.yml and paste the public keys
+# sent by the students.
+#
+# Each student generates their own SSH key locally and sends only the .pub
+# content. Never ask students to send their private key.
+
+student_ssh_keys:
+  student01:
+    - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINFARkStQ0lAKDseoK/MFVqMhKyXCvaTyoxZYOxje53k student01"
+  student02:
+    - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOFlwIlftK+UQWwgkfE4cN6zLs0+9vBR7JZz+DK85U2u student02"
+

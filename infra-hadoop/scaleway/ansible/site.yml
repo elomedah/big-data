@@ -1,0 +1,58 @@
+---
+- name: Prepare all cluster machines
+  hosts: cluster
+  become: true
+  roles:
+    - common
+
+- name: Prepare Hadoop data volumes
+  hosts: masters:workers
+  become: true
+  tags:
+    - storage
+  roles:
+    - storage
+
+- name: Install and configure Hadoop
+  hosts: hadoop
+  become: true
+  tags:
+    - hadoop
+  roles:
+    - hadoop
+
+- name: Install and configure Spark on YARN
+  hosts: hadoop
+  become: true
+  roles:
+    - spark
+
+- name: Install and configure Hive
+  hosts: gateway
+  become: true
+  roles:
+    - hive
+
+- name: Install and configure HBase
+  hosts: hadoop
+  become: true
+  tags:
+    - hbase
+  roles:
+    - hbase
+
+- name: Expose Hadoop web UIs through the gateway
+  hosts: gateway
+  become: true
+  tags:
+    - gateway_proxy
+  roles:
+    - gateway_proxy
+
+- name: Create teaching accounts and quotas
+  hosts: gateway:masters
+  become: true
+  tags:
+    - students
+  roles:
+    - students

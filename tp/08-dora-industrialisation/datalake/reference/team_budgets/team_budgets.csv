@@ -1,0 +1,7 @@
+team_id,budget_year,currency,annual_budget,cloud_budget,run_budget,compliance_budget,run_budget_ratio,budget_domain
+team_payments,2026,EUR,1250000,380000,420000,180000,0.336,finance
+team_identity,2026,EUR,980000,260000,360000,220000,0.3673,security
+team_risk,2026,EUR,1420000,410000,520000,300000,0.3662,risk
+team_mobile,2026,EUR,860000,210000,300000,120000,0.3488,digital
+team_support,2026,EUR,640000,150000,180000,90000,0.2812,operations
+team_data,2026,EUR,1550000,520000,610000,240000,0.3935,platform

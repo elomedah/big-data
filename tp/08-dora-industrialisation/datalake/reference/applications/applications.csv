@@ -1,0 +1,13 @@
+app_id,app_name,team_id,criticality,runtime,tier,primary_region
+payment-api,Payment API,team_payments,critical,java,tier_1,eu-central-1
+billing-worker,Billing Worker,team_payments,high,python,tier_2,eu-central-1
+auth-service,Auth Service,team_identity,critical,java,tier_1,eu-west-1
+identity-portal,Identity Portal,team_identity,medium,nodejs,tier_2,eu-west-1
+risk-engine,Risk Engine,team_risk,critical,scala,tier_1,eu-west-3
+fraud-detector,Fraud Detector,team_risk,high,python,tier_1,eu-west-3
+mobile-backend,Mobile Backend,team_mobile,high,go,tier_2,eu-west-1
+notification-api,Notification API,team_mobile,medium,nodejs,tier_3,eu-central-1
+ticketing-api,Ticketing API,team_support,medium,java,tier_3,eu-central-1
+crm-sync,CRM Sync,team_support,low,python,tier_3,eu-central-1
+datalake-ingest,Datalake Ingest,team_data,high,scala,tier_2,eu-west-3
+metrics-api,Metrics API,team_data,medium,go,tier_2,eu-west-3

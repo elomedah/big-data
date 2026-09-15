@@ -1,0 +1,9 @@
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export HBASE_HOME=/opt/hbase
+export HBASE_CONF_DIR=/opt/hbase/conf
+export HBASE_LOG_DIR=/var/log/hbase
+export HBASE_PID_DIR=/data/hbase/pids
+export HBASE_MANAGES_ZK=false
+export HADOOP_HOME=${HADOOP_HOME:-/opt/hadoop}
+export HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-/opt/hadoop/etc/hadoop}
+export HBASE_CLASSPATH="$HADOOP_CONF_DIR:$("$HADOOP_HOME"/bin/hadoop classpath --glob)"

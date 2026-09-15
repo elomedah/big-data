@@ -1,0 +1,56 @@
+admin_ssh_public_key_path = "~/.ssh/m2-hadoop-scaleway.pub"
+teacher_ssh_cidr          = "0.0.0.0/0"
+student_ssh_cidrs         = ["0.0.0.0/0"]
+student_web_cidrs         = ["0.0.0.0/0"]
+
+# Optional overrides:
+# project_name = "m2-hadoop"
+# region       = "fr-par"
+# zone         = "fr-par-1"
+# image        = "ubuntu_jammy"
+# private_subnet = "10.42.0.0/24"
+# allocate_public_ip_to_private_nodes = true
+
+# Sizing profile:
+# - tiny: test cluster, all data volumes <= 20 GB, very small instances.
+# - large: teaching cluster, preserves the sizing from scaleway-cluster.md.
+cluster_size = "tiny"
+
+# Worker counts:
+# tiny_worker_count  = 3
+# large_worker_count = 5
+
+# Worker compute mode:
+# - active: full worker resources during TP sessions.
+# - reduced: smaller worker instances outside TP sessions.
+# Data volumes are kept separately and protected from accidental deletion.
+# worker_mode = "active"
+# worker_active_commercial_type  = "DEV1-S"
+# worker_reduced_commercial_type = "DEV1-S"
+
+# For the large teaching cluster, override the same variables with the quoted
+# Scaleway instance types, for example:
+# worker_active_commercial_type  = "BASIC3-X16C-32G"
+# worker_reduced_commercial_type = "DEV1-L"
+
+# Gateway compute mode:
+# - active: normal gateway size during TP sessions.
+# - reduced: smaller gateway outside TP sessions.
+# Defaults preserve the profile defaults: tiny active = DEV1-S, large active = DEV1-L.
+# gateway_mode = "active"
+# gateway_active_commercial_type  = "DEV1-L"
+# gateway_reduced_commercial_type = "DEV1-S"
+
+# Master compute mode:
+# - active: normal NameNode/ResourceManager size during TP sessions.
+# - reduced: smaller master outside TP sessions.
+# Defaults preserve the active profile sizing: tiny active = DEV1-S, large active = BASIC3-X8C-32G.
+# Large reduced defaults to DEV1-L.
+# master_mode = "active"
+# master_active_commercial_type  = "BASIC3-X8C-32G"
+# master_reduced_commercial_type = "DEV1-L"
+
+# HDFS data disk size per worker for the large profile.
+# large_worker_count x large_worker_data_size_gb = raw HDFS capacity.
+# Increase this value progressively as student needs grow.
+# large_worker_data_size_gb = 600

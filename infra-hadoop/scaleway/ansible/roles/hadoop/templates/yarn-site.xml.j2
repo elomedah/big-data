@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>{{ hostvars[resourcemanager_host].private_ip }}</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.webapp.address</name>
+    <value>{{ hostvars[resourcemanager_host].private_ip }}:8088</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.hostname</name>
+    <value>{{ hostvars[inventory_hostname].private_ip }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.address</name>
+    <value>{{ hostvars[inventory_hostname].private_ip }}:0</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.localizer.address</name>
+    <value>{{ hostvars[inventory_hostname].private_ip }}:8040</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.bind-host</name>
+    <value>0.0.0.0</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.webapp.address</name>
+    <value>{% if inventory_hostname in groups['workers'] %}{{ hostvars[groups['gateway'][0]].public_ip }}:{{ 8042 + groups['workers'].index(inventory_hostname) }}{% else %}{{ hostvars[inventory_hostname].private_ip }}:8042{% endif %}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.memory-mb</name>
+    <value>{{ yarn_nodemanager_resource_memory_mb }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.system-reserved-memory-mb</name>
+    <value>{% if (yarn_nodemanager_resource_system_reserved_memory_mb | int) >= 0 %}{{ yarn_nodemanager_resource_system_reserved_memory_mb }}{% else %}{{ ((ansible_memtotal_mb | int) * (yarn_nodemanager_resource_system_reserved_memory_ratio | float)) | round(0, 'ceil') | int }}{% endif %}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.cpu-vcores</name>
+    <value>{{ yarn_nodemanager_resource_cpu_vcores }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.detect-hardware-capabilities</name>
+    <value>{{ yarn_nodemanager_resource_detect_hardware_capabilities | lower }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.count-logical-processors-as-cores</name>
+    <value>{{ yarn_nodemanager_resource_count_logical_processors_as_cores | lower }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.pcores-vcores-multiplier</name>
+    <value>{{ yarn_nodemanager_resource_pcores_vcores_multiplier }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.percentage-physical-cpu-limit</name>
+    <value>{{ yarn_nodemanager_resource_percentage_physical_cpu_limit }}</value>
+  </property>
+  <property>
+    <name>yarn.application.classpath</name>
+    <value>{{ hadoop_home }}/etc/hadoop,{{ hadoop_home }}/share/hadoop/common/*,{{ hadoop_home }}/share/hadoop/common/lib/*,{{ hadoop_home }}/share/hadoop/hdfs/*,{{ hadoop_home }}/share/hadoop/hdfs/lib/*,{{ hadoop_home }}/share/hadoop/mapreduce/*,{{ hadoop_home }}/share/hadoop/mapreduce/lib/*,{{ hadoop_home }}/share/hadoop/yarn/*,{{ hadoop_home }}/share/hadoop/yarn/lib/*</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.local-dirs</name>
+    <value>{{ yarn_local_dir }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.log-dirs</name>
+    <value>{{ yarn_log_dir }}</value>
+  </property>
+  <property>
+    <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.remote-app-log-dir</name>
+    <value>/tmp/logs</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.remote-app-log-dir-suffix</name>
+    <value>logs</value>
+  </property>
+  <property>
+    <name>yarn.log.server.url</name>
+    <value>http://{{ hostvars[groups['gateway'][0]].public_ip }}:19888/jobhistory/logs</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.maximum-allocation-mb</name>
+    <value>{{ yarn_maximum_allocation_mb }}</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.maximum-allocation-vcores</name>
+    <value>{{ yarn_maximum_allocation_vcores }}</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.scheduler.class</name>
+    <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+  </property>
+</configuration>

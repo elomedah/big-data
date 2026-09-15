@@ -1,0 +1,45 @@
+---
+- name: Build cluster service list
+  ansible.builtin.set_fact:
+    cluster_services: >-
+      {{
+        []
+        + (
+          ['hive-server2', 'hive-metastore', 'nginx']
+          if inventory_hostname in groups.get('gateway', []) and cluster_services_state == 'stopped'
+          else []
+        )
+        + (
+          ['hive-metastore', 'hive-server2', 'nginx']
+          if inventory_hostname in groups.get('gateway', []) and cluster_services_state == 'started'
+          else []
+        )
+        + (
+          ['hbase-regionserver', 'hadoop-nodemanager', 'hadoop-datanode']
+          if inventory_hostname in groups.get('workers', []) and cluster_services_state == 'stopped'
+          else []
+        )
+        + (
+          ['hadoop-datanode', 'hadoop-nodemanager', 'hbase-regionserver']
+          if inventory_hostname in groups.get('workers', []) and cluster_services_state == 'started'
+          else []
+        )
+        + (
+          ['hbase-master', 'hbase-zookeeper', 'spark-historyserver', 'hadoop-historyserver', 'hadoop-resourcemanager', 'hadoop-namenode']
+          if inventory_hostname in groups.get('masters', []) and cluster_services_state == 'stopped'
+          else []
+        )
+        + (
+          ['hadoop-namenode', 'hadoop-resourcemanager', 'hadoop-historyserver', 'spark-historyserver', 'hbase-zookeeper', 'hbase-master']
+          if inventory_hostname in groups.get('masters', []) and cluster_services_state == 'started'
+          else []
+        )
+      }}
+
+- name: Manage cluster services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: "{{ cluster_services_state }}"
+  loop: "{{ cluster_services }}"
+  register: managed_cluster_services
+  failed_when: false

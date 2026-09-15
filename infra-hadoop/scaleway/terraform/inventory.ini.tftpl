@@ -1,0 +1,29 @@
+[bastion]
+bastion ansible_host=${nodes["bastion"].public_ip} private_ip=${nodes["bastion"].private_ip}
+
+[gateway]
+gateway ansible_host=${nodes["gateway"].private_ip} public_ip=${nodes["gateway"].public_ip} private_ip=${nodes["gateway"].private_ip}
+
+[masters]
+master ansible_host=${nodes["master"].private_ip} private_ip=${nodes["master"].private_ip}
+
+[workers]
+%{ for name in sort(keys(worker_nodes)) ~}
+${name} ansible_host=${worker_nodes[name].private_ip} private_ip=${worker_nodes[name].private_ip}
+%{ endfor ~}
+
+[hadoop:children]
+gateway
+masters
+workers
+
+[cluster:children]
+bastion
+hadoop
+
+[cluster:vars]
+ansible_user=ubuntu
+ansible_ssh_common_args='-o ProxyJump=ubuntu@${bastion_ip} -o StrictHostKeyChecking=accept-new'
+
+[bastion:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=accept-new'

@@ -1,0 +1,24 @@
+---
+- name: Stop gateway services
+  hosts: gateway
+  become: true
+  vars:
+    cluster_services_state: stopped
+  roles:
+    - cluster_services
+
+- name: Stop worker services
+  hosts: workers
+  become: true
+  vars:
+    cluster_services_state: stopped
+  roles:
+    - cluster_services
+
+- name: Stop master services
+  hosts: masters
+  become: true
+  vars:
+    cluster_services_state: stopped
+  roles:
+    - cluster_services

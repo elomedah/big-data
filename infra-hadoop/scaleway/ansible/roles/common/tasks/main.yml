@@ -1,0 +1,76 @@
+---
+- name: Remove broken Scaleway apt source files
+  ansible.builtin.find:
+    paths: /etc/apt/sources.list.d
+    patterns:
+      - "*scaleway*"
+      - "*scw*"
+    file_type: file
+  register: scaleway_apt_sources
+
+- name: Delete broken Scaleway apt source files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ scaleway_apt_sources.files }}"
+
+- name: Remove broken Scaleway apt source lines
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list
+    regexp: ".*ppa\\.launchpadcontent\\.net/scaleway/stable.*"
+    state: absent
+  when: ansible_facts['distribution'] == 'Ubuntu'
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - "{{ java_package }}"
+      - curl
+      - rsync
+      - tar
+      - vim
+      - acl
+      - python3
+    state: present
+    update_cache: true
+
+- name: Create Hadoop group
+  ansible.builtin.group:
+    name: "{{ hadoop_group }}"
+    system: true
+
+- name: Create Hadoop user
+  ansible.builtin.user:
+    name: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+    shell: /bin/bash
+    home: /home/{{ hadoop_user }}
+    create_home: true
+    system: true
+
+- name: Create student group
+  ansible.builtin.group:
+    name: "{{ student_group }}"
+
+- name: Disable local loopback hostname entry
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s+.*\b{{ inventory_hostname }}\b.*$'
+    state: absent
+
+- name: Register cluster private hostnames
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    marker: "# {mark} ANSIBLE HADOOP CLUSTER HOSTS"
+    block: |
+      {% for host in groups['cluster'] %}
+      {{ hostvars[host].private_ip }} {{ host }}
+      {% endfor %}
+
+- name: Install Linux resource limits for students
+  ansible.builtin.template:
+    src: student-limits.conf.j2
+    dest: /etc/security/limits.d/90-students.conf
+    owner: root
+    group: root
+    mode: "0644"

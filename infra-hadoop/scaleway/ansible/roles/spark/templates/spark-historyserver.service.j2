@@ -1,0 +1,23 @@
+[Unit]
+Description=Spark History Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+User={{ hadoop_user }}
+Group={{ hadoop_group }}
+Environment=JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+Environment=HADOOP_HOME={{ hadoop_home }}
+Environment=HADOOP_CONF_DIR={{ hadoop_home }}/etc/hadoop
+Environment=YARN_CONF_DIR={{ hadoop_home }}/etc/hadoop
+Environment=SPARK_HOME={{ spark_home }}
+Environment=SPARK_LOG_DIR=/var/log/spark
+Environment=SPARK_PID_DIR=/run/spark
+RuntimeDirectory=spark
+ExecStart={{ spark_home }}/sbin/start-history-server.sh
+ExecStop={{ spark_home }}/sbin/stop-history-server.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

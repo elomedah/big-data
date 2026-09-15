@@ -1,0 +1,66 @@
+---
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+
+- name: Disable default Nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Configure Hadoop web UI reverse proxy
+  ansible.builtin.template:
+    src: hadoop-web-ui.conf.j2
+    dest: /etc/nginx/sites-available/hadoop-web-ui.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Enable Hadoop web UI reverse proxy
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/hadoop-web-ui.conf
+    dest: /etc/nginx/sites-enabled/hadoop-web-ui.conf
+    state: link
+  notify: Reload nginx
+
+- name: Validate Nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Start Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    state: started
+
+- name: Flush Nginx reload before port checks
+  ansible.builtin.meta: flush_handlers
+
+- name: Reload Nginx so the rendered proxy configuration is active
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+  changed_when: false
+
+- name: Build Nginx-owned gateway web UI listening port list
+  ansible.builtin.set_fact:
+    gateway_web_ui_ports:
+      - 9870
+      - 8088
+      - 19888
+      - 16010
+
+- name: Add worker web UI listening ports
+  ansible.builtin.set_fact:
+    gateway_web_ui_ports: "{{ gateway_web_ui_ports + [9864 + item, 8042 + item, 16030 + item] }}"
+  loop: "{{ range(groups['workers'] | length) | list }}"
+
+- name: Check Nginx-owned gateway web UI listening ports
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ item }}"
+    timeout: 5
+  loop: "{{ gateway_web_ui_ports }}"

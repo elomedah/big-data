@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.rootdir</name>
+    <value>hdfs://{{ hostvars[groups['masters'][0]].private_ip }}:9000{{ hbase_root_dir }}</value>
+  </property>
+  <property>
+    <name>hbase.master.hostname</name>
+    <value>{{ hostvars[groups['masters'][0]].private_ip }}</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.hostname</name>
+    <value>{{ hostvars[inventory_hostname].private_ip }}</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.quorum</name>
+    <value>{{ hostvars[groups['masters'][0]].private_ip }}</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.property.clientPort</name>
+    <value>2181</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.property.dataDir</name>
+    <value>{{ hbase_zookeeper_data_dir }}</value>
+  </property>
+  <property>
+    <name>hbase.master.info.bindAddress</name>
+    <value>0.0.0.0</value>
+  </property>
+  <property>
+    <name>hbase.master.info.port</name>
+    <value>{{ hbase_master_web_port }}</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.info.bindAddress</name>
+    <value>0.0.0.0</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.info.port</name>
+    <value>{{ hbase_regionserver_web_port }}</value>
+  </property>
+  <property>
+    <name>hbase.unsafe.stream.capability.enforce</name>
+    <value>false</value>
+  </property>
+</configuration>

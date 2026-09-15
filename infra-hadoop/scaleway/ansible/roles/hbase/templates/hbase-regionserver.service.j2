@@ -1,0 +1,21 @@
+[Unit]
+Description=HBase RegionServer
+After=network-online.target hadoop-datanode.service
+Wants=network-online.target
+
+[Service]
+Type=forking
+User={{ hadoop_user }}
+Group={{ hadoop_group }}
+Environment=JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+Environment=HBASE_HOME={{ hbase_home }}
+Environment=HBASE_CONF_DIR={{ hbase_home }}/conf
+Environment=HBASE_LOG_DIR=/var/log/hbase
+Environment=HBASE_PID_DIR=/run/hbase
+ExecStart={{ hbase_home }}/bin/hbase-daemon.sh start regionserver
+ExecStop={{ hbase_home }}/bin/hbase-daemon.sh stop regionserver
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

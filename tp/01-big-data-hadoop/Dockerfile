@@ -6,7 +6,7 @@ ARG HIVE_VERSION=4.0.1
 ARG HBASE_VERSION=2.5.15
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \
+    JAVA_HOME=/opt/java \
     HADOOP_HOME=/opt/hadoop \
     HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop \
     HADOOP_COMMON_HOME=/opt/hadoop \
@@ -45,6 +45,11 @@ RUN apt-get update \
         tini \
         vim-tiny \
     && rm -rf /var/lib/apt/lists/*
+
+# Keep JAVA_HOME independent from the container architecture. Ubuntu installs
+# Java under an architecture-specific directory (for example, -amd64 or
+# -arm64), so expose it through one stable path used by all services.
+RUN ln -s "$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")" /opt/java
 
 RUN groupadd --system hadoop \
     && useradd --system --create-home --gid hadoop --shell /bin/bash hadoop \

@@ -1,4 +1,4 @@
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export JAVA_HOME=/opt/java
 export HBASE_HOME=/opt/hbase
 export HBASE_CONF_DIR=/opt/hbase/conf
 export HBASE_LOG_DIR=/var/log/hbase

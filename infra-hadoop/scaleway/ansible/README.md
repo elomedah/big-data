@@ -426,8 +426,18 @@ The playbook creates locked Linux accounts named:
 student01
 student02
 ...
-student30
+studentNN
 ```
+
+Only numbered accounts listed in `student_ssh_keys` are provisioned; no accounts
+are generated from a count. For example, adding `student04` with a list of public keys
+creates its Linux account, installs its keys on the gateway, and provisions its
+HDFS directory and quotas. Use names such as `student04`, with a non-empty list
+of keys for each entry.
+
+Removing an entry does not delete an existing Linux account, SSH keys, or HDFS
+data. The YARN queue application limit is configured independently using
+`yarn_students_maximum_applications` in `group_vars/all.yml` (default: `3`).
 
 Students should generate their own SSH key locally and send only the public key.
 
@@ -462,6 +472,13 @@ Then rerun only the student role:
 ```bash
 ansible-playbook site.yml --tags students
 ```
+
+Run this from the Ansible directory on the controller (for example the bastion).
+Update `group_vars/student_ssh_keys.yml` on that same controller before running
+the command; editing a different checkout does not update the controller copy.
+The cluster must already be installed and HDFS running for directory and quota
+provisioning. SSH keys are installed on the gateway; Linux accounts are also
+created on the masters for HDFS group mapping. Existing keys are retained.
 
 Students connect to the gateway:
 

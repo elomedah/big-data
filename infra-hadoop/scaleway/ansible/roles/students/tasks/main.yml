@@ -3,9 +3,35 @@
   ansible.builtin.include_vars:
     file: "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
 
-- name: Build student account list
+- name: Validate student SSH key mapping
+  ansible.builtin.assert:
+    that:
+      - student_ssh_keys is defined
+      - student_ssh_keys is mapping
+      - student_ssh_keys | length > 0
+    fail_msg: "Define student_ssh_keys as a non-empty mapping in group_vars/student_ssh_keys.yml on the Ansible controller."
+
+- name: Validate student account names and key lists
+  ansible.builtin.assert:
+    that:
+      - item.key is match('^student[0-9]+$')
+      - item.value is sequence
+      - item.value is not string
+      - item.value is not mapping
+      - item.value | length > 0
+    fail_msg: "Each entry must use a numbered student account (for example student04) and a non-empty list of public keys."
+  loop: "{{ student_ssh_keys | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Build student account list from SSH keys
   ansible.builtin.set_fact:
-    student_accounts: "{{ query('sequence', 'start=1 end=' ~ student_count ~ ' format=student%02d') }}"
+    student_accounts: "{{ student_ssh_keys.keys() | list | sort }}"
+
+- name: Ensure student group exists for tagged runs
+  ansible.builtin.group:
+    name: "{{ student_group }}"
+    state: present
 
 - name: Create Linux student accounts for SSH and HDFS group mapping
   ansible.builtin.user:
@@ -48,14 +74,6 @@
   loop: "{{ student_ssh_keys | default({}) | dict2items | subelements('value') }}"
   when:
     - inventory_hostname in groups['gateway']
-    - item.0.key in student_accounts
-
-- name: Fail when no student SSH keys were loaded
-  ansible.builtin.fail:
-    msg: "No student SSH keys loaded. Create group_vars/student_ssh_keys.yml on the Ansible controller."
-  when:
-    - inventory_hostname in groups['gateway']
-    - (student_ssh_keys | default({}) | length) == 0
 
 - name: Refresh NameNode user to group mappings
   ansible.builtin.command: "{{ hadoop_home }}/bin/hdfs dfsadmin -refreshUserToGroupsMappings"

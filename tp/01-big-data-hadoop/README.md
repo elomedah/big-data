@@ -59,6 +59,22 @@ Construisez l’image Docker.
 docker compose build
 ```
 
+Le chemin Java de l'image est `/opt/java`, un lien vers le JDK installé pendant
+le build. Il ne dépend pas de l'architecture du processeur (Intel/AMD ou Apple
+Silicon).
+
+Si une ancienne image affiche `JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64 does
+not exist`, mettez le dépôt à jour puis reconstruisez et recréez le conteneur
+depuis ce dossier :
+
+```bash
+git pull --ff-only
+docker compose up -d --build --force-recreate
+docker compose exec tp-hadoop bash -lc '"$JAVA_HOME/bin/java" -version'
+```
+
+Cette opération conserve les volumes de données existants.
+
 Le premier build peut prendre plusieurs minutes, car l’image télécharge Hadoop, Spark, Hive et HBase.
 
 Démarrez l’environnement.

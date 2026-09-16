@@ -6,7 +6,7 @@ ARG HIVE_VERSION=4.0.1
 ARG HBASE_VERSION=2.5.15
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \
+    JAVA_HOME=/opt/java \
     HADOOP_HOME=/opt/hadoop \
     HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop \
     HADOOP_COMMON_HOME=/opt/hadoop \
@@ -45,6 +45,11 @@ RUN apt-get update \
         tini \
         vim-tiny \
     && rm -rf /var/lib/apt/lists/*
+
+# Resolve the installed JDK on both amd64 and arm64 (Apple Silicon).
+RUN ln -s "$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")" "${JAVA_HOME}" \
+    && "${JAVA_HOME}/bin/java" -version \
+    && "${JAVA_HOME}/bin/javac" -version
 
 RUN groupadd --system hadoop \
     && useradd --system --create-home --gid hadoop --shell /bin/bash hadoop \

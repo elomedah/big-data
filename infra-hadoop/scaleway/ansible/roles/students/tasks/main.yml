@@ -11,16 +11,14 @@
       - student_ssh_keys | length > 0
     fail_msg: "Define student_ssh_keys as a non-empty mapping in group_vars/student_ssh_keys.yml on the Ansible controller."
 
-- name: Validate student account names and key lists
+- name: Validate student SSH key lists
   ansible.builtin.assert:
     that:
-      - item.key is match('^[a-z_][a-z0-9_.-]{0,31}$')
-      - item.key not in ['root', hadoop_user, teacher_user]
       - item.value is sequence
       - item.value is not string
       - item.value is not mapping
       - item.value | length > 0
-    fail_msg: "Use a student login such as student04 or elias.merimi (1-32 lowercase letters, digits, dots, underscores or hyphens, starting with a letter or underscore), not root or a configured Hadoop/teacher account, and a non-empty list of public keys."
+    fail_msg: "Each student_ssh_keys entry must contain a non-empty list of public keys."
   loop: "{{ student_ssh_keys | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

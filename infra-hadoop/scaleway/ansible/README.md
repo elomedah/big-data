@@ -432,11 +432,10 @@ toma.chang
 Only accounts listed in `student_ssh_keys` are provisioned; no accounts
 are generated from a count. For example, adding `student04` with a list of public keys
 creates its Linux account, installs its keys on the gateway, and provisions its
-HDFS directory and quotas. Names such as `student04` and `elias.merimi` are
-supported. Logins must start with a lowercase letter or underscore and contain
-only lowercase letters, digits, dots, underscores or hyphens (32 characters
-maximum). The root, Hadoop and teacher accounts are reserved. Supply a
-non-empty list of keys for each student.
+HDFS directory and quotas. Account names are taken directly from the mapping,
+without a naming pattern or reserved-name restriction in the role. The target
+operating system validates usernames when creating accounts. Supply a non-empty
+list of keys for each student.
 
 Removing an entry does not delete an existing Linux account, SSH keys, or HDFS
 data. The YARN queue application limit is configured independently using

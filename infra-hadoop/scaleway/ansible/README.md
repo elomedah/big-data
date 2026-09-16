@@ -420,20 +420,23 @@ Worker 3 NodeManager: http://10.42.0.23:8042
 
 ## Student SSH Keys
 
-The playbook creates locked Linux accounts named:
+The playbook creates locked Linux accounts using the names in the keys file,
+for example:
 
 ```text
 student01
-student02
-...
-studentNN
+elias.merimi
+toma.chang
 ```
 
-Only numbered accounts listed in `student_ssh_keys` are provisioned; no accounts
+Only accounts listed in `student_ssh_keys` are provisioned; no accounts
 are generated from a count. For example, adding `student04` with a list of public keys
 creates its Linux account, installs its keys on the gateway, and provisions its
-HDFS directory and quotas. Use names such as `student04`, with a non-empty list
-of keys for each entry.
+HDFS directory and quotas. Names such as `student04` and `elias.merimi` are
+supported. Logins must start with a lowercase letter or underscore and contain
+only lowercase letters, digits, dots, underscores or hyphens (32 characters
+maximum). The root, Hadoop and teacher accounts are reserved. Supply a
+non-empty list of keys for each student.
 
 Removing an entry does not delete an existing Linux account, SSH keys, or HDFS
 data. The YARN queue application limit is configured independently using

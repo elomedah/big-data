@@ -14,12 +14,13 @@
 - name: Validate student account names and key lists
   ansible.builtin.assert:
     that:
-      - item.key is match('^student[0-9]+$')
+      - item.key is match('^[a-z_][a-z0-9_.-]{0,31}$')
+      - item.key not in ['root', hadoop_user, teacher_user]
       - item.value is sequence
       - item.value is not string
       - item.value is not mapping
       - item.value | length > 0
-    fail_msg: "Each entry must use a numbered student account (for example student04) and a non-empty list of public keys."
+    fail_msg: "Use a student login such as student04 or elias.merimi (1-32 lowercase letters, digits, dots, underscores or hyphens, starting with a letter or underscore), not root or a configured Hadoop/teacher account, and a non-empty list of public keys."
   loop: "{{ student_ssh_keys | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -72,6 +73,8 @@
     state: present
     exclusive: false
   loop: "{{ student_ssh_keys | default({}) | dict2items | subelements('value') }}"
+  loop_control:
+    label: "{{ item.0.key }}"
   when:
     - inventory_hostname in groups['gateway']
 

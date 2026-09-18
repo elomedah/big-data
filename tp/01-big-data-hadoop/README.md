@@ -297,7 +297,7 @@ Cet exemple est abrégé : collez votre véritable clé complète.
 2. Renseignez **Username (nom.prenom)**, par exemple `dupont.jean`.
 3. Collez la clé dans **Clés publiques SSH**, une clé `ssh-ed25519` par ligne si vous en avez plusieurs.
 4. Envoyez le formulaire pour créer une issue, puis suivez la réponse de l’automatisation et le lien vers la pull request (PR).
-5. Attendez la validation et la fusion de la PR par l’enseignant, puis la synchronisation de la gateway. Lorsque le service est activé et le cluster disponible, il vérifie les changements environ toutes les deux minutes.
+5. Attendez la validation et la fusion de la PR par l’enseignant, puis la synchronisation depuis le bastion. Lorsque le service est activé et le cluster disponible, il vérifie les changements environ toutes les deux minutes.
 
 Le formulaire et les clés publiques sont visibles publiquement. Ne collez jamais votre clé privée ni d’autres informations personnelles inutiles.
 

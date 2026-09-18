@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Run as the existing Ansible controller user, not root.
 if [ "$(id -u)" -eq 0 ]; then
-  echo "Run as the gateway Ansible user (normally ubuntu), without sudo." >&2
+  echo "Run as the bastion Ansible user (normally ubuntu), without sudo." >&2
   exit 1
 fi
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -59,7 +59,7 @@ systemctl --user daemon-reload
 sudo loginctl enable-linger "$(id -un)"
 systemctl --user enable student-access.timer
 systemctl --user restart student-access.timer
-echo "Automatic synchronization enabled on this gateway."
+echo "Automatic synchronization enabled on this bastion."
 echo "First check in about 5 seconds, then every two minutes; retries are automatic."
 echo "No manual restart is needed after a PR is merged. Inspect progress with:"
 echo "  journalctl --user -u student-access.service -n 50"

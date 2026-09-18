@@ -36,7 +36,7 @@ Paste the public key. The teacher reviews the generated pull request; after
 merge, the bastion adds the approved keys. Existing keys are always retained.
 
 Follow the automation's comment on your issue to the PR. After approval and
-merge, the enabled gateway timer checks about every two minutes; the cluster
+merge, the enabled bastion timer checks about every two minutes; the cluster
 must be available. Merge alone does not confirm successful deployment.
 
 To add another computer, submit its public key with the same username. Duplicate

@@ -101,7 +101,7 @@ def main():
             "branch": branch, "sha": source["sha"], "content": base64.b64encode(serialized.encode()).decode()})
         pr = api("POST", "/pulls", {"title": f"Accès étudiant : demande #{number}", "head": branch,
             "base": base, "body": f"Ajoute des clés au compte `{name}`, demandé par @{issue['user']['login']}. Les clés existantes sont conservées.\n\n"
-            f"Vérifier que le demandeur est bien autorisé à utiliser ce compte, surtout s'il existe déjà. La synchronisation de la gateway intervient après fusion.\n\nCloses #{number}"})
+            f"Vérifier que le demandeur est bien autorisé à utiliser ce compte, surtout s'il existe déjà. La synchronisation depuis le bastion intervient après fusion.\n\nCloses #{number}"})
         api("POST", f"/issues/{number}/comments", {"body": "Proposition prête à vérifier : " + pr["html_url"]})
     except ValueError as exc:
         api("POST", f"/issues/{number}/comments", {"body": "Demande refusée : " + str(exc) + ". Corriger puis fermer et rouvrir cette issue."})

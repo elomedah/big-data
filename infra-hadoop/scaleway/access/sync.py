@@ -1,4 +1,4 @@
-"""Installed on the gateway controller. Fetch data only, never remote playbooks."""
+"""Installed on the bastion controller. Fetch data only, never remote playbooks."""
 import argparse
 import base64
 import fcntl

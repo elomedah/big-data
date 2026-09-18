@@ -116,6 +116,8 @@ There is no permanent GitHub Actions runner on the bastion.
 
 ## Student procedure
 
+The full exercise is in [TP 01](../../../tp/01-big-data-hadoop/README.md).
+
 1. Generate a local Ed25519 key using the [connection guide](../docs/student-connection.md).
 2. Open Issues → New issue → **Accès SSH au cluster** using any GitHub account.
 3. Enter your username in `nom.prenom` format, for example `dupont.alice`.

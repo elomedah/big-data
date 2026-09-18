@@ -427,13 +427,12 @@ The playbook creates locked Linux accounts using the names in the keys file,
 for example:
 
 ```text
-student01
-elias.merimi
-toma.chang
+dupont.jean
+le-gall.jean-pierre
 ```
 
 Only accounts listed in `student_ssh_keys` are provisioned; no accounts
-are generated from a count. For example, adding `student04` with a list of public keys
+are generated from a count. For example, adding `dupont.jean` with a list of public keys
 creates its Linux account, installs its keys on the gateway, and provisions its
 HDFS directory and quotas. Account names are taken directly from the mapping,
 with a validated login pattern and reserved-name restrictions. Existing accounts
@@ -447,32 +446,47 @@ keys. Neither mechanism deletes Linux accounts or HDFS data.
 The YARN queue application limit is configured independently using
 `yarn_students_maximum_applications` in `group_vars/all.yml` (default: `3`).
 
-Students should generate their own SSH key locally and send only the public key.
+Students generate their own SSH key locally and submit only the public key
+through the [public form](https://github.com/elomedah/big-data/issues/new?template=student-access.yml).
+Any signed-in GitHub user can request access without prior registration. The
+teacher verifies the requested username and identity before merging the PR.
 
 Student command:
 
 ```bash
-ssh-keygen -t ed25519 -a 100 -f ~/.ssh/m2-hadoop-student -C student01
+ssh-keygen -t ed25519 -a 100 -f ~/.ssh/m2-hadoop-student -C dupont.jean
 cat ~/.ssh/m2-hadoop-student.pub
 ```
 
-The student sends the output of the `cat` command to the teacher. They must
-never send the private key file.
+The student enters `dupont.jean` in the username field and pastes the complete
+output of `cat` in the public-key field. They must never submit the private key.
+See [TP 01](../../../tp/01-big-data-hadoop/README.md) and the
+[connection guide](../docs/student-connection.md) for the student procedure.
 
-Teacher workflow:
+After merge, the configured bastion timer applies new keys. Follow its status
+with `journalctl --user -u student-access.service -n 50` on the bastion.
+The [automation guide](../access/README.md) covers the GitHub secret, branch
+protection and timer installation; publishing the form alone does not activate
+deployment. Existing installations must update both the local Ansible role and
+the installed synchronizer to use the additive behavior.
+
+Manual teacher fallback (when automatic deployment is not configured):
+
+Only initialize the file from the example if it does not already exist:
 
 ```bash
-cp group_vars/student_ssh_keys.yml.example group_vars/student_ssh_keys.yml
+test -f group_vars/student_ssh_keys.yml || cp group_vars/student_ssh_keys.yml.example group_vars/student_ssh_keys.yml
 ```
 
-Edit `group_vars/student_ssh_keys.yml`:
+Append actual complete public keys to `group_vars/student_ssh_keys.yml`, retaining
+existing entries. The keys below are abbreviated placeholders:
 
 ```yaml
 student_ssh_keys:
-  student01:
-    - "ssh-ed25519 AAAA... student01@example"
-  student02:
-    - "ssh-ed25519 AAAA... student02@example"
+  dupont.jean:
+    - "ssh-ed25519 AAAA... dupont.jean"
+  martin.alice:
+    - "ssh-ed25519 AAAA... martin.alice"
 ```
 
 Then rerun only the student role:
@@ -492,7 +506,7 @@ created on the masters for HDFS group mapping. Keys are installed with
 Students connect to the gateway:
 
 ```bash
-ssh -i ~/.ssh/m2-hadoop-student student01@<gateway_public_ip>
+ssh -i ~/.ssh/m2-hadoop-student dupont.jean@<gateway_public_ip>
 ```
 
 ## Stop And Start Services

@@ -301,14 +301,29 @@ Ansible installera automatiquement :
 
 # Gestion des étudiants
 
-160 comptes seront créés automatiquement :
+Les comptes sont créés à partir des entrées approuvées du fichier
+`scaleway/ansible/group_vars/student_ssh_keys.yml`, et non à partir d’un nombre
+fixe d’étudiants. Les nouvelles demandes utilisent le format `nom.prenom` :
 
 ```text
-student01
-student02
-...
-student160
+dupont.jean
+martin.alice
 ```
+
+L’étudiant génère une clé Ed25519 puis remplit le
+[formulaire public « Accès SSH au cluster »](https://github.com/elomedah/big-data/issues/new?template=student-access.yml)
+avec son username et sa clé publique. Un compte GitHub est nécessaire ; aucune
+inscription préalable dans un registre n’est requise. L’enseignant vérifie
+l’identité et fusionne la PR proposée. Une fois configuré, le timer du bastion
+récupère les ajouts environ toutes les deux minutes et exécute le rôle Ansible.
+
+Les clés existantes sont conservées, y compris celles déjà présentes sur la
+gateway. Une nouvelle demande ajoute des clés ; retirer une clé du dépôt ne
+révoque pas l’accès. Les révocations restent une opération d’administration.
+
+Voir le [TP 01](../tp/01-big-data-hadoop/README.md), le
+[guide de connexion](scaleway/docs/student-connection.md) et le
+[guide d’activation de l’automatisation](scaleway/access/README.md).
 
 Chaque étudiant disposera :
 
@@ -320,10 +335,8 @@ Chaque étudiant disposera :
 Exemple d'arborescence HDFS :
 
 ```text
-/user/student01
-/user/student02
-...
-/user/student160
+/user/dupont.jean
+/user/martin.alice
 /datalake/raw
 /datalake/archive
 /datalake/processed
@@ -346,8 +359,8 @@ Quota fichiers : 50 000 fichiers
 Exemple :
 
 ```bash
-hdfs dfsadmin -setSpaceQuota 5g /user/student01
-hdfs dfsadmin -setQuota 50000 /user/student01
+hdfs dfsadmin -setSpaceQuota 5g /user/dupont.jean
+hdfs dfsadmin -setQuota 50000 /user/dupont.jean
 ```
 
 ## YARN
@@ -528,8 +541,8 @@ Le fonctionnement continu peut augmenter fortement le coût mensuel par rapport 
 ## Étudiants
 
 ```text
-160 comptes Linux
-160 espaces HDFS
+1 compte Linux par étudiant approuvé
+1 espace HDFS par étudiant approuvé
 1 queue YARN partagée
 quotas HDFS
 limites Linux

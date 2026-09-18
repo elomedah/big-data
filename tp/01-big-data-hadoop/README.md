@@ -9,7 +9,7 @@
 - identifier les premiers enjeux d’accès, de sécurité et de gouvernance ;
 - démarrer l'image Docker locale utilisée dans les TP ;
 - générer une clé SSH personnelle ;
-- transmettre uniquement votre clé publique à l’enseignant ;
+- demander votre accès via le formulaire public GitHub en transmettant uniquement votre clé publique ;
 - vous connecter au gateway Hadoop ;
 - vérifier que votre environnement de travail est prêt pour les prochaines séances.
 
@@ -202,21 +202,23 @@ Vous devez avoir :
 
 - un terminal ;
 - un navigateur Web ;
+- un compte GitHub pour soumettre le formulaire public (aucune inscription préalable auprès de l’enseignant) ;
 - l’adresse IP publique du gateway fournie par l’enseignant ;
 - votre identifiant étudiant.
 
-Votre identifiant correspond à la première partie de votre adresse e-mail, avant le caractère `@`.
+Choisissez votre identifiant au format **`nom.prenom`** : nom de famille puis prénom, séparés par un seul point. Utilisez uniquement des lettres minuscules sans accents ni espaces, avec des tirets entre les parties des noms composés. La longueur totale ne doit pas dépasser 32 caractères.
 
 Exemple :
 
 ```text
-jean.dupont@ecole.fr
+Nom : Dupont
+Prénom : Jean
 ```
 
 donne l’identifiant :
 
 ```text
-jean.dupont
+dupont.jean
 ```
 
 Dans les commandes, remplacez :
@@ -226,6 +228,10 @@ identifiant
 ```
 
 par votre identifiant étudiant.
+
+Pour un nom composé, `le-gall.jean-pierre` est accepté. Utilisez le même identifiant dans le formulaire et pour la connexion SSH. En cas d’homonymie, contactez l’enseignant avant de demander l’accès à un compte existant.
+
+Le formulaire concerne le cluster cloud. L’environnement Docker local utilise le compte `hadoop` et ne nécessite pas cette demande.
 
 Remplacez aussi :
 
@@ -245,10 +251,10 @@ Exécutez la commande suivante :
 ssh-keygen -t ed25519 -a 100 -f ~/.ssh/m2-hadoop-student -C identifiant
 ```
 
-Exemple pour `jean.dupont` :
+Exemple pour `dupont.jean` :
 
 ```bash
-ssh-keygen -t ed25519 -a 100 -f ~/.ssh/m2-hadoop-student -C jean.dupont
+ssh-keygen -t ed25519 -a 100 -f ~/.ssh/m2-hadoop-student -C dupont.jean
 ```
 
 La commande crée deux fichiers :
@@ -260,16 +266,16 @@ La commande crée deux fichiers :
 
 Le fichier sans extension est votre clé privée. Il doit rester sur votre ordinateur.
 
-Le fichier avec l’extension `.pub` est votre clé publique. C’est ce fichier qui doit être transmis à l’enseignant.
+Le fichier avec l’extension `.pub` est votre clé publique. Son contenu sera collé dans le formulaire. Si ces fichiers existent déjà, réutilisez votre clé ou choisissez un autre nom de fichier pour une nouvelle clé ; ne les écrasez pas.
 
 Questions de réflexion :
 
 1. Pourquoi une clé SSH personnelle est-elle préférable à un mot de passe commun partagé ?
 2. Quels risques apparaissent si plusieurs utilisateurs partagent la même identité technique sur un cluster ?
-3. Pourquoi le commentaire placé à la fin de la clé, par exemple `jean.dupont`, est-il utile pour l’administration ?
+3. Pourquoi le commentaire placé à la fin de la clé, par exemple `dupont.jean`, aide-t-il à l’identifier localement sans constituer une preuve d’identité ? Le formulaire retire ce commentaire avant l’enregistrement.
 4. Que faudrait-il prévoir dans une organisation réelle lorsqu’un collaborateur quitte un projet ou perd sa clé privée ?
 
-## Exercice 2 - Transmettre votre clé publique
+## Exercice 2 - Demander l’accès via le formulaire public
 
 Affichez votre clé publique.
 
@@ -277,7 +283,7 @@ Affichez votre clé publique.
 cat ~/.ssh/m2-hadoop-student.pub
 ```
 
-Copiez toute la ligne affichée et envoyez-la à l’enseignant.
+Copiez toute la ligne affichée.
 
 Elle doit ressembler à ceci :
 
@@ -285,9 +291,28 @@ Elle doit ressembler à ceci :
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... identifiant
 ```
 
+Cet exemple est abrégé : collez votre véritable clé complète.
+
+1. Connectez-vous à GitHub et ouvrez le [formulaire public « Accès SSH au cluster »](https://github.com/elomedah/big-data/issues/new?template=student-access.yml).
+2. Renseignez **Username (nom.prenom)**, par exemple `dupont.jean`.
+3. Collez la clé dans **Clés publiques SSH**, une clé `ssh-ed25519` par ligne si vous en avez plusieurs.
+4. Envoyez le formulaire pour créer une issue, puis suivez la réponse de l’automatisation et le lien vers la pull request (PR).
+5. Attendez la validation et la fusion de la PR par l’enseignant, puis la synchronisation du bastion. Lorsque le service est activé et le cluster disponible, il vérifie les changements environ toutes les deux minutes.
+
+Le formulaire et les clés publiques sont visibles publiquement. Ne collez jamais votre clé privée ni d’autres informations personnelles inutiles.
+
+**Les clés sont ajoutées sans écraser les anciennes.** Pour ajouter un autre ordinateur, générez une clé sur celui-ci et soumettez une nouvelle demande avec le même username. Les doublons ne sont pas ajoutés une seconde fois. Chaque compte peut contenir au plus dix clés dans le fichier géré.
+
+Si la demande est refusée pour un champ invalide, corrigez l’issue puis fermez-la et rouvrez-la pour relancer la validation. Si une PR a déjà été créée, ouvrez une nouvelle demande pour la correction et prévenez l’enseignant de la PR à abandonner.
+
+Questions de réflexion :
+
+1. Pourquoi un formulaire public ne doit-il pas donner immédiatement accès au cluster sans validation ?
+2. Pourquoi ajouter une nouvelle clé ne suffit-il pas à révoquer une ancienne clé perdue ou compromise ?
+
 ## Exercice 3 - Connexion au gateway Hadoop
 
-Une fois votre clé publique installée par l’enseignant, connectez-vous au gateway.
+Une fois la PR fusionnée et la clé déployée sur le gateway, connectez-vous avec le username indiqué dans le formulaire. La fusion seule ne garantit pas que le déploiement a déjà réussi.
 
 ```bash
 ssh -i ~/.ssh/m2-hadoop-student identifiant@<gateway_public_ip>
@@ -296,7 +321,7 @@ ssh -i ~/.ssh/m2-hadoop-student identifiant@<gateway_public_ip>
 Exemple :
 
 ```bash
-ssh -i ~/.ssh/m2-hadoop-student jean.dupont@<gateway_public_ip>
+ssh -i ~/.ssh/m2-hadoop-student dupont.jean@<gateway_public_ip>
 ```
 
 Après connexion, vérifiez votre utilisateur.
@@ -306,6 +331,10 @@ whoami
 hostname
 pwd
 ```
+
+`whoami` doit afficher votre username, par exemple `dupont.jean`. En cas de `Permission denied (publickey)`, vérifiez l’identifiant, le chemin de votre clé privée et l’état de la PR. Si la PR est fusionnée, demandez à l’enseignant de vérifier la synchronisation. Ne transmettez pas votre clé privée pour le diagnostic.
+
+Le [guide de connexion](../../infra-hadoop/scaleway/docs/student-connection.md) reprend ces étapes ; le [guide d’automatisation](../../infra-hadoop/scaleway/access/README.md) décrit l’activation et le suivi côté enseignant.
 
 Questions de réflexion :
 

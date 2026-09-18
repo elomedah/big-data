@@ -438,11 +438,12 @@ creates its Linux account, installs its keys on the gateway, and provisions its
 HDFS directory and quotas. Account names are taken directly from the mapping,
 with a validated login pattern and reserved-name restrictions. Existing accounts
 outside the student primary group cannot be taken over. Supply plain Ed25519
-public keys, or an empty list to revoke SSH access.
+public keys. Public form submissions require usernames in `nom.prenom` format;
+legacy account names remain supported for existing entries.
 
-Direct Ansible runs do not process removed entries: use an empty list to revoke
-access. The bastion synchronizer also clears keys for removed accounts it has
-previously tracked. Neither mechanism deletes Linux accounts or HDFS data.
+Keys are added without removing existing keys. An empty list or a removed entry
+does not revoke access. The bastion synchronizer preserves previously applied
+keys. Neither mechanism deletes Linux accounts or HDFS data.
 The YARN queue application limit is configured independently using
 `yarn_students_maximum_applications` in `group_vars/all.yml` (default: `3`).
 
@@ -485,9 +486,8 @@ Update `group_vars/student_ssh_keys.yml` on that same controller before running
 the command; editing a different checkout does not update the controller copy.
 The cluster must already be installed and HDFS running for directory and quota
 provisioning. SSH keys are installed on the gateway; Linux accounts are also
-created on the masters for HDFS group mapping. Each listed student's
-`authorized_keys` file is replaced by the exact configured list; omitted keys
-are revoked. This also removes manually installed extra keys.
+created on the masters for HDFS group mapping. Keys are installed with
+`exclusive: false`; existing keys, including manually installed keys, remain.
 
 Students connect to the gateway:
 

@@ -1,31 +1,31 @@
 # Student access automation
 
-The GitHub form creates an issue. A workflow validates its author's GitHub
-account against `roster.json` and opens a pull request changing only
+The public GitHub form creates an issue without prior student registration.
+A workflow validates the requested `nom.prenom` username and opens a pull request changing only
 `ansible/group_vars/student_ssh_keys.yml`. The teacher reviews and merges it.
 A timer on the bastion reads that file from the configured branch and applies
 the **locally installed** Ansible student role. No remote playbook or workflow
 is executed on the bastion, and no cluster SSH private key is stored in GitHub.
 
-## 1. Register identities
+## 1. Public form and username
 
-Edit `roster.json` on a teacher-reviewed branch, using real GitHub usernames:
+On a public repository, any signed-in GitHub user can submit the form; there
+is no registry or allowlist. GitHub Issues requires a GitHub account, so this
+is not an anonymous form. Open:
 
-```json
-{
-  "github_users": {
-    "alice-github": "student01",
-    "bob-github": "student02"
-  }
-}
-```
+https://github.com/elomedah/big-data/issues/new?template=student-access.yml
 
-The supplied registry is intentionally empty: existing student accounts and
-keys are preserved, but no requester is authorized until registered. Never
-approve a student changing this registry themselves. One GitHub account maps
-to one Linux account. Existing manually managed students may remain outside
-the registry. Only plain Ed25519 public keys are accepted; comments are removed
-from form submissions. Each account can have up to ten distinct keys.
+The required username is **surname.firstname**, for example `dupont.alice`
+or `le-gall.jean-pierre`. Use lowercase ASCII letters, exactly one dot, no
+accents or spaces, and at most 32 characters. Hyphens may separate components
+of either name. Validation is performed by the workflow after submission.
+Existing legacy accounts such as `student01` remain valid in the keys file.
+
+Only plain Ed25519 public keys are accepted; comments are removed from form
+submissions. Each account can have up to ten distinct keys. Requests only add
+keys and deduplicate them; they never replace existing keys. The teacher must
+verify the requester is entitled to use the requested account before merging,
+especially when that account already exists or two students share a name.
 
 ## 2. Configure GitHub
 
@@ -65,9 +65,11 @@ same keys file may conflict; resolve them before merging and rerun validation.
 First update the controller copy with this version of the project, including
 `access/` and the updated `ansible/roles/students/` role. You can use the existing
 `terraform/prepare-bastion.sh` procedure. Preserve the controller's inventory
-and review the keys file before copying: subsequent synchronization makes Git
-authoritative for **all** keys of listed student accounts. Import any public
-keys that must be retained into Git first.
+and its existing keys file when updating. Synchronization merges approved Git
+keys with the current controller file and previously applied keys. Ansible adds
+them with `exclusive: false`, retaining keys already present on the server too.
+If the previous version was installed, update both the local student role and
+rerun the synchronizer installer to switch off the old replacement behavior.
 
 On the bastion, as the existing Ansible user (normally `ubuntu`):
 
@@ -109,37 +111,33 @@ the service journal is the deployment status.
 
 The original controller keys are backed up to
 `~/.local/share/student-access/state/initial-keys.yml`. Retain the state directory:
-it tracks accounts removed from Git so their SSH keys can be cleared.
+it retains previously applied keys even when they are later removed from Git.
 There is no permanent GitHub Actions runner on the bastion.
 
 ## Student procedure
 
 1. Generate a local Ed25519 key using the [connection guide](../docs/student-connection.md).
-2. Open Issues → New issue → **Accès SSH au cluster** using the registered GitHub account.
-3. Choose **Ajouter** to retain current keys, or **Remplacer** to replace all keys.
+2. Open Issues → New issue → **Accès SSH au cluster** using any GitHub account.
+3. Enter your username in `nom.prenom` format, for example `dupont.alice`.
 4. Paste the `.pub` content, one key per line. Never submit the private key.
-5. Wait for teacher review and bastion synchronization, then connect with the assigned login.
+5. Wait for teacher review and bastion synchronization, then connect with that username.
 
 Requests, usernames and public keys are visible to anyone who can read the
 repository. Do not submit personal email addresses or other unnecessary data.
 
-## Revocation and rollback
+## Preservation and manual revocation
 
-For explicit revocation, the teacher changes the student's entry to `[]` and
-merges the PR. Removing an entry also revokes its keys on the next bastion
-synchronization when the account is known in the local keys/state file.
-Accounts and HDFS data remain. Revocation prevents new key-based SSH logins;
-it does not terminate existing sessions or jobs. Remove the student's registry
-entry too if they must no longer request new keys.
+Removing a key or account from Git, setting a key list to `[]`, or reverting a
+commit does **not** revoke any existing SSH access. The workflow and synchronizer
+only add keys. Existing accounts and HDFS data remain. The role refuses reserved
+names and existing accounts whose primary group is not the student group.
 
-Direct Ansible execution clears keys only for listed students: retain an empty
-entry when revoking without the timer. The role refuses reserved names and
-existing accounts whose primary group is not the configured student group.
-The entire `authorized_keys` file of each student is managed; manual extra keys
-are removed on the next application. Teacher/admin keys are outside this scope.
-
-To roll back, revert the relevant keys commit through a reviewed PR. The next
-successful sync reapplies that version. To pause:
+Revocation is a separate administrator operation: pause the timer, remove the
+key from Git, the controller keys file, the applied state file
+`~/.local/share/student-access/state/applied.yml`, and the student's
+`authorized_keys` on the gateway before restarting the timer. Otherwise a retained
+copy could add the key again. Existing sessions and jobs are unaffected.
+To pause:
 
 ```bash
 systemctl --user disable --now student-access.timer
@@ -155,8 +153,7 @@ merging changes to those files does not deploy executable code to the bastion.
 python3 -m pip install -r infra-hadoop/scaleway/access/requirements.txt
 python3 -m unittest discover -s infra-hadoop/scaleway/access -p 'test_*.py' -v
 python3 infra-hadoop/scaleway/access/validate.py \
-  infra-hadoop/scaleway/ansible/group_vars/student_ssh_keys.yml \
-  --roster infra-hadoop/scaleway/access/roster.json
+  infra-hadoop/scaleway/ansible/group_vars/student_ssh_keys.yml
 ```
 
 Linux is required for the synchronization test (`fcntl.flock`). The remaining

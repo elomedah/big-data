@@ -10,7 +10,7 @@ from unittest.mock import patch
 import yaml
 
 from request import apply_request, parse_request
-from validate import load_keys, load_roster, public_key
+from validate import load_keys, public_key, requested_login
 
 
 def key(byte=1):
@@ -27,27 +27,32 @@ class AccessTests(unittest.TestCase):
         self.path.write_text(yaml.safe_dump({'student_ssh_keys': mapping}))
         return load_keys(self.path)
 
-    def test_form_and_replacement(self):
-        operation, keys = parse_request('### Opération\n\nRemplacer\n\n### Clés publiques SSH\n\n```text\n' + key(2) + ' comment\n```')
-        result = apply_request({'alice': [key()]}, {'alice-gh': 'alice'}, 'Alice-GH', operation, keys)
-        self.assertEqual(result, {'alice': [key(2)]})
+    def test_public_form_adds_without_replacing(self):
+        name, keys = parse_request('### Username (nom.prenom)\n\ndupont.alice\n\n### Clés publiques SSH\n\n```text\n' + key(2) + ' comment\n```')
+        result = apply_request({'dupont.alice': [key()]}, name, keys)
+        self.assertEqual(result, {'dupont.alice': [key(), key(2)]})
 
     def test_append_idempotent_and_other_accounts_unchanged(self):
-        old = {'alice': [key()], 'bob': [key(3)]}
-        result = apply_request(old, {'alice-gh': 'alice'}, 'alice-gh', 'Ajouter', [key(), key(2)])
-        self.assertEqual(result, {'alice': [key(), key(2)], 'bob': [key(3)]})
-        self.assertEqual(old['alice'], [key()])
+        old = {'dupont.alice': [key()], 'bob': [key(3)]}
+        result = apply_request(old, 'dupont.alice', [key(), key(2)])
+        self.assertEqual(result, {'dupont.alice': [key(), key(2)], 'bob': [key(3)]})
+        self.assertEqual(old['dupont.alice'], [key()])
 
-    def test_unknown_identity(self):
-        with self.assertRaises(ValueError):
-            apply_request({}, {}, 'intruder', 'Ajouter', [key()])
+    def test_new_student_without_registration(self):
+        self.assertEqual(apply_request({}, 'dupont.alice', [key()]), {'dupont.alice': [key()]})
+
+    def test_username_format(self):
+        for name in ['alice', 'Dupont.alice', 'dupont.alicé', 'dupont.alice.anne', 'dupont alice', 'dupont.alice1', '-dupont.alice', 'dupont..alice', 'a' * 30 + '.bob']:
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                requested_login(name)
+        self.assertEqual(requested_login('le-gall.jean-pierre'), 'le-gall.jean-pierre')
 
     def test_invalid_and_private_keys(self):
         for value in ['-----BEGIN OPENSSH PRIVATE KEY-----', 'ssh-ed25519 AAAA', 'command="id" ' + key(), key() + '\n' + key(2), 'ssh-rsa AAAA']:
             with self.subTest(value=value), self.assertRaises(ValueError):
                 public_key(value)
 
-    def test_revocation(self):
+    def test_empty_key_list_is_valid(self):
         self.assertEqual(self.write_keys({'alice': []}), {'alice': []})
 
     def test_cross_account_duplicates(self):
@@ -65,11 +70,6 @@ class AccessTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 load_keys(self.path)
 
-    def test_roster_case_collision(self):
-        self.path.write_text(json.dumps({'github_users': {'Alice': 'alice', 'alice': 'bob'}}))
-        with self.assertRaises(ValueError):
-            load_roster(self.path)
-
     def test_missing_form_fields(self):
         with self.assertRaises(ValueError):
             parse_request('### Opération\nAjouter')
@@ -77,7 +77,7 @@ class AccessTests(unittest.TestCase):
 
 @unittest.skipIf(sys.platform == 'win32', 'Bastion synchronization uses Linux flock')
 class SyncTests(unittest.TestCase):
-    def test_deleted_accounts_revoked_and_failed_apply_retried(self):
+    def test_existing_keys_preserved_and_failed_apply_retried(self):
         import sync
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -96,22 +96,31 @@ class SyncTests(unittest.TestCase):
             with patch.object(sync, 'urlopen', side_effect=fetch), patch.object(sync.subprocess, 'run', side_effect=RuntimeError('offline')):
                 with self.assertRaises(RuntimeError): sync.synchronize(config)
             self.assertFalse((root / 'state/applied.sha256').exists())
-            self.assertEqual(load_keys(target)['bob'], [])
+            self.assertEqual(load_keys(target)['bob'], [key(2)])
             with patch.object(sync, 'urlopen', side_effect=fetch), patch.object(sync.subprocess, 'run') as run:
                 sync.synchronize(config)
                 sync.synchronize(config)
                 self.assertEqual(run.call_count, 1)
-            self.assertEqual(load_keys(root / 'state/applied.yml')['bob'], [])
+            self.assertEqual(load_keys(root / 'state/applied.yml')['bob'], [key(2)])
 
-            # A newly provisioned account from a failed run must still be
-            # revoked if it disappears from Git before the successful retry.
+            # Keys from a partially failed run remain even if removed from Git.
             desired = yaml.safe_dump({'student_ssh_keys': {'alice': [key()], 'carol': [key(3)]}}).encode()
             with patch.object(sync, 'urlopen', side_effect=fetch), patch.object(sync.subprocess, 'run', side_effect=RuntimeError('offline')):
                 with self.assertRaises(RuntimeError): sync.synchronize(config)
             desired = yaml.safe_dump({'student_ssh_keys': {'alice': [key()]}}).encode()
             with patch.object(sync, 'urlopen', side_effect=fetch), patch.object(sync.subprocess, 'run'):
                 sync.synchronize(config)
-            self.assertEqual(load_keys(target)['carol'], [])
+            self.assertEqual(load_keys(target)['carol'], [key(3)])
+
+            desired = yaml.safe_dump({'student_ssh_keys': {'alice': [key(4)]}}).encode()
+            with patch.object(sync, 'urlopen', side_effect=fetch), patch.object(sync.subprocess, 'run'):
+                sync.synchronize(config)
+            self.assertEqual(load_keys(target)['alice'], [key(), key(4)])
+
+            desired = yaml.safe_dump({'student_ssh_keys': {'alice': []}}).encode()
+            with patch.object(sync, 'urlopen', side_effect=fetch), patch.object(sync.subprocess, 'run'):
+                sync.synchronize(config)
+            self.assertEqual(load_keys(target)['alice'], [key(), key(4)])
 
             # Invalid remote data must not change the controller file or run Ansible.
             before = target.read_bytes()

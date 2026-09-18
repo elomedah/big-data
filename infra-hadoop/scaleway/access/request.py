@@ -11,10 +11,9 @@ from urllib.request import Request, urlopen
 
 import yaml
 
-from validate import load_keys, load_roster, public_key
+from validate import load_keys, public_key, requested_login
 
 KEYS = "infra-hadoop/scaleway/ansible/group_vars/student_ssh_keys.yml"
-ROSTER = "infra-hadoop/scaleway/access/roster.json"
 
 
 def parse_request(body):
@@ -27,24 +26,20 @@ def parse_request(body):
         if heading in fields:
             raise ValueError("Champ dupliqué")
         fields[heading] = value.strip()
-    operation = fields.get("Opération")
-    if operation not in {"Ajouter", "Remplacer"}:
-        raise ValueError("Opération inconnue")
+    name = requested_login(fields.get("Username (nom.prenom)", ""))
     value = fields.get("Clés publiques SSH", "")
     if value.startswith("```text\n") and value.endswith("\n```"):
         value = value[len("```text\n"):-len("\n```")]
     keys = [public_key(line.strip()) for line in value.splitlines() if line.strip()]
     if not keys or len(keys) > 10 or len(keys) != len(set(keys)):
         raise ValueError("Fournir entre une et dix clés distinctes")
-    return operation, keys
+    return name, keys
 
 
-def apply_request(mapping, roster, author, operation, keys):
-    name = roster.get(author.lower())
-    if name is None:
-        raise ValueError("Compte GitHub absent de roster.json : contacter l'enseignant")
+def apply_request(mapping, name, keys):
+    requested_login(name)
     updated = {user: list(values) for user, values in mapping.items()}
-    current = updated.get(name, []) if operation == "Ajouter" else []
+    current = updated.get(name, [])
     updated[name] = list(dict.fromkeys(current + keys))
     return updated
 
@@ -71,7 +66,7 @@ def main():
         issue = api("GET", f"/issues/{number}")
         if issue["state"] != "open" or "pull_request" in issue:
             return
-        operation, keys = parse_request(issue["body"])
+        name, keys = parse_request(issue["body"])
         base = api("GET", "")["default_branch"]
         sha = api("GET", "/git/ref/heads/" + quote(base, safe=""))["object"]["sha"]
 
@@ -80,11 +75,10 @@ def main():
 
         source = content(KEYS)
         with tempfile.TemporaryDirectory() as directory:
-            keys_path, roster_path = Path(directory) / "keys.yml", Path(directory) / "roster.json"
+            keys_path = Path(directory) / "keys.yml"
             keys_path.write_bytes(base64.b64decode(source["content"]))
-            roster_path.write_bytes(base64.b64decode(content(ROSTER)["content"]))
             mapping = load_keys(keys_path)
-            updated = apply_request(mapping, load_roster(roster_path), issue["user"]["login"], operation, keys)
+            updated = apply_request(mapping, name, keys)
             if updated == mapping:
                 api("POST", f"/issues/{number}/comments", {"body": "Ces clés sont déjà enregistrées dans le dépôt."})
                 return
@@ -106,8 +100,8 @@ def main():
         api("PUT", "/contents/" + KEYS, {"message": f"Update student access from issue #{number}",
             "branch": branch, "sha": source["sha"], "content": base64.b64encode(serialized.encode()).decode()})
         pr = api("POST", "/pulls", {"title": f"Accès étudiant : demande #{number}", "head": branch,
-            "base": base, "body": f"Met à jour les clés du compte associé à @{issue['user']['login']} dans le registre approuvé.\n\n"
-            f"Opération : {operation}. Vérifier l'identité avant fusion. La synchronisation du bastion intervient après fusion.\n\nCloses #{number}"})
+            "base": base, "body": f"Ajoute des clés au compte `{name}`, demandé par @{issue['user']['login']}. Les clés existantes sont conservées.\n\n"
+            f"Vérifier que le demandeur est bien autorisé à utiliser ce compte, surtout s'il existe déjà. La synchronisation du bastion intervient après fusion.\n\nCloses #{number}"})
         api("POST", f"/issues/{number}/comments", {"body": "Proposition prête à vérifier : " + pr["html_url"]})
     except ValueError as exc:
         api("POST", f"/issues/{number}/comments", {"body": "Demande refusée : " + str(exc) + ". Corriger puis fermer et rouvrir cette issue."})

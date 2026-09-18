@@ -29,7 +29,7 @@
       - item.value is sequence
       - item.value is not string
       - item.value is not mapping
-    fail_msg: "Each student_ssh_keys entry must contain a list of public keys (empty revokes SSH access)."
+    fail_msg: "Each student_ssh_keys entry must contain a list of public keys."
   loop: "{{ student_ssh_keys | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -90,17 +90,15 @@
   loop: "{{ student_accounts }}"
   when: inventory_hostname in groups['gateway']
 
-- name: Synchronize student SSH public keys (empty list revokes access)
-  ansible.builtin.copy:
-    dest: "/home/{{ item.key }}/.ssh/authorized_keys"
-    content: >-
-      {{ (item.value | join('\n') ~ '\n') if item.value | length > 0 else '' }}
-    owner: "{{ item.key }}"
-    group: "{{ student_group }}"
-    mode: "0600"
-  loop: "{{ student_ssh_keys | dict2items }}"
+- name: Add student SSH public keys while preserving existing keys
+  ansible.posix.authorized_key:
+    user: "{{ item.0.key }}"
+    key: "{{ item.1 }}"
+    state: present
+    exclusive: false
+  loop: "{{ student_ssh_keys | dict2items | subelements('value') }}"
   loop_control:
-    label: "{{ item.key }}"
+    label: "{{ item.0.key }}"
   when:
     - inventory_hostname in groups['gateway']
 

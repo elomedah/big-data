@@ -1,7 +1,6 @@
 """Validate data before it reaches privileged Ansible tasks. Ed25519 only."""
 import argparse
 import base64
-import json
 import re
 import struct
 from pathlib import Path
@@ -55,6 +54,13 @@ def public_key(value):
     return "ssh-ed25519 " + base64.b64encode(blob).decode("ascii")
 
 
+def requested_login(value):
+    login(value)
+    if not re.fullmatch(r"[a-z]+(?:-[a-z]+)*\.[a-z]+(?:-[a-z]+)*", value):
+        raise ValueError("Le username doit respecter nom.prenom, en minuscules sans accents ni espaces (exemple : dupont.jean-pierre)")
+    return value
+
+
 def load_keys(path):
     raw = Path(path).read_text(encoding="utf-8")
     if len(raw) > 1_000_000:
@@ -70,7 +76,7 @@ def load_keys(path):
     for name, keys in mapping.items():
         login(name)
         if not isinstance(keys, list) or len(keys) > 10:
-            raise ValueError("Expected at most ten keys per student (or [] to revoke)")
+            raise ValueError("Expected a list of at most ten keys per student")
         result[name] = []
         for value in keys:
             key = public_key(value)
@@ -81,35 +87,9 @@ def load_keys(path):
     return result
 
 
-def load_roster(path):
-    data = json.loads(Path(path).read_text(encoding="utf-8"), object_pairs_hook=unique_json)
-    if not isinstance(data, dict) or set(data) != {"github_users"} or not isinstance(data["github_users"], dict):
-        raise ValueError("Expected github_users mapping")
-    result = {}
-    for github, name in data["github_users"].items():
-        if not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})", github):
-            raise ValueError("Invalid GitHub username")
-        if github.lower() in result or name in result.values():
-            raise ValueError("Each GitHub account and student login must be unique")
-        result[github.lower()] = login(name)
-    return result
-
-
-def unique_json(pairs):
-    result = {}
-    for key, value in pairs:
-        if key in result:
-            raise ValueError("Duplicate JSON key")
-        result[key] = value
-    return result
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("keys")
-    parser.add_argument("--roster")
     args = parser.parse_args()
     load_keys(args.keys)
-    if args.roster:
-        load_roster(args.roster)
     print("Student access data is valid")

@@ -39,14 +39,20 @@ def synchronize(config):
             incoming = Path(directory) / "keys.yml"
             incoming.write_bytes(raw)
             desired = load_keys(incoming)
-        # Tombstones survive removal from Git, so deleted accounts lose SSH keys.
+        # Preserve all previously known accounts and keys, including partial runs.
         previous_path = state / "applied.yml"
         # Include accounts provisioned during a previous partially failed run.
         previous = load_keys(target)
         if previous_path.exists():
-            previous.update(load_keys(previous_path))
-        for name in previous:
-            desired.setdefault(name, [])
+            for name, keys in load_keys(previous_path).items():
+                previous[name] = list(dict.fromkeys(previous.get(name, []) + keys))
+        for name, keys in previous.items():
+            desired[name] = list(dict.fromkeys(keys + desired.get(name, [])))
+        # Check the merged data too (e.g. a key reassigned to another account).
+        with tempfile.TemporaryDirectory(dir=state) as directory:
+            merged = Path(directory) / "keys.yml"
+            merged.write_text(yaml.safe_dump({"student_ssh_keys": desired}), encoding="utf-8")
+            load_keys(merged)
         serialized = yaml.safe_dump({"student_ssh_keys": desired}, sort_keys=True).encode()
         digest = hashlib.sha256(serialized).hexdigest()
         marker = state / "applied.sha256"

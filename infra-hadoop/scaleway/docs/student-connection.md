@@ -8,10 +8,10 @@ Run this command on your own computer:
 ssh-keygen -t ed25519 -a 100 -f ~/.ssh/m2-hadoop-student -C studentXX
 ```
 
-Replace `studentXX` with your assigned login, for example:
+Replace `studentXX` with your username in `nom.prenom` format, for example:
 
 ```bash
-ssh-keygen -t ed25519 -a 100 -f ~/.ssh/m2-hadoop-student -C student02
+ssh-keygen -t ed25519 -a 100 -f ~/.ssh/m2-hadoop-student -C dupont.alice
 ```
 
 ## Submit the public key
@@ -22,12 +22,13 @@ Display your public key:
 cat ~/.ssh/m2-hadoop-student.pub
 ```
 
-Once your teacher has registered your GitHub account, open the repository's
-**Issues → New issue → Accès SSH au cluster** form. Choose **Ajouter** to keep
-your current keys or **Remplacer** to replace all of them, then paste the public
-key. The teacher reviews the generated pull request; after merge, the bastion
-synchronizes approved keys. Your login is assigned by the teacher, not chosen
-in the form. If the form is not yet activated, send the public key to the teacher.
+Open the public [Accès SSH au cluster form](https://github.com/elomedah/big-data/issues/new?template=student-access.yml)
+using your GitHub account; no prior registration with the teacher is required.
+Enter your username as `nom.prenom` (surname.firstname), for example
+`dupont.alice`: lowercase letters without accents or spaces, exactly one dot,
+32 characters maximum. Hyphens are allowed in compound names.
+Paste the public key. The teacher reviews the generated pull request; after
+merge, the bastion adds the approved keys. Existing keys are always retained.
 
 Do not send the private key:
 
@@ -46,7 +47,7 @@ ssh -i ~/.ssh/m2-hadoop-student studentXX@<gateway_public_ip>
 Example:
 
 ```bash
-ssh -i ~/.ssh/m2-hadoop-student student02@<gateway_public_ip>
+ssh -i ~/.ssh/m2-hadoop-student dupont.alice@<gateway_public_ip>
 ```
 
 ## Load Hadoop and Spark commands

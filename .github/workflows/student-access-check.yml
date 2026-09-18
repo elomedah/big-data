@@ -1,0 +1,23 @@
+name: Student access validation
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r infra-hadoop/scaleway/access/requirements.txt
+      - run: python -m unittest discover -s infra-hadoop/scaleway/access -p 'test_*.py'
+      - run: python infra-hadoop/scaleway/access/validate.py infra-hadoop/scaleway/ansible/group_vars/student_ssh_keys.yml --roster infra-hadoop/scaleway/access/roster.json
+      - run: bash -n infra-hadoop/scaleway/access/install-sync.sh

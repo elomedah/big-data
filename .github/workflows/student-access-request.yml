@@ -1,0 +1,26 @@
+name: Student access request
+on:
+  issues:
+    types: [opened, reopened]
+permissions:
+  contents: read
+concurrency:
+  group: student-access-requests
+  cancel-in-progress: false
+jobs:
+  request:
+    if: startsWith(github.event.issue.title, '[Accès SSH]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r infra-hadoop/scaleway/access/requirements.txt
+      - name: Validate request and open pull request
+        env:
+          GH_TOKEN: ${{ secrets.STUDENT_PR_TOKEN }}
+        run: python infra-hadoop/scaleway/access/request.py

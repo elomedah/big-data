@@ -1,0 +1,27 @@
+name: Accès SSH au cluster
+description: Ajouter ou remplacer vos clés publiques SSH.
+title: "[Accès SSH] Demande étudiant"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Votre compte GitHub doit être associé par l'enseignant à votre login étudiant.
+        Collez uniquement des clés publiques .pub, jamais de clé privée.
+        Le contenu de cette demande est visible par les lecteurs du dépôt.
+  - type: dropdown
+    id: operation
+    attributes:
+      label: Opération
+      options:
+        - Ajouter
+        - Remplacer
+    validations:
+      required: true
+  - type: textarea
+    id: keys
+    attributes:
+      label: Clés publiques SSH
+      description: Une clé ssh-ed25519 par ligne. Remplacer retire toutes vos anciennes clés.
+      render: text
+    validations:
+      required: true

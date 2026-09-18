@@ -1,4 +1,16 @@
 ---
+- name: Validate access data on the controller before loading variables
+  ansible.builtin.command:
+    argv:
+      - "{{ ansible_playbook_python }}"
+      - "{{ playbook_dir }}/../access/validate.py"
+      - "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+  check_mode: false
+
 - name: Load student SSH keys file
   ansible.builtin.include_vars:
     file: "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
@@ -17,11 +29,25 @@
       - item.value is sequence
       - item.value is not string
       - item.value is not mapping
-      - item.value | length > 0
-    fail_msg: "Each student_ssh_keys entry must contain a non-empty list of public keys."
+    fail_msg: "Each student_ssh_keys entry must contain a list of public keys (empty revokes SSH access)."
   loop: "{{ student_ssh_keys | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+
+- name: Read existing accounts and groups
+  ansible.builtin.getent:
+    database: "{{ item }}"
+  loop:
+    - passwd
+    - group
+
+- name: Refuse to take over existing non-student accounts
+  ansible.builtin.assert:
+    that:
+      - item != teacher_user
+      - item not in ansible_facts.getent_passwd or (student_group in ansible_facts.getent_group and ansible_facts.getent_passwd[item][2] == ansible_facts.getent_group[student_group][1])
+    fail_msg: "Refusing to manage an existing account outside the student group."
+  loop: "{{ student_ssh_keys.keys() | list }}"
 
 - name: Build student account list from SSH keys
   ansible.builtin.set_fact:
@@ -64,15 +90,17 @@
   loop: "{{ student_accounts }}"
   when: inventory_hostname in groups['gateway']
 
-- name: Install student SSH public keys
-  ansible.posix.authorized_key:
-    user: "{{ item.0.key }}"
-    key: "{{ item.1 }}"
-    state: present
-    exclusive: false
-  loop: "{{ student_ssh_keys | default({}) | dict2items | subelements('value') }}"
+- name: Synchronize student SSH public keys (empty list revokes access)
+  ansible.builtin.copy:
+    dest: "/home/{{ item.key }}/.ssh/authorized_keys"
+    content: >-
+      {{ (item.value | join('\n') ~ '\n') if item.value | length > 0 else '' }}
+    owner: "{{ item.key }}"
+    group: "{{ student_group }}"
+    mode: "0600"
+  loop: "{{ student_ssh_keys | dict2items }}"
   loop_control:
-    label: "{{ item.0.key }}"
+    label: "{{ item.key }}"
   when:
     - inventory_hostname in groups['gateway']
 

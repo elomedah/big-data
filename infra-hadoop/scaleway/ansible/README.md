@@ -420,6 +420,9 @@ Worker 3 NodeManager: http://10.42.0.23:8042
 
 ## Student SSH Keys
 
+For the GitHub form, automated PRs and bastion timer, see the
+[student access automation guide](../access/README.md).
+
 The playbook creates locked Linux accounts using the names in the keys file,
 for example:
 
@@ -433,12 +436,14 @@ Only accounts listed in `student_ssh_keys` are provisioned; no accounts
 are generated from a count. For example, adding `student04` with a list of public keys
 creates its Linux account, installs its keys on the gateway, and provisions its
 HDFS directory and quotas. Account names are taken directly from the mapping,
-without a naming pattern or reserved-name restriction in the role. The target
-operating system validates usernames when creating accounts. Supply a non-empty
-list of keys for each student.
+with a validated login pattern and reserved-name restrictions. Existing accounts
+outside the student primary group cannot be taken over. Supply plain Ed25519
+public keys, or an empty list to revoke SSH access.
 
-Removing an entry does not delete an existing Linux account, SSH keys, or HDFS
-data. The YARN queue application limit is configured independently using
+Direct Ansible runs do not process removed entries: use an empty list to revoke
+access. The bastion synchronizer also clears keys for removed accounts it has
+previously tracked. Neither mechanism deletes Linux accounts or HDFS data.
+The YARN queue application limit is configured independently using
 `yarn_students_maximum_applications` in `group_vars/all.yml` (default: `3`).
 
 Students should generate their own SSH key locally and send only the public key.
@@ -480,7 +485,9 @@ Update `group_vars/student_ssh_keys.yml` on that same controller before running
 the command; editing a different checkout does not update the controller copy.
 The cluster must already be installed and HDFS running for directory and quota
 provisioning. SSH keys are installed on the gateway; Linux accounts are also
-created on the masters for HDFS group mapping. Existing keys are retained.
+created on the masters for HDFS group mapping. Each listed student's
+`authorized_keys` file is replaced by the exact configured list; omitted keys
+are revoked. This also removes manually installed extra keys.
 
 Students connect to the gateway:
 

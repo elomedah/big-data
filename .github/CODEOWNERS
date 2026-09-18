@@ -1,0 +1,4 @@
+# Access changes must be reviewed by the teacher (enable required code-owner reviews).
+/.github/ @elomedah
+/infra-hadoop/scaleway/access/ @elomedah
+/infra-hadoop/scaleway/ansible/ @elomedah

@@ -14,7 +14,7 @@ Replace `studentXX` with your assigned login, for example:
 ssh-keygen -t ed25519 -a 100 -f ~/.ssh/m2-hadoop-student -C student02
 ```
 
-## Send the public key
+## Submit the public key
 
 Display your public key:
 
@@ -22,7 +22,12 @@ Display your public key:
 cat ~/.ssh/m2-hadoop-student.pub
 ```
 
-Send only this public key to the teacher.
+Once your teacher has registered your GitHub account, open the repository's
+**Issues → New issue → Accès SSH au cluster** form. Choose **Ajouter** to keep
+your current keys or **Remplacer** to replace all of them, then paste the public
+key. The teacher reviews the generated pull request; after merge, the bastion
+synchronizes approved keys. Your login is assigned by the teacher, not chosen
+in the form. If the form is not yet activated, send the public key to the teacher.
 
 Do not send the private key:
 

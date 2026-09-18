@@ -92,7 +92,7 @@ class SyncTests(unittest.TestCase):
                 def read(self): return json.dumps(self.data).encode()
             def fetch(request, **kwargs):
                 return Response({'sha': 'abc123'} if '/commits/' in request.full_url else {'content': base64.b64encode(desired).decode()})
-            config = {'ansible_dir': str(root), 'state_dir': str(root / 'state'), 'repository': 'example/repo', 'branch': 'main'}
+            config = {'ansible_dir': str(root), 'state_dir': str(root / 'state'), 'repository': 'example/repo', 'branch': 'main', 'ansible_playbook': '/opt/ansible/bin/ansible-playbook'}
             with patch.object(sync, 'urlopen', side_effect=fetch), patch.object(sync.subprocess, 'run', side_effect=RuntimeError('offline')):
                 with self.assertRaises(RuntimeError): sync.synchronize(config)
             self.assertFalse((root / 'state/applied.sha256').exists())
@@ -101,6 +101,7 @@ class SyncTests(unittest.TestCase):
                 sync.synchronize(config)
                 sync.synchronize(config)
                 self.assertEqual(run.call_count, 1)
+                self.assertEqual(run.call_args.args[0], ['/opt/ansible/bin/ansible-playbook', 'site.yml', '--tags', 'students'])
             self.assertEqual(load_keys(root / 'state/applied.yml')['bob'], [key(2)])
 
             # Keys from a partially failed run remain even if removed from Git.

@@ -3,9 +3,9 @@
 The public GitHub form creates an issue without prior student registration.
 A workflow validates the requested `nom.prenom` username and opens a pull request changing only
 `ansible/group_vars/student_ssh_keys.yml`. The teacher reviews and merges it.
-A timer on the bastion reads that file from the configured branch and applies
+A timer on the gateway (the current Ansible controller) reads that file from the configured branch and applies
 the **locally installed** Ansible student role. No remote playbook or workflow
-is executed on the bastion, and no cluster SSH private key is stored in GitHub.
+is fetched from Git, and no cluster SSH private key is stored in GitHub.
 
 ## 1. Public form and username
 
@@ -60,18 +60,18 @@ opening a PR from `student-access/issue-N`, or delete that branch after checking
 it has no active PR and reopen the issue. Concurrent proposals touching the
 same keys file may conflict; resolve them before merging and rerun validation.
 
-## 3. Install on the bastion
+## 3. Enable automatic synchronization on the gateway
 
 First update the controller copy with this version of the project, including
-`access/` and the updated `ansible/roles/students/` role. You can use the existing
-`terraform/prepare-bastion.sh` procedure. Preserve the controller's inventory
+`access/` and the updated `ansible/roles/students/` role. Use the gateway checkout
+from which you already run Ansible. Preserve the controller's inventory
 and its existing keys file when updating. Synchronization merges approved Git
 keys with the current controller file and previously applied keys. Ansible adds
 them with `exclusive: false`, retaining keys already present on the server too.
 If the previous version was installed, update both the local student role and
 rerun the synchronizer installer to switch off the old replacement behavior.
 
-On the bastion, as the existing Ansible user (normally `ubuntu`):
+On the gateway, as the existing Ansible user (normally `ubuntu`), install once:
 
 ```bash
 sudo apt-get install -y python3-venv
@@ -85,22 +85,28 @@ existing inventory and SSH key. Its Python interpreter must have PyYAML
 
 Review `~/.local/share/student-access/config.json`. For a private repository,
 create a separate read-only token with repository Contents read access, save it
-in a mode-0600 file on the bastion, and set `token_file` to its absolute path.
-The bastion must reach `api.github.com` over HTTPS. Do not reuse the PR write
-token on the bastion.
+in a mode-0600 file on the gateway, and set `token_file` to its absolute path.
+For a public repository no read token is needed. The gateway must reach
+`api.github.com` over HTTPS. Do not reuse the PR write token on the gateway.
 
-Apply once, inspect the result, then enable periodic synchronization:
+The installer enables the timer immediately and uses `sudo loginctl enable-linger`
+so it continues after logout and starts again after reboot. The first check runs
+about five seconds after installation, then every two minutes after a run ends.
+It records the absolute path to your Ansible executable, including virtualenvs.
+Ansible's SSH credentials and privilege escalation must work without interactive
+password prompts. No service restart or manual Ansible run is needed after a PR
+is merged. Inspect the timer and deployment journal with:
 
 ```bash
-systemctl --user start student-access.service
 journalctl --user -u student-access.service -n 50
-sudo loginctl enable-linger "$(id -un)"
-systemctl --user enable --now student-access.timer
 systemctl --user list-timers student-access.timer
 ```
 
-The installer deliberately does not start synchronization before this first
-review. The timer checks every two minutes after the previous run finishes.
+Run only one timer, on the gateway. If an earlier installation enabled one on
+the bastion, disable it there with `systemctl --user disable --now student-access.timer`
+and let any active service run finish before enabling the gateway timer.
+
+The timer checks every two minutes after the previous run finishes.
 It serializes runs, fetches the keys from a single commit, validates them,
 and runs `ansible-playbook site.yml --tags students` only when needed. Failures
 are recorded in the journal and retried. The success marker is written only
@@ -112,7 +118,7 @@ the service journal is the deployment status.
 The original controller keys are backed up to
 `~/.local/share/student-access/state/initial-keys.yml`. Retain the state directory:
 it retains previously applied keys even when they are later removed from Git.
-There is no permanent GitHub Actions runner on the bastion.
+There is no permanent GitHub Actions runner on the gateway.
 
 ## Student procedure
 
@@ -122,7 +128,7 @@ The full exercise is in [TP 01](../../../tp/01-big-data-hadoop/README.md).
 2. Open Issues → New issue → **Accès SSH au cluster** using any GitHub account.
 3. Enter your username in `nom.prenom` format, for example `dupont.alice`.
 4. Paste the `.pub` content, one key per line. Never submit the private key.
-5. Wait for teacher review and bastion synchronization, then connect with that username.
+5. Wait for teacher review and gateway synchronization, then connect with that username.
 
 Requests, usernames and public keys are visible to anyone who can read the
 repository. Do not submit personal email addresses or other unnecessary data.
@@ -147,7 +153,7 @@ systemctl --user disable --now student-access.timer
 ```
 
 Local playbooks and synchronizer code are updated manually using the installer;
-merging changes to those files does not deploy executable code to the bastion.
+merging changes to those files does not deploy executable code to the gateway.
 
 ## Tests
 

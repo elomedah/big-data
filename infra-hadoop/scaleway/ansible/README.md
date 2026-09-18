@@ -43,7 +43,7 @@ admin_ssh_public_key_path = "~/.ssh/m2-hadoop-scaleway.pub"
 
 ## Run Ansible From The Bastion
 
-Use this when Ansible is installed directly on the bastion.
+Use this when Ansible is installed directly on the gateway.
 
 From your local machine, prepare the bastion. This copies the whole
 `infra-hadoop/scaleway` project, installs the bastion inventory, and copies the
@@ -420,7 +420,7 @@ Worker 3 NodeManager: http://10.42.0.23:8042
 
 ## Student SSH Keys
 
-For the GitHub form, automated PRs and bastion timer, see the
+For the GitHub form, automated PRs and gateway timer, see the
 [student access automation guide](../access/README.md).
 
 The playbook creates locked Linux accounts using the names in the keys file,
@@ -441,7 +441,7 @@ public keys. Public form submissions require usernames in `nom.prenom` format;
 legacy account names remain supported for existing entries.
 
 Keys are added without removing existing keys. An empty list or a removed entry
-does not revoke access. The bastion synchronizer preserves previously applied
+does not revoke access. The gateway synchronizer preserves previously applied
 keys. Neither mechanism deletes Linux accounts or HDFS data.
 The YARN queue application limit is configured independently using
 `yarn_students_maximum_applications` in `group_vars/all.yml` (default: `3`).
@@ -463,8 +463,8 @@ output of `cat` in the public-key field. They must never submit the private key.
 See [TP 01](../../../tp/01-big-data-hadoop/README.md) and the
 [connection guide](../docs/student-connection.md) for the student procedure.
 
-After merge, the configured bastion timer applies new keys. Follow its status
-with `journalctl --user -u student-access.service -n 50` on the bastion.
+After merge, the configured gateway timer applies new keys. Follow its status
+with `journalctl --user -u student-access.service -n 50` on the gateway.
 The [automation guide](../access/README.md) covers the GitHub secret, branch
 protection and timer installation; publishing the form alone does not activate
 deployment. Existing installations must update both the local Ansible role and

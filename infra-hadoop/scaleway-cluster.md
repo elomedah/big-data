@@ -314,7 +314,7 @@ L’étudiant génère une clé Ed25519 puis remplit le
 [formulaire public « Accès SSH au cluster »](https://github.com/elomedah/big-data/issues/new?template=student-access.yml)
 avec son username et sa clé publique. Un compte GitHub est nécessaire ; aucune
 inscription préalable dans un registre n’est requise. L’enseignant vérifie
-l’identité et fusionne la PR proposée. Une fois configuré, le timer du bastion
+l’identité et fusionne la PR proposée. Une fois configuré, le timer de la gateway
 récupère les ajouts environ toutes les deux minutes et exécute le rôle Ansible.
 
 Les clés existantes sont conservées, y compris celles déjà présentes sur la

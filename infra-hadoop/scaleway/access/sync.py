@@ -1,4 +1,4 @@
-"""Installed locally on the bastion. Fetch data only, never remote playbooks."""
+"""Installed on the gateway controller. Fetch data only, never remote playbooks."""
 import argparse
 import base64
 import fcntl
@@ -67,7 +67,7 @@ def synchronize(config):
         temporary.write_bytes(serialized)
         os.replace(temporary, target)
         print(f"Applying student access from {commit}", flush=True)
-        subprocess.run(["ansible-playbook", "site.yml", "--tags", "students"], cwd=project, check=True, timeout=900)
+        subprocess.run([config.get("ansible_playbook", "ansible-playbook"), "site.yml", "--tags", "students"], cwd=project, check=True, timeout=900)
         # Only record success after Ansible succeeds; failures retry next timer tick.
         pending_state = state / "applied.pending"
         pending_state.write_bytes(serialized)

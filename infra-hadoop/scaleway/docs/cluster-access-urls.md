@@ -7,7 +7,7 @@ Replace `<gateway_public_ip>` with the gateway public IP given by the teacher.
 Use the [public access form](https://github.com/elomedah/big-data/issues/new?template=student-access.yml)
 with a `nom.prenom` username and your Ed25519 public key. A GitHub account is
 required, but no prior registration. The teacher reviews the generated PR;
-access becomes available after merge and successful bastion synchronization.
+access becomes available after merge and successful gateway synchronization.
 New keys are added without replacing existing ones. See the
 [student connection guide](student-connection.md) for generation and login commands.
 

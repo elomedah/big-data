@@ -1,4 +1,6 @@
 student_ssh_keys:
+  dubust.mathieu:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDDNkWNwU7jTW5TZklWVg64ECyI/9EhuC7EciNdHYJFU
   kodjo.edah:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMtOkGQIoeegtzeBQWr+h3TCkCP4Q3tITG+w1GPp9Pw8
   koffi.ama:

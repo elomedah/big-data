@@ -68,24 +68,30 @@ RUN groupadd --system hadoop \
         /var/log/hive \
         /var/log/spark
 
+ARG APACHE_MIRROR=https://apache.mirror.iphh.net
+
 RUN mkdir -p "${HADOOP_HOME}" \
-    && curl -fsSL "https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" -o /tmp/hadoop.tar.gz \
+    && (curl -fsSL --connect-timeout 15 --speed-limit 1024 --speed-time 60 "${APACHE_MIRROR%/}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" -o /tmp/hadoop.tar.gz \
+        || curl -fsSL --retry 3 "https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" -o /tmp/hadoop.tar.gz) \
     && tar -xzf /tmp/hadoop.tar.gz -C "${HADOOP_HOME}" --strip-components=1 \
     && rm /tmp/hadoop.tar.gz
 
 RUN mkdir -p "${SPARK_HOME}" \
-    && curl -fsSL "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz" -o /tmp/spark.tgz \
+    && (curl -fsSL --connect-timeout 15 --speed-limit 1024 --speed-time 60 "${APACHE_MIRROR%/}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz" -o /tmp/spark.tgz \
+        || curl -fsSL --retry 3 "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz" -o /tmp/spark.tgz) \
     && tar -xzf /tmp/spark.tgz -C "${SPARK_HOME}" --strip-components=1 \
     && rm /tmp/spark.tgz
 
 RUN mkdir -p "${HIVE_HOME}" \
-    && curl -fsSL "https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz" -o /tmp/hive.tar.gz \
+    && (curl -fsSL --connect-timeout 15 --speed-limit 1024 --speed-time 60 "${APACHE_MIRROR%/}/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz" -o /tmp/hive.tar.gz \
+        || curl -fsSL --retry 3 "https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz" -o /tmp/hive.tar.gz) \
     && tar -xzf /tmp/hive.tar.gz -C "${HIVE_HOME}" --strip-components=1 \
     && ln -sf /usr/share/java/postgresql.jar "${HIVE_HOME}/lib/postgresql-jdbc.jar" \
     && rm /tmp/hive.tar.gz
 
 RUN mkdir -p "${HBASE_HOME}" \
-    && curl -fsSL "https://archive.apache.org/dist/hbase/${HBASE_VERSION}/hbase-${HBASE_VERSION}-hadoop3-bin.tar.gz" -o /tmp/hbase.tar.gz \
+    && (curl -fsSL --connect-timeout 15 --speed-limit 1024 --speed-time 60 "${APACHE_MIRROR%/}/hbase/${HBASE_VERSION}/hbase-${HBASE_VERSION}-hadoop3-bin.tar.gz" -o /tmp/hbase.tar.gz \
+        || curl -fsSL --retry 3 "https://archive.apache.org/dist/hbase/${HBASE_VERSION}/hbase-${HBASE_VERSION}-hadoop3-bin.tar.gz" -o /tmp/hbase.tar.gz) \
     && tar -xzf /tmp/hbase.tar.gz -C "${HBASE_HOME}" --strip-components=1 \
     && find "${HBASE_HOME}/lib" -maxdepth 1 -type f -name 'hadoop-*.jar' -delete \
     && rm /tmp/hbase.tar.gz

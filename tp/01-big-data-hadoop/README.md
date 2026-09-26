@@ -59,6 +59,17 @@ Construisez l’image Docker.
 docker compose build
 ```
 
+Les téléchargements utilisent par défaut le [miroir européen IPHH](https://apache.mirror.iphh.net/),
+avec repli sur les archives Apache si le miroir échoue ou ne contient pas la version.
+Pour changer de serveur pour Hadoop, Spark, Hive et HBase :
+
+```bash
+docker compose build --build-arg APACHE_MIRROR=https://dlcdn.apache.org
+```
+
+Pour conserver ce choix, ajoutez `APACHE_MIRROR=https://dlcdn.apache.org` dans
+un fichier `.env` à côté de `docker-compose.yml`.
+
 Le chemin Java de l'image est `/opt/java`, un lien vers le JDK installé pendant
 le build. Il ne dépend pas de l'architecture du processeur (Intel/AMD ou Apple
 Silicon).

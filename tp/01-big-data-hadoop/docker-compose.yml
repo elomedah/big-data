@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        APACHE_MIRROR: ${APACHE_MIRROR:-https://apache.mirror.iphh.net}
     image: tp01-bigdata-hadoop:latest
     container_name: tp-hadoop
     hostname: tp-hadoop

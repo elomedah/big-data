@@ -178,7 +178,6 @@ cluster.
 pyspark \
   --master yarn \
   --deploy-mode client \
-  --conf spark.driver.host=localhost \
   --conf spark.driver.bindAddress=0.0.0.0
 ```
 

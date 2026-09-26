@@ -1,4 +1,6 @@
 student_ssh_keys:
+  daly.anis:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA0lymL7Esp0L1nk+VXAcvK/uSaiLd+22vFssCk3G2Xz
   dubust.mathieu:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDDNkWNwU7jTW5TZklWVg64ECyI/9EhuC7EciNdHYJFU
   kodjo.edah:

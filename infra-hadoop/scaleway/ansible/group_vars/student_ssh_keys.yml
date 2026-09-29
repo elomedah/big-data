@@ -13,6 +13,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN6TAemtwIR9tRjD41fu7PpQTaQzeFKkqs5bUe3MXhLd
   le-guidevais.thibault:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZN9JL6yfHxN9UYWBLQKsgeGDqb8bexCKig5FqIkamM
+  mendjour.lydia:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC3OFHkuvkzDg2rmrb8Bku/0t0dekReosOQ9TCZjehO7
   nazari.ibrahim:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICm+F3/lioKXXY9AMmD8NV1HVc6zJdMfjHxc3DhM2GZR
   noemie.niang:
@@ -21,6 +23,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHhf05eeVJi0esMjyaSYIMfrJnhShtYkjhopxd78XSRl
   patrick.noyon:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEHpjfNrj59OJtWcfPEr/dXONFtvjheBl1BUUs1If9cZ
+  robert.william:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKCdbsxgnROtmdqHaZ5fnw6H4pJHw18jFR2WstmVv5p5
   ruis.geremy:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICje85vDFkplhB44Ug7VMbIfUB22jpc8+RuCjaK2mnm8
   sawadogo.kenanja:
@@ -37,3 +41,5 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBNcFyxkBm7Xu5+POgcTxxNQh9DEZFOU/oeV1Dk72SeD
   ziane.celina:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPlhw594GoNzSpYp1SBc784EA99GpDoZTcP05d92nL22
+  yattassaye.mohamed:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPbbC6rUPkIjLHUOyU6oYZS1WQy/eZ3bT8gKHaa9k2QD

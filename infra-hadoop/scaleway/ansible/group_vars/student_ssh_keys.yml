@@ -15,13 +15,15 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHhf05eeVJi0esMjyaSYIMfrJnhShtYkjhopxd78XSRl
   patrick.noyon:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEHpjfNrj59OJtWcfPEr/dXONFtvjheBl1BUUs1If9cZ
-  sawadogo.kenanja:
-  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWMvSlM+hTBnnakwB11IrktpnD6ixxcGT/BX7S80h+7
   ruis.geremy:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICje85vDFkplhB44Ug7VMbIfUB22jpc8+RuCjaK2mnm8
+  sawadogo.kenanja:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWMvSlM+hTBnnakwB11IrktpnD6ixxcGT/BX7S80h+7
   student01:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINFARkStQ0lAKDseoK/MFVqMhKyXCvaTyoxZYOxje53k
   student02:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOFlwIlftK+UQWwgkfE4cN6zLs0+9vBR7JZz+DK85U2u
   tewa-djimbou.christian:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQ/Emo4EzHdE8UPYmiC9RTR8tlS86CVC2NhGj4ohR3
+  wan.william:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBNcFyxkBm7Xu5+POgcTxxNQh9DEZFOU/oeV1Dk72SeD

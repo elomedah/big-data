@@ -9,12 +9,16 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDDNkWNwU7jTW5TZklWVg64ECyI/9EhuC7EciNdHYJFU
   grall.jules:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDPeAjwFsNKoPn9H7vYuFQW1oR6pvm035GEQOb11drsJ
+  kerrit.hadile:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB19L+58gjnU6Hu9SFTtAnID8WbKNK1FCWduK19jiWWl
   kodjo.edah:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMtOkGQIoeegtzeBQWr+h3TCkCP4Q3tITG+w1GPp9Pw8
   koffi.ama:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN6TAemtwIR9tRjD41fu7PpQTaQzeFKkqs5bUe3MXhLd
   lazzem.leila:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKdmbE6aagxgKn9Zp3vm4WUloui8As/OMtSy2CJtPT8G
+  laurent.louis:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0c3+clCh5fduCKqtd6/Ps+pQrEXfIDp9rNt8G/XgfL
   le-guidevais.thibault:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZN9JL6yfHxN9UYWBLQKsgeGDqb8bexCKig5FqIkamM
   mendjour.lydia:

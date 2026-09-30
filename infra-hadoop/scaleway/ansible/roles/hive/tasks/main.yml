@@ -214,7 +214,7 @@
   ansible.builtin.command: "{{ hive_home }}/bin/schematool -dbType postgres -initSchema"
   become_user: "{{ hadoop_user }}"
   environment:
-    JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+    JAVA_HOME: "{{ java_home }}"
     HADOOP_HOME: "{{ hadoop_home }}"
     HADOOP_CONF_DIR: "{{ hadoop_home }}/etc/hadoop"
     HIVE_HOME: "{{ hive_home }}"

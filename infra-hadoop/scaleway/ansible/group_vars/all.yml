@@ -52,6 +52,8 @@ hbase_master_web_port: 16010
 hbase_regionserver_web_port: 16030
 
 java_package: openjdk-11-jdk
+# Match Ubuntu's Java path to each host's architecture; override for custom JDKs.
+java_home: "/usr/lib/jvm/java-11-openjdk-{{ {'x86_64': 'amd64', 'aarch64': 'arm64'}.get(ansible_facts['architecture'], ansible_facts['architecture']) }}"
 
 student_group: student
 student_space_quota: 5g

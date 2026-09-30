@@ -1,4 +1,6 @@
 student_ssh_keys:
+  binhminh.tran:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDso8mvJQhAVW26cFIL64Jlc09IrEPYQJtxogTruDjmx
   choix.maria:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOOdooaE7R/x2rDyHSzZgaK4JfCGh8iFx6RnOFtEmFUe
   cuisenier.adele:

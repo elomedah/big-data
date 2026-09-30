@@ -21,6 +21,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKdmbE6aagxgKn9Zp3vm4WUloui8As/OMtSy2CJtPT8G
   le-guidevais.thibault:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZN9JL6yfHxN9UYWBLQKsgeGDqb8bexCKig5FqIkamM
+  mahfouf.kaoutar:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxFiGHwAuFCB6qD2NTD5QpxlYKVzwaoPIwTubbXglPU
   mendjour.lydia:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC3OFHkuvkzDg2rmrb8Bku/0t0dekReosOQ9TCZjehO7
   mimouni.lina:

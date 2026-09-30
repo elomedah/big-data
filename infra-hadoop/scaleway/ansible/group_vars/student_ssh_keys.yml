@@ -7,6 +7,7 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA0lymL7Esp0L1nk+VXAcvK/uSaiLd+22vFssCk3G2Xz
   delhi.noah:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGS77TTjJyWyvDC/1yL2KmTOkJjpexVoGmgt4rEvKfzg
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFHwxghlHERdcOLl1K1bJwL1de4JGkOEiKKqhQR9EXb0
   dubust.mathieu:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDDNkWNwU7jTW5TZklWVg64ECyI/9EhuC7EciNdHYJFU
   grall.jules:

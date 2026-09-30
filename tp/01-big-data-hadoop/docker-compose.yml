@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         APACHE_MIRROR: ${APACHE_MIRROR:-https://apache.mirror.iphh.net}
+        HIVE_MIRROR: ${HIVE_MIRROR:-https://archive.apache.org/dist}
     image: tp01-bigdata-hadoop:latest
     container_name: tp-hadoop
     hostname: tp-hadoop

@@ -82,9 +82,12 @@ RUN mkdir -p "${SPARK_HOME}" \
     && tar -xzf /tmp/spark.tgz -C "${SPARK_HOME}" --strip-components=1 \
     && rm /tmp/spark.tgz
 
+# Hive 4.0.1 is archived; current-release mirrors may return 404.
+ARG HIVE_MIRROR=https://archive.apache.org/dist
+
 RUN mkdir -p "${HIVE_HOME}" \
-    && (curl -fsSL --connect-timeout 15 --speed-limit 1024 --speed-time 60 "${APACHE_MIRROR%/}/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz" -o /tmp/hive.tar.gz \
-        || curl -fsSL --retry 3 "https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz" -o /tmp/hive.tar.gz) \
+    && curl -fSL --retry 3 --connect-timeout 30 \
+        "${HIVE_MIRROR%/}/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz" -o /tmp/hive.tar.gz \
     && tar -xzf /tmp/hive.tar.gz -C "${HIVE_HOME}" --strip-components=1 \
     && ln -sf /usr/share/java/postgresql.jar "${HIVE_HOME}/lib/postgresql-jdbc.jar" \
     && rm /tmp/hive.tar.gz

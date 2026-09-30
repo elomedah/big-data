@@ -61,11 +61,27 @@ docker compose build
 
 Les téléchargements utilisent par défaut le [miroir européen IPHH](https://apache.mirror.iphh.net/),
 avec repli sur les archives Apache si le miroir échoue ou ne contient pas la version.
-Pour changer de serveur pour Hadoop, Spark, Hive et HBase :
+Hive 4.0.1 est téléchargé directement depuis les archives Apache : les miroirs
+des versions courantes peuvent répondre `404` pour cette ancienne version.
+Pour changer de serveur pour Hadoop, Spark et HBase :
 
 ```bash
 docker compose build --build-arg APACHE_MIRROR=https://dlcdn.apache.org
 ```
+
+Si un ancien Dockerfile affiche une erreur `404` pendant le téléchargement de
+Hive, mettez le dépôt à jour, puis relancez le build en conservant son cache :
+
+```bash
+git pull
+docker compose build --build-arg HIVE_MIRROR=https://archive.apache.org/dist
+docker compose up -d
+```
+
+Le paramètre `HIVE_MIRROR` est indépendant de `APACHE_MIRROR`. Il peut aussi
+être défini dans `.env`. L'archive Hive fait environ 389 Mo ; son téléchargement
+peut prendre plusieurs minutes. Avec l'ancien Dockerfile, un premier `404`
+pouvait être suivi d'un téléchargement réussi depuis le serveur de repli.
 
 Pour conserver ce choix, ajoutez `APACHE_MIRROR=https://dlcdn.apache.org` dans
 un fichier `.env` à côté de `docker-compose.yml`.

@@ -41,6 +41,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEHpjfNrj59OJtWcfPEr/dXONFtvjheBl1BUUs1If9cZ
   pouillaude.agathe:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMd4Xu3xODyrOsq7ui5uV+q9n1uuQy9udyLe3swiXFAt
+  qiu.laurent:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBcs/L3WEduWdQRkQbpI1TRMYuRu9OOg9xnl+/fCV+Qe
   robert.william:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKCdbsxgnROtmdqHaZ5fnw6H4pJHw18jFR2WstmVv5p5
   ruis.geremy:

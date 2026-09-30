@@ -1,4 +1,6 @@
 student_ssh_keys:
+  abir.ouadhour:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEB5TDJiI9yBp2hzAb7bUSZOvChZZJ8OQG4DVdrXD5VA
   binhminh.tran:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDso8mvJQhAVW26cFIL64Jlc09IrEPYQJtxogTruDjmx
   choix.maria:

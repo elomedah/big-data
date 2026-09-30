@@ -1,27 +1,49 @@
 student_ssh_keys:
+  choix.maria:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOOdooaE7R/x2rDyHSzZgaK4JfCGh8iFx6RnOFtEmFUe
   cuisenier.adele:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKHYUp+34NFgfgxI54r9keNoyMawSGVq/LrvX16En/t7
   daly.anis:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA0lymL7Esp0L1nk+VXAcvK/uSaiLd+22vFssCk3G2Xz
   dubust.mathieu:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDDNkWNwU7jTW5TZklWVg64ECyI/9EhuC7EciNdHYJFU
+  grall.jules:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDPeAjwFsNKoPn9H7vYuFQW1oR6pvm035GEQOb11drsJ
   kodjo.edah:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMtOkGQIoeegtzeBQWr+h3TCkCP4Q3tITG+w1GPp9Pw8
   koffi.ama:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN6TAemtwIR9tRjD41fu7PpQTaQzeFKkqs5bUe3MXhLd
   le-guidevais.thibault:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZN9JL6yfHxN9UYWBLQKsgeGDqb8bexCKig5FqIkamM
+  mendjour.lydia:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC3OFHkuvkzDg2rmrb8Bku/0t0dekReosOQ9TCZjehO7
+  nazari.ibrahim:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICm+F3/lioKXXY9AMmD8NV1HVc6zJdMfjHxc3DhM2GZR
+  noemie.niang:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIF/sdmqO4PlSnZ0ai9EKBAwP42vQlwQDdalExOHaDme
   pascal.alban:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHhf05eeVJi0esMjyaSYIMfrJnhShtYkjhopxd78XSRl
   patrick.noyon:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEHpjfNrj59OJtWcfPEr/dXONFtvjheBl1BUUs1If9cZ
-  sawadogo.kenanja:
-  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWMvSlM+hTBnnakwB11IrktpnD6ixxcGT/BX7S80h+7
+  pouillaude.agathe:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMd4Xu3xODyrOsq7ui5uV+q9n1uuQy9udyLe3swiXFAt
+  robert.william:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKCdbsxgnROtmdqHaZ5fnw6H4pJHw18jFR2WstmVv5p5
   ruis.geremy:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICje85vDFkplhB44Ug7VMbIfUB22jpc8+RuCjaK2mnm8
+  sawadogo.kenanja:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWMvSlM+hTBnnakwB11IrktpnD6ixxcGT/BX7S80h+7
   student01:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINFARkStQ0lAKDseoK/MFVqMhKyXCvaTyoxZYOxje53k
   student02:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOFlwIlftK+UQWwgkfE4cN6zLs0+9vBR7JZz+DK85U2u
+  tarzet.elyas:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIQtZb2mbDtbY62RKXWXWwdvaA577PnDeTf1mwK/RB6Q
   tewa-djimbou.christian:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQ/Emo4EzHdE8UPYmiC9RTR8tlS86CVC2NhGj4ohR3
+  wan.william:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBNcFyxkBm7Xu5+POgcTxxNQh9DEZFOU/oeV1Dk72SeD
+  ziane.celina:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPlhw594GoNzSpYp1SBc784EA99GpDoZTcP05d92nL22
+  yattassaye.mohamed:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPbbC6rUPkIjLHUOyU6oYZS1WQy/eZ3bT8gKHaa9k2QD

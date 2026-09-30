@@ -7,7 +7,7 @@ Wants=network-online.target
 Type=forking
 User={{ hadoop_user }}
 Group={{ hadoop_group }}
-Environment=JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+Environment=JAVA_HOME={{ java_home }}
 Environment=HADOOP_HOME={{ hadoop_home }}
 ExecStart={{ hadoop_home }}/bin/hdfs --daemon start namenode
 ExecStop={{ hadoop_home }}/bin/hdfs --daemon stop namenode

@@ -7,7 +7,7 @@ Wants=network-online.target
 Type=simple
 User={{ hadoop_user }}
 Group={{ hadoop_group }}
-Environment=JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+Environment=JAVA_HOME={{ java_home }}
 Environment=HADOOP_HOME={{ hadoop_home }}
 Environment=HADOOP_CONF_DIR={{ hadoop_home }}/etc/hadoop
 Environment=HIVE_HOME={{ hive_home }}

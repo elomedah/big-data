@@ -34,6 +34,18 @@
     state: present
     update_cache: true
 
+- name: Check configured Java executable
+  ansible.builtin.stat:
+    path: "{{ java_home }}/bin/java"
+  register: java_executable
+
+- name: Validate Java installation path
+  ansible.builtin.assert:
+    that:
+      - java_executable.stat.exists
+      - java_executable.stat.executable | default(false)
+    fail_msg: "Java is missing at {{ java_home }}/bin/java. Check java_package and override java_home for this host if needed."
+
 - name: Create Hadoop group
   ansible.builtin.group:
     name: "{{ hadoop_group }}"

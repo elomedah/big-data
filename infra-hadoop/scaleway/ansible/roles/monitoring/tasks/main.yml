@@ -1,0 +1,215 @@
+---
+- name: Validate monitoring inventory
+  ansible.builtin.assert:
+    that:
+      - groups.get('gateway', []) | length == 1
+      - groups.get('masters', []) | length == 1
+      - groups.get('cluster', []) | length > 0
+    fail_msg: "Monitoring expects one gateway, one master and the cluster inventory group."
+
+- name: Install monitoring packages
+  ansible.builtin.apt:
+    name: [prometheus, prometheus-blackbox-exporter, python3, ca-certificates, gnupg]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+    policy_rc_d: 101
+    install_recommends: false
+
+- name: Create package signing key directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Install Grafana repository signing key
+  ansible.builtin.get_url:
+    url: https://apt.grafana.com/gpg-full.key
+    dest: /etc/apt/keyrings/grafana.asc
+    mode: "0644"
+
+- name: Configure Grafana stable repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/grafana.asc] https://apt.grafana.com stable main"
+    filename: grafana
+    state: present
+
+- name: Install Grafana
+  ansible.builtin.apt:
+    name: grafana
+    state: present
+    update_cache: true
+    policy_rc_d: 101
+
+- name: Create monitoring configuration directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /etc/prometheus/rules
+    - /etc/systemd/system/prometheus.service.d
+    - /etc/systemd/system/prometheus-blackbox-exporter.service.d
+    - /etc/grafana/provisioning/datasources
+    - /etc/grafana/provisioning/dashboards
+    - /var/lib/grafana/dashboards
+    - /opt/platform-monitoring
+
+- name: Ensure Prometheus data directory ownership
+  ansible.builtin.file:
+    path: /var/lib/prometheus/metrics2
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: "0755"
+
+- name: Install platform alert rules
+  ansible.builtin.copy:
+    src: alerts.yml
+    dest: /etc/prometheus/rules/platform.yml
+    mode: "0644"
+    validate: /usr/bin/promtool check rules %s
+  notify: Restart Prometheus
+
+- name: Configure Prometheus targets from inventory
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    mode: "0644"
+    validate: /usr/bin/promtool check config %s
+  notify: Restart Prometheus
+
+- name: Configure Prometheus listener and retention
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/prometheus.service.d/monitoring.conf
+    mode: "0644"
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=/usr/bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus/metrics2 --storage.tsdb.retention.time={{ monitoring_retention_time }} --storage.tsdb.retention.size={{ monitoring_retention_size }} --web.listen-address=127.0.0.1:{{ monitoring_prometheus_port }}
+  notify: Restart Prometheus
+
+- name: Configure TCP probes
+  ansible.builtin.copy:
+    dest: /etc/prometheus/blackbox.yml
+    mode: "0644"
+    content: |
+      modules:
+        tcp_connect:
+          prober: tcp
+          timeout: 5s
+          tcp:
+            preferred_ip_protocol: ip4
+  notify: Restart Blackbox Exporter
+
+- name: Bind Blackbox Exporter to localhost
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/prometheus-blackbox-exporter.service.d/monitoring.conf
+    mode: "0644"
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=/usr/bin/prometheus-blackbox-exporter --config.file=/etc/prometheus/blackbox.yml --web.listen-address=127.0.0.1:{{ monitoring_blackbox_port }}
+  notify: Restart Blackbox Exporter
+
+- name: Install Hadoop metrics adapter
+  ansible.builtin.copy:
+    src: hadoop_exporter.py
+    dest: /opt/platform-monitoring/hadoop_exporter.py
+    mode: "0644"
+  notify: Restart Hadoop Exporter
+
+- name: Configure Hadoop metrics adapter
+  ansible.builtin.copy:
+    dest: /etc/prometheus/hadoop-exporter.json
+    mode: "0644"
+    content: "{{ {'master': hostvars[groups['masters'][0]].private_ip, 'port': monitoring_hadoop_port | int, 'timeout': 5} | to_nice_json }}\n"
+  notify: Restart Hadoop Exporter
+
+- name: Install Hadoop metrics adapter service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/platform-hadoop-exporter.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=HDFS and YARN Prometheus metrics adapter
+      After=network-online.target
+      Wants=network-online.target
+      [Service]
+      User=prometheus
+      Group=prometheus
+      ExecStart=/usr/bin/python3 /opt/platform-monitoring/hadoop_exporter.py /etc/prometheus/hadoop-exporter.json
+      Restart=on-failure
+      RestartSec=5
+      NoNewPrivileges=true
+      ProtectSystem=strict
+      ProtectHome=true
+      PrivateTmp=true
+      [Install]
+      WantedBy=multi-user.target
+  notify: Restart Hadoop Exporter
+
+- name: Generate the initial Grafana administrator password once
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/python3
+      - -c
+      - "import os,secrets; fd=os.open('/etc/grafana/admin-password', os.O_WRONLY|os.O_CREAT|os.O_EXCL, 0o600); os.write(fd, (secrets.token_urlsafe(32)+'\n').encode()); os.close(fd)"
+    creates: /etc/grafana/admin-password
+  no_log: true
+
+- name: Allow Grafana to read its initial administrator password
+  ansible.builtin.file:
+    path: /etc/grafana/admin-password
+    owner: root
+    group: grafana
+    mode: "0640"
+
+- name: Configure Grafana
+  ansible.builtin.template:
+    src: grafana.ini.j2
+    dest: /etc/grafana/grafana.ini
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Provision Grafana datasource and dashboard provider
+  ansible.builtin.template:
+    src: "{{ item }}.yml.j2"
+    dest: "/etc/grafana/provisioning/{{ 'datasources' if item == 'datasource' else 'dashboards' }}/platform.yml"
+    mode: "0644"
+  loop: [datasource, dashboard-provider]
+  notify: Restart Grafana
+
+- name: Install platform dashboard
+  ansible.builtin.copy:
+    src: platform-dashboard.json
+    dest: /var/lib/grafana/dashboards/platform.json
+    mode: "0644"
+  notify: Restart Grafana
+
+- name: Start monitoring services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    daemon_reload: true
+    state: started
+  loop: [prometheus-blackbox-exporter, platform-hadoop-exporter, prometheus, grafana-server]
+
+- name: Apply monitoring configuration
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify monitoring endpoints
+  ansible.builtin.uri:
+    url: "{{ item }}"
+    status_code: 200
+  loop:
+    - "http://127.0.0.1:{{ monitoring_prometheus_port }}/-/ready"
+    - "http://127.0.0.1:{{ monitoring_blackbox_port }}/metrics"
+    - "http://127.0.0.1:{{ monitoring_hadoop_port }}/health"
+    - "http://127.0.0.1:{{ monitoring_grafana_port }}/api/health"
+  register: monitoring_health
+  retries: 10
+  delay: 3
+  until: monitoring_health is succeeded

@@ -1,0 +1,51 @@
+rule_files:
+  - ../ansible/roles/monitoring/files/alerts.yml
+evaluation_interval: 30s
+tests:
+  - interval: 30s
+    input_series:
+      - series: 'probe_success{job="services",instance="10.0.0.10:9870",node="master",service="namenode"}'
+        values: '0+0x6'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: PlatformServiceDown
+        exp_alerts: []
+      - eval_time: 3m
+        alertname: PlatformServiceDown
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: services
+              instance: 10.0.0.10:9870
+              node: master
+              service: namenode
+            exp_annotations:
+              summary: namenode is unreachable on master
+  - interval: 30s
+    input_series:
+      - series: hadoop_hdfs_total_bytes
+        values: '1000+0x12'
+      - series: hadoop_hdfs_free_bytes
+        values: '50+0x12'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: HDFSAlmostFull
+        exp_alerts:
+          - exp_labels: {severity: warning}
+            exp_annotations:
+              summary: HDFS has less than 10% free capacity
+  - interval: 30s
+    input_series:
+      - series: 'probe_success{job="services",instance="10.0.0.10:9870",node="master",service="namenode"}'
+        values: '1+0x12'
+      - series: hadoop_hdfs_total_bytes
+        values: '1000+0x12'
+      - series: hadoop_hdfs_free_bytes
+        values: '500+0x12'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: PlatformServiceDown
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: HDFSAlmostFull
+        exp_alerts: []

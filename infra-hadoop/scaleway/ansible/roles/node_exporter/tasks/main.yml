@@ -1,0 +1,44 @@
+---
+- name: Install Node Exporter
+  ansible.builtin.apt:
+    name: prometheus-node-exporter
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+    policy_rc_d: 101
+    install_recommends: false
+
+- name: Create Node Exporter service override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/prometheus-node-exporter.service.d
+    state: directory
+    mode: "0755"
+
+- name: Bind Node Exporter to the private network
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/prometheus-node-exporter.service.d/monitoring.conf
+    mode: "0644"
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=/usr/bin/prometheus-node-exporter --web.listen-address={{ private_ip }}:9100
+  notify: Restart Node Exporter
+
+- name: Start Node Exporter
+  ansible.builtin.systemd:
+    name: prometheus-node-exporter
+    enabled: true
+    daemon_reload: true
+    state: started
+
+- name: Apply Node Exporter configuration
+  ansible.builtin.meta: flush_handlers
+
+- name: Check Node Exporter metrics
+  ansible.builtin.uri:
+    url: "http://{{ private_ip }}:9100/metrics"
+    status_code: 200
+  register: node_exporter_check
+  retries: 5
+  delay: 2
+  until: node_exporter_check is succeeded

@@ -18,6 +18,13 @@ It installs and configures:
 - Service stop/start playbooks for maintenance and resize operations.
 - A shutdown playbook to stop services and power off the cluster.
 
+## Monitoring
+
+Prometheus, Grafana, Node Exporter and HDFS/YARN metrics are installed by
+`site.yml`, or independently with `ansible-playbook monitoring.yml`.
+See the [monitoring guide](../monitoring/README.md) for SSH access,
+dashboards, alert rules, retention and validation.
+
 ## Prerequisites
 
 The Hive download is polled every 15 seconds, reuses a validated archive in

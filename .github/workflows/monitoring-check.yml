@@ -1,0 +1,29 @@
+name: Monitoring validation
+on:
+  push:
+    paths:
+      - 'infra-hadoop/scaleway/ansible/**'
+      - 'infra-hadoop/scaleway/monitoring/**'
+      - '.github/workflows/monitoring-check.yml'
+  pull_request:
+    paths:
+      - 'infra-hadoop/scaleway/ansible/**'
+      - 'infra-hadoop/scaleway/monitoring/**'
+      - '.github/workflows/monitoring-check.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r infra-hadoop/scaleway/monitoring/requirements.txt ansible-core
+      - run: sudo apt-get update && sudo apt-get install -y prometheus
+      - run: python -m unittest discover -s infra-hadoop/scaleway/monitoring -p 'test_*.py'
+      - name: Check Ansible monitoring syntax
+        working-directory: infra-hadoop/scaleway/ansible
+        run: ansible-playbook monitoring.yml --syntax-check -i 'gateway,'

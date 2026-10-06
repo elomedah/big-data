@@ -16,3 +16,7 @@ enseignants/
 # Local OS/editor files
 .DS_Store
 Thumbs.db
+
+# Python validation artifacts
+__pycache__/
+*.py[cod]

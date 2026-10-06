@@ -56,6 +56,8 @@ java_package: openjdk-11-jdk
 java_home: "/usr/lib/jvm/java-11-openjdk-{{ {'x86_64': 'amd64', 'aarch64': 'arm64'}.get(ansible_facts['architecture'], ansible_facts['architecture']) }}"
 
 student_group: student
+# Select a school in inventory or with -e student_school=iris.
+# Allowed values: ensitech, iris, efrei. No default school is selected.
 student_space_quota: 5g
 student_file_quota: 50000
 student_password_lock: true

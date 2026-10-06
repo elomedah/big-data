@@ -33,16 +33,17 @@ Enter your username as `nom.prenom` (surname.firstname), for example
 `dupont.alice`: lowercase letters without accents or spaces, exactly one dot,
 32 characters maximum. Hyphens are allowed in compound names.
 Paste the public key. The teacher reviews the generated pull request; after
-merge, the bastion adds the approved keys. Existing keys are always retained.
+merge, the bastion replaces that account's keys with the approved list.
 
 Follow the automation's comment on your issue to the PR. After approval and
 merge, the enabled bastion timer checks about every two minutes; the cluster
 must be available. Merge alone does not confirm successful deployment.
 
-To add another computer, submit its public key with the same username. Duplicate
-keys are ignored; up to ten distinct keys per account are supported. Requests
-never replace or revoke older keys. Contact the teacher if a key must be revoked
-or another student has the same name.
+To add another computer, submit its public key and all keys you want to keep
+with the same username. Duplicate keys are accepted and stored once; up to ten
+distinct keys per account are supported. Unlisted keys lose access after
+synchronization. Contact the teacher to revoke all keys or if another student
+has the same name.
 
 For invalid fields, edit the issue, then close and reopen it to retry. Once a
 PR exists, submit corrections through a new issue and ask the teacher to close

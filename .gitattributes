@@ -5,3 +5,4 @@ tp/01-big-data-hadoop/docker/**/*.sh text eol=lf
 tp/01-big-data-hadoop/docker/config/** text eol=lf
 tp/01-big-data-hadoop/docker/profile.d/*.sh text eol=lf
 infra-hadoop/scaleway/access/*.sh text eol=lf
+infra-hadoop/scaleway/ansible/roles/hive/files/*.sh text eol=lf

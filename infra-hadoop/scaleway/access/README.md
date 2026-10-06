@@ -1,8 +1,51 @@
 # Student access automation
 
+## Listes par école
+
+Le formulaire demande de saisir librement le nom de l'école, sans afficher
+les autres établissements. Les erreurs de validation ne citent pas les écoles
+acceptées. Les fichiers et les issues restent visibles aux lecteurs du dépôt.
+Une expression régulière construite depuis la liste interne des écoles reconnaît
+le nom dans le texte saisi, sans tenir compte des majuscules (par exemple un nom
+suivi de la ville). Le nom doit être un mot complet ; une saisie mentionnant
+plusieurs écoles différentes est refusée.
+Chaque demande modifie uniquement le fichier de l'école sélectionnée :
+
+- `ansible/group_vars/student_ssh_keys_ensitech.yml`
+- `ansible/group_vars/student_ssh_keys_iris.yml`
+- `ansible/group_vars/student_ssh_keys_efrei.yml`
+
+Ces trois fichiers utilisent le format `student_ssh_keys: {nom.prenom: [clé publique]}`.
+Ils sont initialement vides. La liste historique `student_ssh_keys.yml` reste
+conservée : déplacer manuellement chaque entrée vers son école quand elle est
+connue, en retirant l'entrée du fichier historique dans le même changement.
+Chaque installation sélectionne une seule école. Les fichiers sont validés
+indépendamment. Les clés identiques sur des comptes différents d'une même école
+sont refusées.
+
+Ansible charge uniquement la liste choisie par le paramètre obligatoire
+`student_school` (`ensitech`, `iris` ou `efrei`) :
+
+```bash
+cd infra-hadoop/scaleway/ansible
+ansible-playbook -i inventory.ini site.yml --tags students -e student_school=iris
+```
+
+Pour une installation complète, retirer `--tags students` et conserver `-e`.
+Le paramètre peut aussi être défini dans l'inventaire du cluster. Les autres
+listes et le fichier historique ne sont pas chargés. Une liste vide est acceptée.
+Changer d'école ne supprime pas les comptes ni les accès déjà installés.
+
+Le synchroniseur récupère uniquement le fichier de l'école configurée et
+conserve un état distinct par école dans `state/<école>/`.
+Pour activer cette évolution sur le bastion, mettre à jour les fichiers locaux
+(y compris les trois fichiers d'école et le rôle students), puis relancer
+`bash access/install-sync.sh "$PWD/ansible" elomedah/big-data main iris`.
+Les changements de code locaux ne sont pas déployés par une fusion GitHub.
+
 The public GitHub form creates an issue without prior student registration.
 A workflow validates the requested `nom.prenom` username and opens a pull request changing only
-`ansible/group_vars/student_ssh_keys.yml`. The teacher reviews and merges it.
+the selected school's `ansible/group_vars/student_ssh_keys_<school>.yml`. The teacher reviews and merges it.
 A timer on the bastion (the Ansible controller) reads that file from the configured branch and applies
 the **locally installed** Ansible student role. No remote playbook or workflow
 is fetched from Git, and no cluster SSH private key is stored in GitHub.
@@ -22,8 +65,9 @@ of either name. Validation is performed by the workflow after submission.
 Existing legacy accounts such as `student01` remain valid in the keys file.
 
 Only plain Ed25519 public keys are accepted; comments are removed from form
-submissions. Each account can have up to ten distinct keys. Requests only add
-keys and deduplicate them; they never replace existing keys. The teacher must
+submissions. Each account can have up to ten distinct keys. Duplicate submitted
+keys are accepted and stored once. Each request replaces that account's key list;
+include every key that should retain access. The teacher must
 verify the requester is entitled to use the requested account before merging,
 especially when that account already exists or two students share a name.
 
@@ -53,7 +97,10 @@ use a separate automation account if your rules require that teacher to approve
 it. Availability of branch-protection features depends on the repository/plan.
 
 The request workflow processes opened or reopened issues, not edits. Invalid
-requests can be corrected and then closed/reopened. Once a branch has been
+requests receive a clear refusal comment explaining the validation failure and
+are automatically closed as not planned. Submit a new form after correcting the
+reported problem. Technical failures (such as a GitHub API error) leave the issue
+open so the workflow can be retried. Once a branch has been
 created, the proposal is immutable: open a new issue for corrections and close
 the superseded PR. If PR creation fails after branch creation, recover by
 opening a PR from `student-access/issue-N`, or delete that branch after checking
@@ -65,18 +112,20 @@ same keys file may conflict; resolve them before merging and rerun validation.
 First update the controller copy with this version of the project, including
 `access/` and the updated `ansible/roles/students/` role. Use the bastion checkout
 from which you already run Ansible. Preserve the controller's inventory
-and its existing keys file when updating. Synchronization merges approved Git
-keys with the current controller file and previously applied keys. Ansible adds
-them with `exclusive: false`, retaining keys already present on the server too.
+and its existing keys file when updating. For accounts present in Git,
+synchronization replaces the controller key list with the approved list.
+Accounts omitted from Git retain their last known list. Ansible writes each
+managed account's complete `authorized_keys` file, removing unlisted keys.
 If the previous version was installed, update both the local student role and
-rerun the synchronizer installer to switch off the old replacement behavior.
+rerun the synchronizer installer to enable replacement behavior. The next
+synchronization reapplies the approved lists even if the Git data is unchanged.
 
 On the bastion, as the existing Ansible user (normally `ubuntu`), install once:
 
 ```bash
 sudo apt-get install -y python3-venv
 cd ~/infra-hadoop/scaleway
-bash access/install-sync.sh "$PWD/ansible" elomedah/big-data main
+bash access/install-sync.sh "$PWD/ansible" elomedah/big-data main iris
 ```
 
 Ansible must already be installed and able to reach the cluster using the
@@ -117,7 +166,8 @@ the service journal is the deployment status.
 
 The original controller keys are backed up to
 `~/.local/share/student-access/state/initial-keys.yml`. Retain the state directory:
-it retains previously applied keys even when they are later removed from Git.
+it retains accounts omitted from Git, but never restores superseded keys for
+accounts with an explicit Git entry.
 There is no permanent GitHub Actions runner on the bastion.
 
 ## Student procedure
@@ -133,19 +183,20 @@ The full exercise is in [TP 01](../../../tp/01-big-data-hadoop/README.md).
 Requests, usernames and public keys are visible to anyone who can read the
 repository. Do not submit personal email addresses or other unnecessary data.
 
-## Preservation and manual revocation
+## Key replacement and revocation
 
-Removing a key or account from Git, setting a key list to `[]`, or reverting a
-commit does **not** revoke any existing SSH access. The workflow and synchronizer
-only add keys. Existing accounts and HDFS data remain. The role refuses reserved
+Removing a key from an account's Git list revokes that key after successful
+synchronization. Setting its list to `[]` clears all its authorized keys;
+this requires a direct reviewed edit because the public form requires a key.
+Removing the entire account entry preserves its last known keys instead.
+Reverting a commit restores the key lists in that commit. Existing accounts
+and HDFS data remain. The role refuses reserved
 names and existing accounts whose primary group is not the student group.
 
-Revocation is a separate administrator operation: pause the timer, remove the
-key from Git, the controller keys file, the applied state file
-`~/.local/share/student-access/state/applied.yml`, and the student's
-`authorized_keys` on the gateway before restarting the timer. Otherwise a retained
-copy could add the key again. Existing sessions and jobs are unaffected.
-To pause:
+For revocation, keep the account entry in Git and submit the complete remaining
+key list (or `[]`) for review. Existing sessions and jobs are unaffected.
+For an urgent manual intervention, pause the timer and update both Git and the
+gateway's `authorized_keys` before restarting synchronization. To pause:
 
 ```bash
 systemctl --user disable --now student-access.timer

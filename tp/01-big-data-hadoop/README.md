@@ -328,14 +328,14 @@ Cet exemple est abrégé : collez votre véritable clé complète.
 
 Le formulaire et les clés publiques sont visibles publiquement. Ne collez jamais votre clé privée ni d’autres informations personnelles inutiles.
 
-**Les clés sont ajoutées sans écraser les anciennes.** Pour ajouter un autre ordinateur, générez une clé sur celui-ci et soumettez une nouvelle demande avec le même username. Les doublons ne sont pas ajoutés une seconde fois. Chaque compte peut contenir au plus dix clés dans le fichier géré.
+**La demande remplace les clés existantes du compte.** Pour ajouter un autre ordinateur, générez une clé sur celui-ci et soumettez une nouvelle demande avec le même username, en incluant toutes les clés à conserver. Les doublons sont acceptés et enregistrés une seule fois. Chaque compte peut contenir au plus dix clés distinctes. Les clés absentes de la nouvelle liste perdent leur accès après validation et synchronisation.
 
 Si la demande est refusée pour un champ invalide, corrigez l’issue puis fermez-la et rouvrez-la pour relancer la validation. Si une PR a déjà été créée, ouvrez une nouvelle demande pour la correction et prévenez l’enseignant de la PR à abandonner.
 
 Questions de réflexion :
 
 1. Pourquoi un formulaire public ne doit-il pas donner immédiatement accès au cluster sans validation ?
-2. Pourquoi ajouter une nouvelle clé ne suffit-il pas à révoquer une ancienne clé perdue ou compromise ?
+2. Quelles clés faut-il inclure dans une demande de remplacement pour conserver l’accès de ses autres ordinateurs et révoquer une clé perdue ?
 
 ## Exercice 3 - Connexion au gateway Hadoop
 

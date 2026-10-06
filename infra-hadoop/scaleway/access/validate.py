@@ -7,6 +7,31 @@ from pathlib import Path
 
 import yaml
 
+SCHOOLS = ("ensitech", "iris", "efrei")
+SCHOOL_PATTERN = re.compile(r"\b(?:" + "|".join(re.escape(name) for name in SCHOOLS) + r")\b", re.IGNORECASE)
+KEYS_ROOT = "infra-hadoop/scaleway/ansible/group_vars"
+
+
+def school(value):
+    matches = {match.group().lower() for match in SCHOOL_PATTERN.finditer(value)} if isinstance(value, str) else set()
+    if len(matches) != 1:
+        raise ValueError("École non reconnue. Saisissez le nom communiqué par votre enseignant.")
+    return matches.pop()
+
+
+def school_keys_path(value):
+    return KEYS_ROOT + "/student_ssh_keys_" + school(value) + ".yml"
+
+
+def merge_keys(mappings):
+    result = {}
+    for mapping in mappings:
+        for name, keys in mapping.items():
+            if name in result and result[name] != keys:
+                raise ValueError("Conflicting student login across school lists: " + name)
+            result[name] = keys
+    return result
+
 
 class UniqueLoader(yaml.SafeLoader):
     pass
@@ -69,8 +94,8 @@ def load_keys(path):
     if not isinstance(data, dict) or set(data) != {"student_ssh_keys"}:
         raise ValueError("Only student_ssh_keys is allowed")
     mapping = data["student_ssh_keys"]
-    if not isinstance(mapping, dict) or not mapping:
-        raise ValueError("Expected a non-empty student mapping")
+    if not isinstance(mapping, dict):
+        raise ValueError("Expected a student mapping")
     seen = set()
     result = {}
     for name, keys in mapping.items():
@@ -89,7 +114,13 @@ def load_keys(path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("keys")
+    parser.add_argument("keys", nargs="+")
     args = parser.parse_args()
-    load_keys(args.keys)
+    merged = merge_keys(load_keys(path) for path in args.keys)
+    seen = set()
+    for keys in merged.values():
+        for key in keys:
+            if key in seen:
+                raise ValueError("Duplicate key across student accounts")
+            seen.add(key)
     print("Student access data is valid")

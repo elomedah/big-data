@@ -10,14 +10,19 @@ SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ANSIBLE_DIR="$(cd "${1:-$SOURCE_DIR/../ansible}" && pwd)"
 REPOSITORY="${2:-elomedah/big-data}"
 BRANCH="${3:-main}"
+STUDENT_SCHOOL="${4:-}"
+case "$STUDENT_SCHOOL" in
+  ensitech|iris|efrei) ;;
+  *) echo "Usage: bash access/install-sync.sh ANSIBLE_DIR REPOSITORY BRANCH SCHOOL (ensitech, iris or efrei)" >&2; exit 1 ;;
+esac
 INSTALL_DIR="$HOME/.local/share/student-access"
-export ANSIBLE_DIR REPOSITORY BRANCH INSTALL_DIR
+export ANSIBLE_DIR REPOSITORY BRANCH INSTALL_DIR STUDENT_SCHOOL
 
 ANSIBLE_PLAYBOOK="$(command -v ansible-playbook)"
 export ANSIBLE_PLAYBOOK
 command -v systemctl >/dev/null
 test -f "$ANSIBLE_DIR/inventory.ini"
-test -f "$ANSIBLE_DIR/group_vars/student_ssh_keys.yml"
+test -f "$ANSIBLE_DIR/group_vars/student_ssh_keys_$STUDENT_SCHOOL.yml"
 mkdir -p "$INSTALL_DIR" "$HOME/.config/systemd/user"
 python3 -m venv "$INSTALL_DIR/venv"
 "$INSTALL_DIR/venv/bin/pip" install -r "$SOURCE_DIR/requirements.txt"
@@ -30,6 +35,7 @@ config = root / 'config.json'
 old = json.loads(config.read_text()) if config.exists() else {}
 config.write_text(json.dumps({
     'repository': os.environ['REPOSITORY'], 'branch': os.environ['BRANCH'],
+    'student_school': os.environ['STUDENT_SCHOOL'],
     'ansible_dir': os.environ['ANSIBLE_DIR'], 'state_dir': str(root / 'state'),
     'token_file': old.get('token_file', ''),
     'ansible_playbook': os.environ['ANSIBLE_PLAYBOOK']}, indent=2) + '\n')

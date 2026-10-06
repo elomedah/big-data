@@ -20,6 +20,12 @@ It installs and configures:
 
 ## Prerequisites
 
+The Hive download is polled every 15 seconds, reuses a validated archive in
+`/tmp`, and keeps URL-specific `.part` files to resume interrupted transfers.
+The controller requires Bash, curl, tar, sha256sum, and flock. Both default
+Hive URLs currently point to the Apache archive; duplicate URLs are tried
+only once. Override `hive_download_url` for a trusted mirror if needed.
+
 Terraform must be applied first from `../terraform`.
 
 From `infra-hadoop/scaleway/terraform`:
@@ -431,7 +437,17 @@ dupont.jean
 le-gall.jean-pierre
 ```
 
-Only accounts listed in `student_ssh_keys` are provisioned; no accounts
+Select a school for every playbook run: `-e student_school=ensitech`,
+`-e student_school=iris` or `-e student_school=efrei`. The students role loads
+only `group_vars/student_ssh_keys_<school>.yml`; the historical keys file is
+preserved but no longer loaded. School files may start empty. Switching schools
+does not revoke existing accounts or keys. Example:
+
+```bash
+ansible-playbook -i inventory.ini site.yml --tags students -e student_school=iris
+```
+
+Only accounts listed in the selected school's `student_ssh_keys` are provisioned; no accounts
 are generated from a count. For example, adding `dupont.jean` with a list of public keys
 creates its Linux account, installs its keys on the gateway, and provisions its
 HDFS directory and quotas. Account names are taken directly from the mapping,
@@ -440,9 +456,10 @@ outside the student primary group cannot be taken over. Supply plain Ed25519
 public keys. Public form submissions require usernames in `nom.prenom` format;
 legacy account names remain supported for existing entries.
 
-Keys are added without removing existing keys. An empty list or a removed entry
-does not revoke access. The bastion synchronizer preserves previously applied
-keys. Neither mechanism deletes Linux accounts or HDFS data.
+Each managed account's `authorized_keys` is replaced with its approved key list.
+An empty list revokes all its keys. The bastion synchronizer retains accounts
+omitted from Git; keep an explicit entry to replace or revoke their keys.
+Neither mechanism deletes Linux accounts or HDFS data.
 The YARN queue application limit is configured independently using
 `yarn_students_maximum_applications` in `group_vars/all.yml` (default: `3`).
 

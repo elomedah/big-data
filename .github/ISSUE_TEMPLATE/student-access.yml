@@ -1,5 +1,5 @@
 name: Accès SSH au cluster
-description: Demander un accès et ajouter vos clés publiques SSH.
+description: Demander un accès ou remplacer vos clés publiques SSH.
 title: "[Accès SSH] Demande étudiant"
 body:
   - type: markdown
@@ -9,6 +9,13 @@ body:
         Choisissez un identifiant nom.prenom. L'enseignant valide la demande avant activation.
         Collez uniquement des clés publiques .pub, jamais de clé privée.
         Le contenu de cette demande est visible par les lecteurs du dépôt.
+  - type: input
+    id: school
+    attributes:
+      label: École
+      description: Saisissez le nom de votre école tel qu'indiqué par votre enseignant.
+    validations:
+      required: true
   - type: input
     id: username
     attributes:
@@ -21,7 +28,7 @@ body:
     id: keys
     attributes:
       label: Clés publiques SSH
-      description: Une clé ssh-ed25519 par ligne. Les clés existantes sont conservées.
+      description: Une clé ssh-ed25519 par ligne, dix clés distinctes maximum. Les doublons sont acceptés et dédupliqués. Cette liste remplace les clés existantes de ce compte ; incluez toutes les clés à conserver.
       render: text
     validations:
       required: true

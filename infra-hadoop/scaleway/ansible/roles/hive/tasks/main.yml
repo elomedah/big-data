@@ -29,26 +29,19 @@
     - hive_archive_stat.stat.exists
     - hive_archive_validation.rc != 0
 
-- name: Download Hive archive from Apache CDN on Ansible controller
-  ansible.builtin.get_url:
-    url: "{{ hive_download_url }}"
-    dest: /tmp/{{ hive_package }}.tar.gz
-    mode: "0644"
-    timeout: 180
+- name: Download Hive archive with resume on Ansible controller
+  ansible.builtin.command:
+    argv:
+      - /bin/bash
+      - "{{ role_path }}/files/download-archive.sh"
+      - /tmp/{{ hive_package }}.tar.gz
+      - "{{ hive_download_url }}"
+      - "{{ hive_download_fallback_url }}"
   delegate_to: localhost
   run_once: true
-  register: hive_cdn_download
-  ignore_errors: true
-
-- name: Download Hive archive from Apache archive fallback
-  ansible.builtin.get_url:
-    url: "{{ hive_download_fallback_url }}"
-    dest: /tmp/{{ hive_package }}.tar.gz
-    mode: "0644"
-    timeout: 180
-  delegate_to: localhost
-  run_once: true
-  when: hive_cdn_download is failed
+  async: 14400
+  poll: 15
+  when: not hive_archive_stat.stat.exists or (hive_archive_validation.rc | default(1)) != 0
 
 - name: Validate downloaded Hive archive on Ansible controller
   ansible.builtin.command:

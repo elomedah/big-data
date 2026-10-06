@@ -387,7 +387,7 @@ terraform apply \
   -var='worker_mode=active' \
   -var='gateway_mode=active' \
   -var='master_mode=active' \
-  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
+  -var='worker_active_commercial_type=BASIC2-A8C-32G' \
   -var='worker_reduced_commercial_type=DEV1-L'
 ```
 
@@ -396,12 +396,33 @@ Large reduced mode outside TP sessions:
 ```bash
 terraform apply \
   -var='cluster_size=large' \
+  -var='worker_mode=active' \
+  -var='gateway_mode=active' \
+  -var='master_mode=active' \
+  -var='worker_active_commercial_type=BASIC2-A4C-8G' \
+  -var='master_active_commercial_type=BASIC2-A4C-16G' \
+  -var='gateway_active_commercial_type=BASIC2-A4C-16G' \
+  -var='master_reduced_commercial_type=DEV1-L' \
+  -var='gateway_reduced_commercial_type=DEV1-L' \
+  -var='worker_reduced_commercial_type=DEV1-L' \
+  -var='large_worker_data_size_gb=50'
+```
+
+```bash
+terraform apply \
+  -var='cluster_size=tiny' \
   -var='worker_mode=reduced' \
   -var='gateway_mode=reduced' \
   -var='master_mode=reduced' \
-  -var='worker_active_commercial_type=BASIC3-X16C-32G' \
-  -var='worker_reduced_commercial_type=DEV1-L'
+  -var='worker_active_commercial_type=BASIC2-A4C-8G' \
+  -var='master_active_commercial_type=BASIC2-A4C-16G' \
+  -var='gateway_active_commercial_type=BASIC2-A4C-16G' \
+  -var='master_reduced_commercial_type=DEV1-S' \
+  -var='gateway_reduced_commercial_type=DEV1-S' \
+  -var='worker_reduced_commercial_type=DEV1-S' \
+  -var='large_worker_data_size_gb=50'
 ```
+
 
 The default instance type variables are:
 

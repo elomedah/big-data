@@ -1,10 +1,16 @@
 ---
+- name: Require an explicit school selection
+  ansible.builtin.assert:
+    that:
+      - student_school | default('') in ['ensitech', 'iris', 'efrei']
+    fail_msg: "Set student_school to ensitech, iris or efrei (for example: -e student_school=iris)."
+
 - name: Validate access data on the controller before loading variables
   ansible.builtin.command:
     argv:
       - "{{ ansible_playbook_python }}"
       - "{{ playbook_dir }}/../access/validate.py"
-      - "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
+      - "{{ playbook_dir }}/group_vars/student_ssh_keys_{{ student_school }}.yml"
   delegate_to: localhost
   become: false
   run_once: true
@@ -13,15 +19,14 @@
 
 - name: Load student SSH keys file
   ansible.builtin.include_vars:
-    file: "{{ playbook_dir }}/group_vars/student_ssh_keys.yml"
+    file: "{{ playbook_dir }}/group_vars/student_ssh_keys_{{ student_school }}.yml"
 
 - name: Validate student SSH key mapping
   ansible.builtin.assert:
     that:
       - student_ssh_keys is defined
       - student_ssh_keys is mapping
-      - student_ssh_keys | length > 0
-    fail_msg: "Define student_ssh_keys as a non-empty mapping in group_vars/student_ssh_keys.yml on the Ansible controller."
+    fail_msg: "Define student_ssh_keys as a mapping in the selected school's keys file."
 
 - name: Validate student SSH key lists
   ansible.builtin.assert:
@@ -90,15 +95,17 @@
   loop: "{{ student_accounts }}"
   when: inventory_hostname in groups['gateway']
 
-- name: Add student SSH public keys while preserving existing keys
-  ansible.posix.authorized_key:
-    user: "{{ item.0.key }}"
-    key: "{{ item.1 }}"
-    state: present
-    exclusive: false
-  loop: "{{ student_ssh_keys | dict2items | subelements('value') }}"
+- name: Replace student SSH public keys with the approved list
+  ansible.builtin.copy:
+    dest: "/home/{{ item.key }}/.ssh/authorized_keys"
+    content: >-
+      {{ (item.value | join('\n') ~ '\n') if item.value else '' }}
+    owner: "{{ item.key }}"
+    group: "{{ student_group }}"
+    mode: "0600"
+  loop: "{{ student_ssh_keys | dict2items }}"
   loop_control:
-    label: "{{ item.0.key }}"
+    label: "{{ item.key }}"
   when:
     - inventory_hostname in groups['gateway']
 

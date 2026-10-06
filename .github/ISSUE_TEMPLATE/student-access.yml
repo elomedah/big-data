@@ -1,5 +1,5 @@
 name: Accès SSH au cluster
-description: Demander un accès ou remplacer vos clés publiques SSH.
+description: Demander un accès ou remplacer vos clés publiques SSH. Mettez votre nom.prenom dans le titre du ticket.
 title: "[Accès SSH] Demande étudiant"
 body:
   - type: markdown

@@ -154,7 +154,13 @@
     argv:
       - /usr/bin/python3
       - -c
-      - "import os,secrets; fd=os.open('/etc/grafana/admin-password', os.O_WRONLY|os.O_CREAT|os.O_EXCL, 0o600); os.write(fd, (secrets.token_urlsafe(32)+'\n').encode()); os.close(fd)"
+      - |
+        import os
+        import secrets
+        password = (secrets.token_urlsafe(32) + '\n').encode()
+        fd = os.open('/etc/grafana/admin-password', os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, 'wb') as password_file:
+            password_file.write(password)
     creates: /etc/grafana/admin-password
   no_log: true
 

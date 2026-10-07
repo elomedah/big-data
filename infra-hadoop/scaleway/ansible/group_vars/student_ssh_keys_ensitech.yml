@@ -11,11 +11,9 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPDJCp8BQgkoMRvOJVGU4DbxUOiQ/ovpIbWwJHZJwWIS
   nicolas.soubigou:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJU1f4aOL/j9Q/3HcnXYaWwqeFiNpwwpBaZ2iKdAvvp7
-  toma.chang:
-  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPDJCp8BQgkoMRvOJVGU4DbxUOiQ/ovpIbWwJHZJwWIS
   vitse.kevin:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMYix9VszWWHKHRfqKHTJB17pGhvvfALt2CF02eVIcLR
   merimi.elias:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINI0Nkj4iv2zp7sJoOLakLDyfn7EayOYlEzQA4bslcoA
-  fatma.itchir
+  fatma.itchir:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILf0hhC85qMscksBqLQYCK2BSUnY8v2xQJz2ztqxVuBj

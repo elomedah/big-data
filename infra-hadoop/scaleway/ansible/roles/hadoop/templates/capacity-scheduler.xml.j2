@@ -34,6 +34,9 @@
   </property>
   <property>
     <name>yarn.scheduler.capacity.root.students.user-limit-factor</name>
-    <value>-1</value>
+    <!-- Hadoop 3.3.6 also multiplies the per-user application ceiling by this
+         factor. A negative value rejects even the user's first submission.
+         A positive factor of 100 lets users reach the queue maximum. -->
+    <value>100</value>
   </property>
 </configuration>

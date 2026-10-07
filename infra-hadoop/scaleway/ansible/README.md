@@ -242,9 +242,14 @@ students start PySpark at the same time.
 
 The `1.0` ApplicationMaster setting removes the separate student AM restriction.
 Each PySpark shell needs an ApplicationMaster before it can allocate its
-executor. Student per-user capacity caps are disabled, and student admission is
+executor. Student per-user capacity caps are effectively removed with
+`minimum-user-limit-percent: 100` and `user-limit-factor: 100`, and student admission is
 set to the largest supported integer (`2147483647`). Actual worker resources,
 cluster-wide admission and the container allocation limits still apply.
+
+Do not use `user-limit-factor: -1` with Hadoop 3.3.6: it also multiplies the
+per-user application ceiling, resulting in a negative limit and rejection of
+the first submission with `already has 0 applications from user`.
 
 To apply only these queue changes without restarting running jobs, run from
 the updated Ansible checkout on the bastion:

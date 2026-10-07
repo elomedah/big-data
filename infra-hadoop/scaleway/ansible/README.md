@@ -230,20 +230,32 @@ curl -I http://<gateway_public_ip>:<spark_ui_port>
 The student queue has a guaranteed capacity and a maximum burst capacity:
 
 ```yaml
-yarn_students_capacity: 60
+yarn_students_capacity: 90
 yarn_students_max_capacity: 100
-yarn_students_maximum_am_resource_percent: 0.5
+yarn_students_maximum_am_resource_percent: 1.0
 ```
 
+Students have 90% guaranteed capacity, leaving 10% for the `default` queue.
 The `100` maximum lets student jobs use idle cluster resources when the
 `default` queue is not active. This is useful for TP sessions where several
 students start PySpark at the same time.
 
-The `0.5` ApplicationMaster limit allows several interactive PySpark sessions
-to start concurrently. Each PySpark shell needs an ApplicationMaster before it
-can allocate its executor. If this value is too low, additional student
-applications stay in `ACCEPTED` with `0` containers even when some executor
-resources still appear available.
+The `1.0` ApplicationMaster setting removes the separate student AM restriction.
+Each PySpark shell needs an ApplicationMaster before it can allocate its
+executor. Student per-user capacity caps are disabled, and student admission is
+set to the largest supported integer (`2147483647`). Actual worker resources,
+cluster-wide admission and the container allocation limits still apply.
+
+To apply only these queue changes without restarting running jobs, run from
+the updated Ansible checkout on the bastion:
+
+```bash
+ansible-playbook -i inventory.ini refresh-yarn-queues.yml
+```
+
+This renders `capacity-scheduler.xml` on the master and runs
+`yarn rmadmin -refreshQueues`. It does not change `yarn-site.xml` or the
+cluster-wide 2 GB / 1-vcore container ceilings.
 
 If the UI still shows auto-detected values, rerun the Hadoop role and restart
 YARN services:
@@ -465,14 +477,14 @@ An empty list revokes all its keys. The bastion synchronizer retains accounts
 omitted from Git; keep an explicit entry to replace or revoke their keys.
 Neither mechanism deletes Linux accounts or HDFS data.
 The YARN queue application limit is configured independently using
-`yarn_students_maximum_applications` in `group_vars/all.yml` (default: `100`).
+`yarn_students_maximum_applications` in `group_vars/all.yml` (default: `2147483647`).
 This counts running and pending applications and rejects submissions at the
 limit, even when cluster resources are free. Resource availability and the
 ApplicationMaster resource limit still govern how many applications can run.
 
 To update an already running cluster without restarting Hadoop services, edit
 `/opt/hadoop/etc/hadoop/capacity-scheduler.xml` on the ResourceManager host and
-set `yarn.scheduler.capacity.root.students.maximum-applications` to `100`.
+set `yarn.scheduler.capacity.root.students.maximum-applications` to `2147483647`.
 Then run as the Hadoop service user (or a YARN administrator):
 
 ```bash

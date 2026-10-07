@@ -63,11 +63,12 @@ student_file_quota: 50000
 student_password_lock: true
 teacher_user: teacher
 
-yarn_students_capacity: 60
-# Admission limit for running and pending applications; resources bound execution.
-yarn_students_maximum_applications: 100
+yarn_students_capacity: 90
+# Effectively unlimited student admission; YARN requires a positive Java integer.
+# Cluster-wide admission and actual worker resources still bound execution.
+yarn_students_maximum_applications: 2147483647
 yarn_students_max_capacity: 100
-yarn_students_maximum_am_resource_percent: 0.5
+yarn_students_maximum_am_resource_percent: 1.0
 yarn_nodemanager_resource_memory_mb: -1
 yarn_nodemanager_resource_system_reserved_memory_mb: -1
 yarn_nodemanager_resource_system_reserved_memory_ratio: 0.2

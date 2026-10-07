@@ -1,0 +1,23 @@
+---
+- name: Remove student YARN queue restrictions without restarting running jobs
+  hosts: masters
+  become: true
+  tasks:
+    - name: Deploy CapacityScheduler configuration
+      ansible.builtin.template:
+        src: roles/hadoop/templates/capacity-scheduler.xml.j2
+        dest: "{{ hadoop_home }}/etc/hadoop/capacity-scheduler.xml"
+        owner: "{{ hadoop_user }}"
+        group: "{{ hadoop_group }}"
+        mode: "0644"
+
+    - name: Refresh queues even if a previous refresh failed
+      become_user: "{{ hadoop_user }}"
+      ansible.builtin.command:
+        argv:
+          - "{{ hadoop_home }}/bin/yarn"
+          - rmadmin
+          - -refreshQueues
+      environment:
+        HADOOP_CONF_DIR: "{{ hadoop_home }}/etc/hadoop"
+      when: not ansible_check_mode

@@ -1,5 +1,7 @@
 student_ssh_keys:
   elom.edah:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKrGVv/7p/kn1vDTPYUNT4C8Kno5SCfV+59KegmD2ZyV
+  nicolas.soubigou:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJU1f4aOL/j9Q/3HcnXYaWwqeFiNpwwpBaZ2iKdAvvp7
   vitse.kevin:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMYix9VszWWHKHRfqKHTJB17pGhvvfALt2CF02eVIcLR

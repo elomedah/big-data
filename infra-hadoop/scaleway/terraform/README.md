@@ -573,13 +573,16 @@ terraform apply \
 
 # Reconfigure and restart services after the resize
 cd ../ansible
-ansible-playbook site.yml
+ansible-playbook site.yml -e student_school=ensitech
 # Or, if the machines were only resized and are already configured:
 ansible-playbook start-services.yml
 ```
 
 `stop-services.yml` stops Hive, HBase, Spark history, YARN and HDFS services in
 a clean order before Terraform resizes the workers, gateway or master.
+
+Select the school's key list with `student_school=ensitech`, `iris` or `efrei`.
+This parameter is required for `site.yml` unless it is defined in the inventory.
 
 ## Final teardown
 

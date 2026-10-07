@@ -94,8 +94,12 @@ Then run:
 ```bash
 cd infra-hadoop/scaleway/ansible
 ansible-galaxy collection install -r requirements.yml
-ansible-playbook site.yml
+ansible-playbook site.yml -e student_school=ensitech
 ```
+
+`student_school` is required unless it is defined in the inventory. Use
+`ensitech`, `iris` or `efrei` to select the school's SSH key list. Without this
+selection, the playbook stops at the students role.
 
 ## Spark On YARN
 
@@ -489,13 +493,13 @@ the installed synchronizer to use the additive behavior.
 
 Manual teacher fallback (when automatic deployment is not configured):
 
-Only initialize the file from the example if it does not already exist:
+For Ensitech, initialize the school's file only if it does not already exist:
 
 ```bash
-test -f group_vars/student_ssh_keys.yml || cp group_vars/student_ssh_keys.yml.example group_vars/student_ssh_keys.yml
+test -f group_vars/student_ssh_keys_ensitech.yml || cp group_vars/student_ssh_keys.yml.example group_vars/student_ssh_keys_ensitech.yml
 ```
 
-Append actual complete public keys to `group_vars/student_ssh_keys.yml`, retaining
+Append actual complete public keys to `group_vars/student_ssh_keys_ensitech.yml`, retaining
 existing entries. The keys below are abbreviated placeholders:
 
 ```yaml
@@ -509,16 +513,16 @@ student_ssh_keys:
 Then rerun only the student role:
 
 ```bash
-ansible-playbook site.yml --tags students
+ansible-playbook site.yml --tags students -e student_school=ensitech
 ```
 
 Run this from the Ansible directory on the controller (for example the bastion).
-Update `group_vars/student_ssh_keys.yml` on that same controller before running
+Update `group_vars/student_ssh_keys_ensitech.yml` on that same controller before running
 the command; editing a different checkout does not update the controller copy.
 The cluster must already be installed and HDFS running for directory and quota
 provisioning. SSH keys are installed on the gateway; Linux accounts are also
-created on the masters for HDFS group mapping. Keys are installed with
-`exclusive: false`; existing keys, including manually installed keys, remain.
+created on the masters for HDFS group mapping. Each managed account's SSH keys
+are replaced by its approved list; include every key that should retain access.
 
 Students connect to the gateway:
 
@@ -544,7 +548,7 @@ The stop playbook uses this order:
 After the resize, either rerun the full configuration:
 
 ```bash
-ansible-playbook site.yml
+ansible-playbook site.yml -e student_school=ensitech
 ```
 
 or restart only the services:

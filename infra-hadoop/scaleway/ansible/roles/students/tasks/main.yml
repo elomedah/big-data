@@ -98,8 +98,10 @@
 - name: Replace student SSH public keys with the approved list
   ansible.builtin.copy:
     dest: "/home/{{ item.key }}/.ssh/authorized_keys"
-    content: >-
-      {{ (item.value | join('\n') ~ '\n') if item.value else '' }}
+    content: |
+      {% for key in item.value %}
+      {{ key }}
+      {% endfor %}
     owner: "{{ item.key }}"
     group: "{{ student_group }}"
     mode: "0600"

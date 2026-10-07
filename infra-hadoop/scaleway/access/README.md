@@ -157,7 +157,8 @@ timer or local Ansible controller installation.
 
 The timer checks every two minutes after the previous run finishes.
 It serializes runs, fetches the keys from a single commit, validates them,
-and runs `ansible-playbook site.yml --tags students` only when needed. Failures
+and runs `ansible-playbook site.yml --tags students -e student_school=<school>`
+only when needed, using the school selected during installation. Failures
 are recorded in the journal and retried. The success marker is written only
 after Ansible succeeds. Ansible can partially apply before failing; a retry
 converges the remaining tasks. A failed HDFS step may occur after SSH keys were

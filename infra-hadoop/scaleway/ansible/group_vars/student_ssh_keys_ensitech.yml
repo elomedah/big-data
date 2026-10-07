@@ -1,3 +1,5 @@
 student_ssh_keys:
   elom.edah:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKrGVv/7p/kn1vDTPYUNT4C8Kno5SCfV+59KegmD2ZyV
+  noyon.patrick:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEHpjfNrj59OJtWcfPEr/dXONFtvjheBl1BUUs1If9cZ

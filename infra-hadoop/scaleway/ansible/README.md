@@ -465,7 +465,23 @@ An empty list revokes all its keys. The bastion synchronizer retains accounts
 omitted from Git; keep an explicit entry to replace or revoke their keys.
 Neither mechanism deletes Linux accounts or HDFS data.
 The YARN queue application limit is configured independently using
-`yarn_students_maximum_applications` in `group_vars/all.yml` (default: `3`).
+`yarn_students_maximum_applications` in `group_vars/all.yml` (default: `100`).
+This counts running and pending applications and rejects submissions at the
+limit, even when cluster resources are free. Resource availability and the
+ApplicationMaster resource limit still govern how many applications can run.
+
+To update an already running cluster without restarting Hadoop services, edit
+`/opt/hadoop/etc/hadoop/capacity-scheduler.xml` on the ResourceManager host and
+set `yarn.scheduler.capacity.root.students.maximum-applications` to `100`.
+Then run as the Hadoop service user (or a YARN administrator):
+
+```bash
+/opt/hadoop/bin/yarn rmadmin -refreshQueues
+```
+
+Keep the Ansible variable in sync so future deployments preserve this value.
+The full `site.yml --tags hadoop` deployment notifies service restart handlers;
+use the targeted file edit and queue refresh for this live change.
 
 Students generate their own SSH key locally and submit only the public key
 through the [public form](https://github.com/elomedah/big-data/issues/new?template=student-access.yml).

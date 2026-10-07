@@ -23,7 +23,13 @@ Les machines doivent pouvoir accéder aux dépôts Ubuntu et à `apt.grafana.com
 
 ## Accéder au tableau de bord
 
-Grafana et Prometheus écoutent uniquement sur `127.0.0.1` de la gateway.
+Grafana écoute sur `0.0.0.0:3000` de la gateway. Après `terraform apply`,
+ouvrir `http://GATEWAY_PUBLIC_IP:3000` depuis le réseau administrateur
+défini dans `teacher_ssh_cidr`. Utiliser une IP ou un réseau précis pour ce CIDR.
+L'adresse d'écoute peut être modifiée avec `monitoring_grafana_bind_address`.
+
+Prometheus écoute uniquement sur `127.0.0.1` de la gateway.
+Pour accéder à Prometheus, ou utiliser Grafana via un tunnel SSH :
 Utiliser le compte SSH administrateur, généralement `ubuntu`, depuis le poste
 enseignant (remplacer `GATEWAY_PUBLIC_IP`) :
 
@@ -47,7 +53,7 @@ font dans `ansible/roles/monitoring/files/platform-dashboard.json`.
 
 Node Exporter écoute sur l'IP privée de chaque machine, port `9100`.
 Blackbox Exporter (`9115`) et l'adaptateur Hadoop (`9116`) restent sur localhost.
-Aucune ouverture de port public supplémentaire dans Terraform n'est nécessaire.
+Terraform autorise le port Grafana `3000` pour `teacher_ssh_cidr` uniquement.
 
 ## Ce qui est surveillé
 

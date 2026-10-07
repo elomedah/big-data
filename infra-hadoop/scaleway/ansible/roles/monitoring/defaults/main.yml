@@ -3,6 +3,7 @@ monitoring_scrape_interval: 30s
 monitoring_retention_time: 7d
 monitoring_retention_size: 2GB
 monitoring_grafana_port: 3000
+monitoring_grafana_bind_address: 0.0.0.0
 monitoring_prometheus_port: 9090
 monitoring_blackbox_port: 9115
 monitoring_hadoop_port: 9116

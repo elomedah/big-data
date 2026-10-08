@@ -22,7 +22,12 @@ It installs and configures:
 
 Prometheus, Grafana, Node Exporter and HDFS/YARN metrics are installed by
 `site.yml`, or independently with `ansible-playbook monitoring.yml`.
-See the [monitoring guide](../monitoring/README.md) for SSH access,
+Grafana is available at `http://<gateway_public_ip>:3000` from the administrator
+network configured in `teacher_ssh_cidr`. Prometheus requires an SSH tunnel
+through the gateway.
+For the Ensitech platform, open <http://ensitech.big-data-ing.fr:3000/> from
+that administrator network.
+See the [monitoring guide](../monitoring/README.md) for login and SSH access,
 dashboards, alert rules, retention and validation.
 
 ## Prerequisites

@@ -24,8 +24,18 @@ Les machines doivent pouvoir accéder aux dépôts Ubuntu et à `apt.grafana.com
 ## Accéder au tableau de bord
 
 Grafana écoute sur `0.0.0.0:3000` de la gateway. Après `terraform apply`,
-ouvrir `http://GATEWAY_PUBLIC_IP:3000` depuis le réseau administrateur
+obtenir son IP publique depuis le répertoire Terraform :
+
+```bash
+cd infra-hadoop/scaleway/terraform
+terraform output -raw gateway_public_ip
+```
+
+Ouvrir `http://GATEWAY_PUBLIC_IP:3000` depuis le réseau administrateur
 défini dans `teacher_ssh_cidr`. Utiliser une IP ou un réseau précis pour ce CIDR.
+Pour la plateforme Ensitech, ouvrir <http://ensitech.big-data-ing.fr:3000/>.
+La même restriction d'accès par `teacher_ssh_cidr` s'applique à cette adresse.
+Grafana est servi directement par la gateway, sans passer par le proxy Nginx.
 L'adresse d'écoute peut être modifiée avec `monitoring_grafana_bind_address`.
 
 Prometheus écoute uniquement sur `127.0.0.1` de la gateway.
@@ -37,11 +47,16 @@ enseignant (remplacer `GATEWAY_PUBLIC_IP`) :
 ssh -N -L 3000:127.0.0.1:3000 -L 9090:127.0.0.1:9090 ubuntu@GATEWAY_PUBLIC_IP
 ```
 
-Ouvrir <http://localhost:3000> et se connecter avec `admin`. Le mot de passe
+Avec le tunnel ouvert, Grafana est disponible sur <http://localhost:3000>
+et Prometheus sur <http://localhost:9090> (cibles :
+<http://localhost:9090/targets>, alertes : <http://localhost:9090/alerts>).
+
+Se connecter à Grafana avec `admin`, en accès direct ou via le tunnel. Le mot de passe
 initial est généré une seule fois sur la gateway ; aucun secret n'est versionné :
 
 ```bash
-ssh ubuntu@GATEWAY_PUBLIC_IP 'sudo cat /etc/grafana/admin-password'
+cd infra-hadoop/scaleway/ansible
+ansible gateway -b -m command -a 'cat /etc/grafana/admin-password'
 ```
 
 Changer le mot de passe dans Grafana après la première connexion. Le fichier

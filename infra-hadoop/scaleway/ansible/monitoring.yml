@@ -1,0 +1,14 @@
+---
+- name: Monitor cluster machines
+  hosts: cluster
+  become: true
+  tags: [monitoring]
+  roles:
+    - node_exporter
+
+- name: Collect and display platform monitoring
+  hosts: gateway
+  become: true
+  tags: [monitoring]
+  roles:
+    - monitoring

@@ -56,3 +56,5 @@
     - students
   roles:
     - students
+
+- import_playbook: monitoring.yml

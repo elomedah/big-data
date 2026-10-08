@@ -1,0 +1,11 @@
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    uid: platform-prometheus
+    type: prometheus
+    access: proxy
+    url: http://127.0.0.1:{{ monitoring_prometheus_port }}
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: {{ monitoring_scrape_interval }}

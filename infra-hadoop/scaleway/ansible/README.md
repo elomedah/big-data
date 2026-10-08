@@ -18,6 +18,18 @@ It installs and configures:
 - Service stop/start playbooks for maintenance and resize operations.
 - A shutdown playbook to stop services and power off the cluster.
 
+## Monitoring
+
+Prometheus, Grafana, Node Exporter and HDFS/YARN metrics are installed by
+`site.yml`, or independently with `ansible-playbook monitoring.yml`.
+Grafana is available at `http://<gateway_public_ip>:3000` from the administrator
+network configured in `teacher_ssh_cidr`. Prometheus requires an SSH tunnel
+through the gateway.
+For the Ensitech platform, open <http://ensitech.big-data-ing.fr:3000/> from
+that administrator network.
+See the [monitoring guide](../monitoring/README.md) for login and SSH access,
+dashboards, alert rules, retention and validation.
+
 ## Prerequisites
 
 The Hive download is polled every 15 seconds, reuses a validated archive in

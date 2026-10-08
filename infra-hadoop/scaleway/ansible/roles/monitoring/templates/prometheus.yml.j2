@@ -1,0 +1,71 @@
+global:
+  scrape_interval: {{ monitoring_scrape_interval }}
+  evaluation_interval: {{ monitoring_scrape_interval }}
+  scrape_timeout: 15s
+
+rule_files:
+  - /etc/prometheus/rules/platform.yml
+
+{% if monitoring_alertmanager_targets %}
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: {{ monitoring_alertmanager_targets | to_json }}
+{% endif %}
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['127.0.0.1:{{ monitoring_prometheus_port }}']
+
+  - job_name: node
+    static_configs:
+{% for host in groups['cluster'] %}
+      - targets: ['{{ hostvars[host].private_ip }}:9100']
+        labels:
+          node: {{ host | to_json }}
+          role: {{ ('master' if host in groups['masters'] else 'worker' if host in groups['workers'] else 'gateway' if host in groups['gateway'] else 'bastion') | to_json }}
+{% endfor %}
+
+  - job_name: hadoop
+    static_configs:
+      - targets: ['127.0.0.1:{{ monitoring_hadoop_port }}']
+
+  - job_name: blackbox
+    static_configs:
+      - targets: ['127.0.0.1:{{ monitoring_blackbox_port }}']
+
+  - job_name: services
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    static_configs:
+{% for host in groups['masters'] %}
+{% for service, port in [('namenode', 9870), ('resourcemanager', 8088), ('mapreduce-history', 19888), ('spark-history', 18080), ('hbase-master', hbase_master_web_port)] %}
+      - targets: ['{{ hostvars[host].private_ip }}:{{ port }}']
+        labels: {node: {{ host | to_json }}, service: {{ service | to_json }}}
+{% endfor %}
+{% endfor %}
+{% for host in groups['workers'] %}
+{% for service, port in [('datanode', 9864), ('nodemanager', 8042), ('hbase-regionserver', hbase_regionserver_web_port)] %}
+      - targets: ['{{ hostvars[host].private_ip }}:{{ port }}']
+        labels: {node: {{ host | to_json }}, service: {{ service | to_json }}}
+{% endfor %}
+{% endfor %}
+{% for host in groups['gateway'] %}
+{% for service, port in [('hive-metastore', hive_metastore_port), ('hive-server2', hive_server2_port), ('ssh', 22)] %}
+      - targets: ['{{ hostvars[host].private_ip }}:{{ port }}']
+        labels: {node: {{ host | to_json }}, service: {{ service | to_json }}}
+{% endfor %}
+{% endfor %}
+{% for target in monitoring_extra_tcp_targets %}
+      - targets: [{{ target.target | to_json }}]
+        labels: {service: {{ target.service | to_json }}}
+{% endfor %}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 127.0.0.1:{{ monitoring_blackbox_port }}

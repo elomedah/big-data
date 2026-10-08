@@ -1,0 +1,51 @@
+groups:
+  - name: platform
+    rules:
+      - alert: MonitoringTargetDown
+        expr: up == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: 'Cannot scrape {{ $labels.job }} on {{ $labels.instance }}'
+      - alert: PlatformServiceDown
+        expr: probe_success{job="services"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: '{{ $labels.service }} is unreachable on {{ $labels.node }}'
+      - alert: HighCPUUsage
+        expr: 100 * (1 - avg by (instance, node) (rate(node_cpu_seconds_total{job="node",mode="idle"}[5m]))) > 90
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: 'CPU usage exceeds 90% on {{ $labels.node }}'
+      - alert: LowAvailableMemory
+        expr: node_memory_MemAvailable_bytes{job="node"} / node_memory_MemTotal_bytes{job="node"} < 0.1
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: 'Less than 10% available memory on {{ $labels.node }}'
+      - alert: FilesystemAlmostFull
+        expr: node_filesystem_avail_bytes{job="node",fstype!~"tmpfs|overlay|squashfs|proc|sysfs|devtmpfs"} / node_filesystem_size_bytes{job="node"} < 0.1 and on(instance, device, mountpoint) node_filesystem_readonly{job="node"} == 0
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: 'Less than 10% disk space on {{ $labels.node }}:{{ $labels.mountpoint }}'
+      - alert: HadoopMetricsUnavailable
+        expr: hadoop_scrape_success == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: '{{ $labels.component }} metrics are unavailable'
+      - alert: HDFSAlmostFull
+        expr: hadoop_hdfs_free_bytes / hadoop_hdfs_total_bytes < 0.1
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: 'HDFS has less than 10% free capacity'
+      - alert: HDFSDeadDataNodes
+        expr: hadoop_hdfs_dead_nodes > 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: 'HDFS reports dead DataNodes'

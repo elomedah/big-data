@@ -144,6 +144,12 @@ resource "scaleway_instance_security_group" "gateway" {
   outbound_default_policy = "accept"
   zone                    = var.zone
 
+  inbound_rule {
+    action   = "accept"
+    port     = 3000
+    ip_range = var.teacher_ssh_cidr
+  }
+
   dynamic "inbound_rule" {
     for_each = local.gateway_cidrs
     content {

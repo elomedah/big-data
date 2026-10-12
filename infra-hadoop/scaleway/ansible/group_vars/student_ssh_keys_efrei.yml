@@ -1,1 +1,3 @@
-student_ssh_keys: {}
+student_ssh_keys:
+  mekuigne.stella:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP/5cx9UnMd4in2pE1KtSUYs4chW5py2W7ONzUjylYrq

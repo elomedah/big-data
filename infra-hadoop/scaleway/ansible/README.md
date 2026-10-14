@@ -169,8 +169,8 @@ yarn_nodemanager_resource_detect_hardware_capabilities: true
 yarn_nodemanager_resource_count_logical_processors_as_cores: true
 yarn_nodemanager_resource_pcores_vcores_multiplier: 0.8
 yarn_nodemanager_resource_percentage_physical_cpu_limit: 80
-yarn_maximum_allocation_mb: 2048
-yarn_maximum_allocation_vcores: 1
+yarn_maximum_allocation_mb: 10240
+yarn_maximum_allocation_vcores: 5
 ```
 
 With `yarn_nodemanager_resource_cpu_vcores: -1` and hardware detection enabled,
@@ -185,12 +185,12 @@ using `yarn_nodemanager_resource_system_reserved_memory_ratio: 0.2`.
 The scheduler maximum allocation values limit a single YARN container request:
 
 ```yaml
-yarn_maximum_allocation_mb: 2048
-yarn_maximum_allocation_vcores: 1
+yarn_maximum_allocation_mb: 10240
+yarn_maximum_allocation_vcores: 5
 ```
 
 This means YARN can see most worker resources, but one Spark/MapReduce
-container cannot request more than 2 GB and 1 vcore.
+container cannot request more than 10 GiB and 5 vcores.
 
 Spark jobs are submitted to YARN cluster mode and to the student queue by
 default:
@@ -211,14 +211,14 @@ For TP concurrency, PySpark uses one executor by default:
 spark_dynamic_allocation_enabled: false
 spark_driver_bind_address: 0.0.0.0
 spark_executor_instances: 1
-spark_executor_cores: 1
+spark_executor_cores: 5
 spark_yarn_am_cores: 1
 ```
 
 A PySpark session on YARN still consumes at least two YARN containers: one
 ApplicationMaster and one executor. With the defaults above, one active PySpark
-session therefore uses about 2 vcores in YARN, even though each individual
-container is limited to 1 vcore.
+session therefore uses about 6 vcores in YARN, and each individual
+container is limited to 5 vcores.
 
 When Spark runs in YARN cluster mode, the driver runs in a YARN container. Use
 the YARN Tracking UI while the application is running, then the Spark History

@@ -18,13 +18,13 @@ spark_home: /opt/spark
 spark_event_log_dir: /spark-logs
 spark_jars_dir: /spark-jars
 spark_submit_deploy_mode: cluster
-spark_driver_memory: 512m
+spark_driver_memory: 2560m
 spark_driver_bind_address: 0.0.0.0
 spark_dynamic_allocation_enabled: false
 spark_executor_instances: 1
-spark_executor_memory: 768m
-spark_executor_cores: 1
-spark_yarn_am_memory: 512m
+spark_executor_memory: 3840m
+spark_executor_cores: 5
+spark_yarn_am_memory: 2560m
 spark_yarn_am_cores: 1
 
 hive_version: "4.0.1"
@@ -77,5 +77,5 @@ yarn_nodemanager_resource_detect_hardware_capabilities: true
 yarn_nodemanager_resource_count_logical_processors_as_cores: true
 yarn_nodemanager_resource_pcores_vcores_multiplier: 0.8
 yarn_nodemanager_resource_percentage_physical_cpu_limit: 80
-yarn_maximum_allocation_mb: 2048
-yarn_maximum_allocation_vcores: 1
+yarn_maximum_allocation_mb: 10240
+yarn_maximum_allocation_vcores: 5

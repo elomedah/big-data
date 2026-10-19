@@ -6,7 +6,7 @@ student_ssh_keys:
   choix.maria:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOOdooaE7R/x2rDyHSzZgaK4JfCGh8iFx6RnOFtEmFUe
   courregelongue.gaelle:
-  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAYngl5vRCyJVuTN+5ojTbSHJ6cu44d1gtNiYvUwHmbj
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHSuE3mg+AhBqXs0h+KjHOjgmlWDOlRU17kN6qtHdA/P
   cuisenier.adele:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKHYUp+34NFgfgxI54r9keNoyMawSGVq/LrvX16En/t7
   daly.anis:
@@ -18,7 +18,7 @@ student_ssh_keys:
   grall.jules:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDPeAjwFsNKoPn9H7vYuFQW1oR6pvm035GEQOb11drsJ
   kbaier.nadine:
-  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB3vmpLCaL4aPDk9TF2ub3tzc4X5X+Z1ddNm83Np4X7L
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEmnveCj3/kZMm+DKf0r00y40FFkCPwwi7d4nSCpGOjl
   kerrit.hadile:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB19L+58gjnU6Hu9SFTtAnID8WbKNK1FCWduK19jiWWl
   kodjo.edah:

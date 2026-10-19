@@ -1,0 +1,6 @@
+---
+- name: Make the gateway YARN web interface read-only
+  hosts: gateway
+  become: true
+  roles:
+    - gateway_proxy

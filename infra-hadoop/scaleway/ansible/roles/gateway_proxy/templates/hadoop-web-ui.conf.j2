@@ -14,7 +14,14 @@ server {
 server {
     listen 0.0.0.0:8088;
     server_name _;
+    access_log /var/log/nginx/yarn-access.log combined;
     location / {
+        # Public YARN browsing only. Block REST submissions and mutations even
+        # when callers choose a different user.name instead of dr.who.
+        # Nginx permits HEAD together with GET.
+        limit_except GET {
+            deny all;
+        }
         proxy_pass http://{{ hostvars[groups['masters'][0]].private_ip }}:8088;
         proxy_redirect http://master:8088/ http://$http_host/;
         proxy_redirect http://{{ hostvars[groups['masters'][0]].private_ip }}:8088/ http://$http_host/;

@@ -45,6 +45,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDPeAjwFsNKoPn9H7vYuFQW1oR6pvm035GEQOb11drsJ
   idrharnane.saad:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL5IERchZhX+aY5cGrJgXK2eRnbHJWIR5vqQHTIgWHly
+  kabore.juvenis:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHISTTk4zVts8h6m9wEUxRBpf+JyutK5nssuvd7fSV6
   kbaier.nadine:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEmnveCj3/kZMm+DKf0r00y40FFkCPwwi7d4nSCpGOjl
   kerrit.hadile:

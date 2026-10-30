@@ -71,6 +71,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINFARkStQ0lAKDseoK/MFVqMhKyXCvaTyoxZYOxje53k
   student02:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOFlwIlftK+UQWwgkfE4cN6zLs0+9vBR7JZz+DK85U2u
+  tamilalagan.angeline:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICx3o8W+7aKWuP8UeijyIu/jZshVwheZAbTCFFUfdlDa
   tarzet.elyas:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIQtZb2mbDtbY62RKXWXWwdvaA577PnDeTf1mwK/RB6Q
   tewa-djimbou.christian:

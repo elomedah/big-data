@@ -1,6 +1,8 @@
 student_ssh_keys:
   abir.ouadhour:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEB5TDJiI9yBp2hzAb7bUSZOvChZZJ8OQG4DVdrXD5VA
+  assepo.warren:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJZ3j1afrd8tXUwTs1IBCa1MiS4N/DAxD6iyxcRvCjYZ
   benabdessalem.aziz:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP4L9OAWe9BnsdH+dWTFXkNtRcDOYmCU++W8rFSx1dDz
   binhminh.tran:

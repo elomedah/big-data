@@ -29,10 +29,10 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeDa1B4eLqPCpKLFZVkdRnbWgUcMDwGoUNEUVO29iOR
   dubust.mathieu:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDDNkWNwU7jTW5TZklWVg64ECyI/9EhuC7EciNdHYJFU
-  faihoun.richard:
-  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFTaRIeACKyhf2WkJSM++ET7AZset691W7Je/KcBVRoB
   elhassani.sabrina:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDmi/YXRsOOtuYeEAJlI5FDhhMU2J/dcEXyTrgafvfN6
+  faihoun.richard:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFTaRIeACKyhf2WkJSM++ET7AZset691W7Je/KcBVRoB
   fixaris.camelia:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFKHiBK+1zVY0FKF8hAogVO5Tm0aUYRfgvZ6vnnRmEm0
   grall.jules:
@@ -85,6 +85,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH9tu+X9AFfwDJmlfNI+IlyG16GwJrR9ZWJaJcr3g/cb
   ouadhour.abir:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDXZr1a2j0p00jrVTNY0aC+Q21lEF6Gg7QE+8rZWCW9y
+  ouadihi.mohamed:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIt8/gdwSQA0xbUKkGzL03Bq8igrroveLyqAY587bknU
   pascal.alban:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHhf05eeVJi0esMjyaSYIMfrJnhShtYkjhopxd78XSRl
   patrick.noyon:

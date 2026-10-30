@@ -29,10 +29,10 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeDa1B4eLqPCpKLFZVkdRnbWgUcMDwGoUNEUVO29iOR
   dubust.mathieu:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDDNkWNwU7jTW5TZklWVg64ECyI/9EhuC7EciNdHYJFU
-  faihoun.richard:
-  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFTaRIeACKyhf2WkJSM++ET7AZset691W7Je/KcBVRoB
   elhassani.sabrina:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDmi/YXRsOOtuYeEAJlI5FDhhMU2J/dcEXyTrgafvfN6
+  faihoun.richard:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFTaRIeACKyhf2WkJSM++ET7AZset691W7Je/KcBVRoB
   fixaris.camelia:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFKHiBK+1zVY0FKF8hAogVO5Tm0aUYRfgvZ6vnnRmEm0
   grall.jules:
@@ -101,6 +101,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICje85vDFkplhB44Ug7VMbIfUB22jpc8+RuCjaK2mnm8
   sawadogo.kenanja:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWMvSlM+hTBnnakwB11IrktpnD6ixxcGT/BX7S80h+7
+  sghaier.souhaib:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM3Kcjbq158w4Uot1y4YDlY4Sx3JRh/psygIGicDe9Zt
   shao.jeremy:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGhHtQOoXo5j+jUGhjCrNjr2S8qwz1qCQBf458q6Evnz
   snoussi.mohammed:

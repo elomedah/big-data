@@ -53,6 +53,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDdYGVD4BIjs5gEKx1UmgU2llXRZoCZftztZSn6KSSoL
   nadal.valentin:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINc//obf6TOMFQy/qiY/tDO0LoWH42mXgFbkc9bYwjJK
+  nauche.baptiste:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC7OGU34e9Lt4f+bI/mMrtjI19XHREa8MiDZ7lrwHt9B
   nazari.ibrahim:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICm+F3/lioKXXY9AMmD8NV1HVc6zJdMfjHxc3DhM2GZR
   noemie.niang:

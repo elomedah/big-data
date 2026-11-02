@@ -1,3 +1,5 @@
 student_ssh_keys:
+  amestoun.chadi:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ2CT1xG4a8mUeoRAz+/ECH161CygC7LxKGTcQL/6OEM
   schmitt.valentin:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPlQHM36XlladUs/LK6GUceiRKuqqfqqph7hB/bSN3pk

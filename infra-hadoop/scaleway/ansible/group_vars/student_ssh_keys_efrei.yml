@@ -117,6 +117,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM3Kcjbq158w4Uot1y4YDlY4Sx3JRh/psygIGicDe9Zt
   shao.jeremy:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGhHtQOoXo5j+jUGhjCrNjr2S8qwz1qCQBf458q6Evnz
+  sivasaranam.sajin:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJChPesZcCdatvCGqoXXahi3iaHNrGp3rYxin7YH/ELh
   snoussi.mohammed:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDdg9thtf/Ql/e+f9gf4eEiBlPFC1tWsCYJ2SCLKThxc
   sogoba.mariam:

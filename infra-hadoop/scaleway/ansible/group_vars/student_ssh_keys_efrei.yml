@@ -13,6 +13,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM6EOXLljhk+bPta7qGG0g/98EW6O3kYxV7yZBCRcWw4
   azdad.samy:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOp6n2oyeuYYsg8vhYRaAWzarQ9L9Ww6OP9lOK00jAxg
+  belot.thomas:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE7NUap6geDbLSctZfOgaDITTmzE+djFvOHCbb10HFTD
   benabdessalem.aziz:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP4L9OAWe9BnsdH+dWTFXkNtRcDOYmCU++W8rFSx1dDz
   berdery.ambre:

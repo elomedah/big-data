@@ -25,6 +25,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAvd6q6R9PWsqezwM58vg78cnHYaH1N8tcLi56DMgl+1
   choix.maria:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOOdooaE7R/x2rDyHSzZgaK4JfCGh8iFx6RnOFtEmFUe
+  chraa.lina:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINXxYRdnehoy8t4lOgByNga0DrMqd0zll79DmmTO6Fxw
   courregelongue.gaelle:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHSuE3mg+AhBqXs0h+KjHOjgmlWDOlRU17kN6qtHdA/P
   cuisenier.adele:

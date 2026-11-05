@@ -29,6 +29,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINXxYRdnehoy8t4lOgByNga0DrMqd0zll79DmmTO6Fxw
   courregelongue.gaelle:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHSuE3mg+AhBqXs0h+KjHOjgmlWDOlRU17kN6qtHdA/P
+  coustillac.celestine:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINReZT4XaIjylCY3CsQOB0KvFltxo+Ejw7LJ1/t+69eU
   cuisenier.adele:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKHYUp+34NFgfgxI54r9keNoyMawSGVq/LrvX16En/t7
   daly.anis:

@@ -65,6 +65,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIC0eXU4OczaITcvzkTKvKf2w+l/50yYFAO2U5JqBv0S
   fixaris.camelia:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFKHiBK+1zVY0FKF8hAogVO5Tm0aUYRfgvZ6vnnRmEm0
+  gilbert.marvin:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICutjuIRcGLnF1lWSJ9r+iDi8sXXZNZQQsjBtZF8i0MZ
   grall.jules:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDPeAjwFsNKoPn9H7vYuFQW1oR6pvm035GEQOb11drsJ
   grondin.david:

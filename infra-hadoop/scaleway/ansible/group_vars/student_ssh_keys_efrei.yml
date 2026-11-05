@@ -23,6 +23,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0X3XmqugRFTjxbzmf7nRoaThbArU2v37BIJnhfmq4I
   carreiras.enzo:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAvd6q6R9PWsqezwM58vg78cnHYaH1N8tcLi56DMgl+1
+  chambon.orian:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ8qGmIjLvP4/7Lf3AcNyOU0NqBqoBpL3Vgdg32SwZC6
   choix.maria:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOOdooaE7R/x2rDyHSzZgaK4JfCGh8iFx6RnOFtEmFUe
   chraa.lina:

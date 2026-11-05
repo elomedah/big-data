@@ -1,6 +1,8 @@
 student_ssh_keys:
   abir.ouadhour:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEB5TDJiI9yBp2hzAb7bUSZOvChZZJ8OQG4DVdrXD5VA
+  acherki.amir:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKfGjqxUFJySSCuq5zuPvkCLmXePbD+xiZbNDk3qgGnT
   ahamada.naheri:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrUgE9e39t2XkW5GVSybzSdT+FhSGxfO+j5IUojQ8Qp
   aitalla.samy:

@@ -19,3 +19,5 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFU5zVX30EmvXTD4okkOpJ3lOtbk9BEJEYV4i1To0x/g
   singery.stephane:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAkBfvo9RrEg865GoxEbFOM7oOgEQYGTHUVqbWNIQEl6
+  yusuf.keskin:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAOl7ahAGC02o0ijpdaBiHgLlvrTGyTn4q7XRy1DA/+j

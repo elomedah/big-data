@@ -5,3 +5,11 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIInrne/5HsuLChUuTXBogVhEQ4aNtek3/FbIGIP+P6g
   lartillot-auteuil.antonin:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK6dQQ1yHWYVGX2/roaxjr2ejbmnQP0e4aaHk1ZImmB8
+  matis.rodier:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP/gGzUU++350BmASfMjHEWr8VB+a9o7Yvwki2FWJjyu
+  okoumassoun.elom:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDhzCc4T77LepX9aNmNZjfH35VxwWxjDusRhlEhxii3O
+  brignone.anissa:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBsXnDMP1BxHcaViS+u6szF4F+bgOWFMnnlQL3lR2AvL
+  servagent.aris:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFU5zVX30EmvXTD4okkOpJ3lOtbk9BEJEYV4i1To0x/g

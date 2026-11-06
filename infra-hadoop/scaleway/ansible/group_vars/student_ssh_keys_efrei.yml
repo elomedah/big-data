@@ -1,4 +1,6 @@
 student_ssh_keys:
+  ben-chamekh.mohamed:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG8H7SzE2vU5g2XxNLGiGecew1Uf1ibi/lu49k2v+PUx
   benhaddya.loqmann:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMzrkqc0JRtxZ1/ioK+Lje+tYpso9YVsXCiJ8zgxC1zd
   bichart.adrien:

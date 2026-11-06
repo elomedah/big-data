@@ -1,4 +1,6 @@
 student_ssh_keys:
+  alexcabrel.tsapikoudjou:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAktEb5ZcyMJXyl9N0h269fEfhA45o5gP2sTIbSce0tt
   ben-chamekh.mohamed:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG8H7SzE2vU5g2XxNLGiGecew1Uf1ibi/lu49k2v+PUx
   benhaddya.loqmann:

@@ -5,6 +5,16 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIInrne/5HsuLChUuTXBogVhEQ4aNtek3/FbIGIP+P6g
   brignone.anissa:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBsXnDMP1BxHcaViS+u6szF4F+bgOWFMnnlQL3lR2AvL
+  lartillot-auteuil.antonin:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK6dQQ1yHWYVGX2/roaxjr2ejbmnQP0e4aaHk1ZImmB8
+  louet.matteo:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8+h1gOno2hUuiuv6giVFfuZbc245B1iYM5QMbHAyyU
+  mallory.lacoche:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFYHY0iBMScEm6GsASTPQYNHbuf0TX4iEsg4QIHwXNwm
+  matis.rodier:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP/gGzUU++350BmASfMjHEWr8VB+a9o7Yvwki2FWJjyu
+  okoumassoun.elom:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDhzCc4T77LepX9aNmNZjfH35VxwWxjDusRhlEhxii3O
   said.sami:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPasT4o3SE4hl4lI7FYnUy2woQCfb7C2kSkbjg4HcF+Z
   servagent.aris:

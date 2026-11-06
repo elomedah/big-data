@@ -5,6 +5,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMzrkqc0JRtxZ1/ioK+Lje+tYpso9YVsXCiJ8zgxC1zd
   bichart.adrien:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIInrne/5HsuLChUuTXBogVhEQ4aNtek3/FbIGIP+P6g
+  bouchrara.ranim:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBkqkM465X6jUrr2SpbI2oiW+TyLq2nkr0ADWOf1AakG
   brignone.anissa:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBsXnDMP1BxHcaViS+u6szF4F+bgOWFMnnlQL3lR2AvL
   keskin.yusuf:

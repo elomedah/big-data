@@ -3,5 +3,7 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMzrkqc0JRtxZ1/ioK+Lje+tYpso9YVsXCiJ8zgxC1zd
   bichart.adrien:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIInrne/5HsuLChUuTXBogVhEQ4aNtek3/FbIGIP+P6g
+  marielouise.esteban:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID7VKFP95lOqtZ//wt9WuOZ3I3cCe+1OImJapgN147R5
   servagent.aris:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFU5zVX30EmvXTD4okkOpJ3lOtbk9BEJEYV4i1To0x/g

@@ -1,11 +1,7 @@
-# If your key is not here, check student_ssh_keys_efrei.key.1.yml in this directory.
-# Add new student SSH public keys below.
-# Example:
-# student_ssh_keys:
-#   firstname.lastname:
-#     - ssh-ed25519 YOUR_PUBLIC_KEY
 student_ssh_keys:
   benhaddya.loqmann:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMzrkqc0JRtxZ1/ioK+Lje+tYpso9YVsXCiJ8zgxC1zd
   bichart.adrien:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIInrne/5HsuLChUuTXBogVhEQ4aNtek3/FbIGIP+P6g
+  rajendram.vidushan:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO5Vkq5DZ1JLO/O6mmAEi920NTv71KkVKHhmDYNqYDyV

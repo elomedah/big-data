@@ -25,6 +25,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE7NUap6geDbLSctZfOgaDITTmzE+djFvOHCbb10HFTD
   benabdessalem.aziz:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP4L9OAWe9BnsdH+dWTFXkNtRcDOYmCU++W8rFSx1dDz
+  benhaddya.loqmann:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMzrkqc0JRtxZ1/ioK+Lje+tYpso9YVsXCiJ8zgxC1zd
   berdery.ambre:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHP8HiVb6DILGgTIPjI6IBS1z6LDBgDx3ExMcj2EsIGp
   binhminh.tran:

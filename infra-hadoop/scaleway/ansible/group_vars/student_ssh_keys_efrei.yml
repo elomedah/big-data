@@ -57,6 +57,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKPjrSK2x1JK5RAdTaBvIxkwGBauNOaQrz7JTeq6rBkm
   yoann.prenom:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ9ZItuE0w/KAGqzWdBz1b41ptd/mW1GQ5YB306Umyfm
+  yoann.r:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA+ZCpd0OrvC8CQU2kcmzPLMGrOXtaBn2YOtfMTjiRIS
   yonta.belva:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHqtg4CnoeauLLMvPWeSX+pu8843HoigPC+KZJ1aF8TA
   yusuf.keskin:

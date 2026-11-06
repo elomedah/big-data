@@ -4,4 +4,6 @@
 # student_ssh_keys:
 #   firstname.lastname:
 #     - ssh-ed25519 YOUR_PUBLIC_KEY
-student_ssh_keys: {}
+student_ssh_keys:
+  bichart.adrien:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIInrne/5HsuLChUuTXBogVhEQ4aNtek3/FbIGIP+P6g

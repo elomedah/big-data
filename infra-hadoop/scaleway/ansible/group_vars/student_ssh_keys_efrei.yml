@@ -29,6 +29,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDhzCc4T77LepX9aNmNZjfH35VxwWxjDusRhlEhxii3O
   rajendram.vidushan:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO5Vkq5DZ1JLO/O6mmAEi920NTv71KkVKHhmDYNqYDyV
+  rakotoarivelo.teddy:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAXoo0DkRoZqElcM2uesELapcA8lUoNZSVrTVW2x0fLn
   rodier.matis:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILMQe3mn3WWeNB/Xwp7WPsIKmJkAITkTT2uTpa9rcrCj
   said.sami:

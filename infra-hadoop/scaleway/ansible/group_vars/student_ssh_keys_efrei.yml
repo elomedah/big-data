@@ -11,6 +11,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBkqkM465X6jUrr2SpbI2oiW+TyLq2nkr0ADWOf1AakG
   brignone.anissa:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBsXnDMP1BxHcaViS+u6szF4F+bgOWFMnnlQL3lR2AvL
+  diallo.marietou:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEm+jV8GzJXIQoe6570BWr73DscWJR6mGBmyW7qiBpJe diallo.marietou
   ka.fatou:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKr2zrLICSs9mJf1NLlj2kYNPZjdq/R7aLCtyn51REoo
   kenmoe.joyce:
@@ -29,10 +31,15 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID7VKFP95lOqtZ//wt9WuOZ3I3cCe+1OImJapgN147R5
   matis.rodier:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP/gGzUU++350BmASfMjHEWr8VB+a9o7Yvwki2FWJjyu
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBX1v8np3fa5Gszn0ZuwqiKVpDuXN8VBQYRTDalwVs0L matis.rodier
+  nouara.marouane:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINUgxaUV0vjWP+ho6B6UGrgSwjuU82CN6ffTXooVOTNS nouara.marouane
   okoumassoun.elom:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDhzCc4T77LepX9aNmNZjfH35VxwWxjDusRhlEhxii3O
   ouari.camelia:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIOzp9WOTPbAXunsPER6rIZ3w4jwvMeNezSALgRtXwpj
+  pernon.neil:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEMRTYbAZ3co8RXYMMtKQ/B2nXN0drnTDNXZKFFsld3Q pernon.neil
   rachida.rahmani:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPuoYqcmrjhDZruywp+THqSrTlMmfVt+Aoafmkhwy3lB
   rahmouni.mohamedamine:

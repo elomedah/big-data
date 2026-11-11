@@ -78,3 +78,6 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHqtg4CnoeauLLMvPWeSX+pu8843HoigPC+KZJ1aF8TA
   yusuf.keskin:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAOl7ahAGC02o0ijpdaBiHgLlvrTGyTn4q7XRy1DA/+j
+  wadhah.hmissi:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzemt+2qAYPGLobwj+0XJFRgZol7/QHxLe6060jDUvV
+

@@ -40,6 +40,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIOzp9WOTPbAXunsPER6rIZ3w4jwvMeNezSALgRtXwpj
   pernon.neil:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEMRTYbAZ3co8RXYMMtKQ/B2nXN0drnTDNXZKFFsld3Q
+  perrine.grelet:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyTE1d17o2wyiUZcDiuD7W9RmS6cdfShAUSDVLwp4SU
   rachida.rahmani:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPuoYqcmrjhDZruywp+THqSrTlMmfVt+Aoafmkhwy3lB
   rahmouni.mohamedamine:

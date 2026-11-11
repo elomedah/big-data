@@ -13,6 +13,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBsXnDMP1BxHcaViS+u6szF4F+bgOWFMnnlQL3lR2AvL
   diallo.marietou:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEm+jV8GzJXIQoe6570BWr73DscWJR6mGBmyW7qiBpJe
+  dos-santos.matheo:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKns+wD+8SSAdfAUgN6mG1SHrGkQOz8dsY2+8Kp8oI+P
   ka.fatou:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKr2zrLICSs9mJf1NLlj2kYNPZjdq/R7aLCtyn51REoo
   kenmoe.joyce:

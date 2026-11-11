@@ -25,6 +25,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIUA8VXbx2MGFBfmvhZFfaANO6FMJecuUrqdLdAcbDmQ
   lartillot-auteuil.antonin:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK6dQQ1yHWYVGX2/roaxjr2ejbmnQP0e4aaHk1ZImmB8
+  laye-fode.keita:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIEES0IZuNC9UAn9uIrT9uHvABltajlLCaQXehXrynJY
   louet.matteo:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8+h1gOno2hUuiuv6giVFfuZbc245B1iYM5QMbHAyyU
   mallory.lacoche:

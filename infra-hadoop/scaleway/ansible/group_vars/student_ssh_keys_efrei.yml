@@ -70,6 +70,10 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGrgbDvS7n7DSzY3EQL0GtrNWI6euc8+upRFrg4Nd//C
   thomas.soline:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKPjrSK2x1JK5RAdTaBvIxkwGBauNOaQrz7JTeq6rBkm
+  wadhah.hmissi:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzemt+2qAYPGLobwj+0XJFRgZol7/QHxLe6060jDUvV
+  yassine.yara:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG2hqwYrAwmzfrBuCsM6tPBxaJqgdnCQ6whOMdZ77rTa
   yoann.prenom:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ9ZItuE0w/KAGqzWdBz1b41ptd/mW1GQ5YB306Umyfm
   yoann.r:
@@ -80,6 +84,3 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHqtg4CnoeauLLMvPWeSX+pu8843HoigPC+KZJ1aF8TA
   yusuf.keskin:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAOl7ahAGC02o0ijpdaBiHgLlvrTGyTn4q7XRy1DA/+j
-  wadhah.hmissi:
-  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzemt+2qAYPGLobwj+0XJFRgZol7/QHxLe6060jDUvV
-

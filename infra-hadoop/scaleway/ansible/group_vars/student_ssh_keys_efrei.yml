@@ -21,6 +21,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEsPWrUOPjl49EPx/CmwxphKT8dOVVskQYm1BlZh9IJf
   ka.fatou:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKr2zrLICSs9mJf1NLlj2kYNPZjdq/R7aLCtyn51REoo
+  karakozian.varoujan:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAA5ySjQYuvvHTvAfq/eD2me7pyFsdk6kCVXuiWuk4cz
   kenmoe.joyce:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOwpQ5jsC60c9kDaYXLBnoTbhMDVlbC4l8EVKlaDtoxS
   keskin.yusuf:

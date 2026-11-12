@@ -78,6 +78,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKPjrSK2x1JK5RAdTaBvIxkwGBauNOaQrz7JTeq6rBkm
   wadhah.hmissi:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzemt+2qAYPGLobwj+0XJFRgZol7/QHxLe6060jDUvV
+  yassine.yara:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG2hqwYrAwmzfrBuCsM6tPBxaJqgdnCQ6whOMdZ77rTa
   yoann.prenom:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ9ZItuE0w/KAGqzWdBz1b41ptd/mW1GQ5YB306Umyfm
   yoann.r:

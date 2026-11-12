@@ -1,6 +1,8 @@
 student_ssh_keys:
   alexcabrel.tsapikoudjou:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAktEb5ZcyMJXyl9N0h269fEfhA45o5gP2sTIbSce0tt
+  awero.oketokoun:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEvfAd6jIxFcIYy0TyxDsK/TSlm7KFUvgq/6nwccCirL
   ben-chamekh.mohamed:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG8H7SzE2vU5g2XxNLGiGecew1Uf1ibi/lu49k2v+PUx
   benhaddya.loqmann:
@@ -15,8 +17,12 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEm+jV8GzJXIQoe6570BWr73DscWJR6mGBmyW7qiBpJe
   dos-santos.matheo:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKns+wD+8SSAdfAUgN6mG1SHrGkQOz8dsY2+8Kp8oI+P
+  hirchyts.daniil:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEsPWrUOPjl49EPx/CmwxphKT8dOVVskQYm1BlZh9IJf
   ka.fatou:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKr2zrLICSs9mJf1NLlj2kYNPZjdq/R7aLCtyn51REoo
+  karakozian.varoujan:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAA5ySjQYuvvHTvAfq/eD2me7pyFsdk6kCVXuiWuk4cz
   kenmoe.joyce:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOwpQ5jsC60c9kDaYXLBnoTbhMDVlbC4l8EVKlaDtoxS
   keskin.yusuf:

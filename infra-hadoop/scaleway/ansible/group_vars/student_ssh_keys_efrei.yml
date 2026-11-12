@@ -3,6 +3,8 @@ student_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAktEb5ZcyMJXyl9N0h269fEfhA45o5gP2sTIbSce0tt
   awero.oketokoun:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEvfAd6jIxFcIYy0TyxDsK/TSlm7KFUvgq/6nwccCirL
+  badoz.marius:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAbDiVqKbLcf5P/1fYMWwmo2XZ+zXQX7hah0+UPfnpfM
   belot.thomas:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJr7UjmW2+THVeSDchJeHwGlDrG6TDMfo62+XJpoWdG
   ben-chamekh.mohamed:

@@ -48,6 +48,8 @@ student_ssh_keys:
   matis.rodier:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP/gGzUU++350BmASfMjHEWr8VB+a9o7Yvwki2FWJjyu
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBX1v8np3fa5Gszn0ZuwqiKVpDuXN8VBQYRTDalwVs0L
+  mouttaki.yasmine:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE371z7exQ2P164hVzs4gKwvCooXAK3BlF3+2NskFf8K
   nouara.marouane:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBBE2TkCVSW9+SzV8SHJXJ7w8xwy3je9iXMUfNaup8lY
   okoumassoun.elom:
